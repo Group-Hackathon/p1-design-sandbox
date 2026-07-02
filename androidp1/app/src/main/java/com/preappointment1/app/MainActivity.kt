@@ -473,34 +473,49 @@ fun MainTopBar(
 @Composable
 private fun SplashScreen() {
     var visible by remember { mutableStateOf(false) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val versionName = remember {
+        context.packageManager.getPackageInfo(context.packageName, 0).versionName
+    }
     LaunchedEffect(Unit) { visible = true }
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        AnimatedVisibility(
-            visible = visible,
-            enter = fadeIn(animationSpec = tween(600)),
-            exit = fadeOut()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = stringResource(R.string.app_name),
-                    fontSize = 72.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = (-2).sp,
-                    color = Black
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.pre_appointment),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = 3.sp,
-                    color = Gray400
-                )
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn(animationSpec = tween(600)),
+                exit = fadeOut()
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        fontSize = 72.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = (-2).sp,
+                        color = Black
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.pre_appointment),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 3.sp,
+                        color = Gray400
+                    )
+                }
             }
         }
+        Text(
+            text = "v$versionName",
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 28.dp),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Normal,
+            color = Gray400
+        )
     }
 }

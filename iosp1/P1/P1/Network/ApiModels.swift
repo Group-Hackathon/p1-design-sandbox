@@ -22,6 +22,8 @@ struct RecommendRequest: Codable {
     let symptoms: String
     let appointment_date: String?
     let rules: TrackingRulesDto?
+    let local_time: String?
+    let timezone: String?
 }
 
 struct AgentResponse: Codable, Identifiable {

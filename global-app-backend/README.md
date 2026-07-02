@@ -1,6 +1,11 @@
 # Global App Backend (Central Server)
 
-This directory represents the central, global application backend for **Pre-Appointment 1**. 
+This directory represents the central, global application backend for **Pre-Appointment 1**.
+
+**Deployed MVP instance (GCP Cloud Run):**  
+`https://living-patient-memory-api-772480669824.us-central1.run.app`
+
+Mobile clients (`androidp1/`, `iosp1/`) point to this URL via `ApiClient`.
 
 While sensitive medical records and photos are kept isolated in each user's private backend instance (VPC), the central server handles the global orchestrations, user accounts, agent catalogs, and payments.
 

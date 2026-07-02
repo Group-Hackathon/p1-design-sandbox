@@ -83,7 +83,12 @@ struct WelcomeScreen: View {
                 }
             }
             .padding(.horizontal, 28)
-            .padding(.bottom, 20)
+            .padding(.bottom, 12)
+
+            Text("v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
+                .font(.system(size: 11))
+                .foregroundColor(Color(UIColor.systemGray3))
+                .padding(.bottom, 12)
         }
         .background(Color.white)
     }

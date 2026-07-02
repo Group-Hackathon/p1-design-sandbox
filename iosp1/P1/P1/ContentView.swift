@@ -35,8 +35,25 @@ struct ContentView: View {
     @State private var currentRoute: AppRoute = .welcome
     @State private var isAuthenticated: Bool = false
     @State private var isDrawerOpen = false
+    @State private var showSplash = true
     
     var body: some View {
+        ZStack {
+            if showSplash {
+                SplashScreen()
+                    .transition(.opacity)
+            } else {
+            mainContent
+            }
+        }
+        .task {
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            withAnimation { showSplash = false }
+        }
+    }
+
+    @ViewBuilder
+    private var mainContent: some View {
         ZStack {
             switch currentRoute {
             case .welcome:

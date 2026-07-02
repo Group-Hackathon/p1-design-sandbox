@@ -2,8 +2,13 @@
 
 Here is a brief update on the MVP Publication Phase.
 
-## Global Status
-The core application development (iOS/Android front-end, Go backend, and embedded AI agent) is complete. We are now deploying to the stores.
+## Global Status (June 2026)
+
+The core stack is live: **Android** (primary), **iOS** SwiftUI clone, **Go backend** on Cloud Run.
+
+**Latest GitHub release:** [v1.0.7](https://github.com/Group-Hackathon/p1/releases) — splash version label, doc sync, iOS Gemini local-time parity.
+
+APK installs are also distributed via GitHub Releases (`Pre-Appointment-1-v1.0.x.apk`).
 
 ## Android (Google Play Store)
 The app is officially published in Closed Testing (Alpha). We successfully bypassed the strict "Health Apps" restrictions(for how long will see....
@@ -37,7 +42,9 @@ BSXKAHAQC4UDSF6R7X8DSQS
 1R2RT9QS25NDWLPKETK1VN4	
 
 ## iOS (App Store)
-The iOS SwiftUI clone is fully operational. We are generating the final build via Xcode to push to App Store Connect for TestFlight.
+The iOS SwiftUI app mirrors Android flows (onboarding, Journey, PDF report). v1.0.7 adds splash version label and `local_time` for Gemini schedules. TestFlight build via Xcode.
+
+**Cloud backend (GCP):** `https://living-patient-memory-api-772480669824.us-central1.run.app` — no redeploy needed for client-only releases unless `global-app-backend/` changes.
 
 #we will transfer the apps to our official company accounts type O"RGANIZATION PLAYSTORE & APPLE IF REQUIRED."
 

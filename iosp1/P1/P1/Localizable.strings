@@ -33,3 +33,6 @@
 "timeline_missed" = "MISSED";
 "timeline_upcoming" = "UPCOMING";
 "timeline_add_missed" = "+ Add missed measurement";
+
+/* App */
+"app_version_label" = "Version %@";

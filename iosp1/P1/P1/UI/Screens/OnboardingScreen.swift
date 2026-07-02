@@ -68,6 +68,9 @@ struct OnboardingScreen: View {
                                     do {
                                         // Fake analysis delay for the prototype if backend is not linked yet
                                         // Or call ApiService.shared.recommendAgent
+                                        let formatter = DateFormatter()
+                                        formatter.dateFormat = "HH:mm"
+                                        let localTime = formatter.string(from: Date())
                                         let request = RecommendRequest(
                                             symptoms: symptomText,
                                             appointment_date: ISO8601DateFormatter().string(from: appointmentDate),
@@ -78,7 +81,9 @@ struct OnboardingScreen: View {
                                                 smartwatch: ruleSmartwatch,
                                                 blood_pressure: ruleBp,
                                                 custom: ""
-                                            )
+                                            ),
+                                            local_time: localTime,
+                                            timezone: TimeZone.current.identifier
                                         )
                                         let response = try await ApiService.shared.recommendAgent(request: request)
                                         

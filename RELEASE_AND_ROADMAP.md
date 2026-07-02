@@ -1,23 +1,49 @@
-# Pre-Appointment 1 - Version 1.0.3
+# Pre-Appointment 1 — Release notes & roadmap
 
-## New Features & Commercial Upgrades
-- **Dynamic Onboarding & Monetization**: Implemented a dynamic pricing model based on tracking duration (0.20€/day, capped at 5.99€). The AI analysis is now presented as a "proprietary intelligent technology" analyzing thousands of medical records (no "Gemini" branding).
-- **Manual Protocol Configuration**: Free/Offline fallback allowing patients to manually configure their reminders day-by-day (intentionally tedious to encourage premium conversion).
-- **PDF Data Visualization**: The PDF report now generates native, medical-grade line charts (Temperature & Pain evolution) directly on the document, providing instant value to physicians.
-- **Local Push Notifications (Architecture)**: Implemented zero-cost, 100% reliable local push notifications via `AlarmManager` to remind patients of their tracking without server costs.
+## Version 1.0.7 (current)
+
+- **Splash version label** on Android and iOS launch screens (`v1.0.7` from build metadata).
+- **Documentation sync** — README, architecture notes, and backend docs aligned with the native dual-codebase MVP.
+- **iOS parity** — `local_time` + `timezone` sent to Gemini recommend endpoint (same as Android).
+- **PDF footer** uses dynamic app version instead of hardcoded `v1.0`.
 
 ---
 
-# Commercial & Technical Roadmap - Version 1.0.4
+## Version 1.0.6
 
-In the upcoming version, we will focus on real payment integration and finalizing the notification system.
+- **Notification deep links** — tap opens the correct Journey check-in (`schedule_key`).
+- **Home bell** reflects real pending check-ins from timeline, not just time windows.
+- **Single API fetch** in `MainActivity` (Dashboard no longer duplicates subscriptions call).
+- **Onboarding** — visible errors on failure; manual setup sends `rules` to backend.
+- **Reminders** scheduled for all active follow-ups.
 
-## 1. Google Play Billing Integration (In-App Purchases)
-- Replace the fake payment button with real Google Play Console Billing.
-- **Adaptive Pricing Strategy**: Since Google Play Billing does not support arbitrary "on-the-fly" dynamic prices, we will pre-create a set of SKUs in the Play Console representing price steps (e.g., `sku_tier_1` for 0.20€, `sku_tier_2` for 0.40€, up to `sku_tier_30` for 5.99€). The app will automatically select and trigger the correct SKU based on the duration.
+---
 
-## 2. Notification Triggers
-- Connect the `NotificationHelper` to the onboarding flow to automatically arm the 08:00, 12:00, and 20:00 alarms based on the generated/purchased schedule.
+## Version 1.0.5
 
-## 3. Real Authentication & Cloud Sync
-- Integrate Firebase Auth (Google / Apple Sign-In) to ensure patient data is backed up and recoverable if the device is lost.
+- Smart schedule: first check-in adapted to launch time via Gemini + `ScheduleLogic`.
+- Editable reminder times from Journey and Notifications screens.
+- Onboarding date picker fixes; smartwatch / BP greyed as “coming soon”.
+- Backend: `PATCH /subscriptions/{id}` accepts `parameters.schedule`; Gemini receives `local_time` + `timezone`.
+
+---
+
+## Version 1.0.3–1.0.4 (archive)
+
+- Dynamic onboarding pricing model; manual protocol fallback.
+- PDF charts (temperature & pain evolution).
+- Local push notifications via `AlarmManager` (Android).
+
+---
+
+## Roadmap
+
+### Near term
+- Google Play Billing (real SKUs instead of test flow).
+- iOS notification deep links and schedule parity with Android.
+- Photo upload to user VPC when private backend pairing ships.
+
+### Medium term
+- Firebase / Apple Sign-In for account recovery.
+- Health Connect (Android) and HealthKit (iOS) integrations.
+- Production migration from shared Cloud Run MVP to per-user self-hosted nodes.

@@ -8,8 +8,8 @@ The system has three components, deliberately decoupled:
 
 ```
 +---------------------+         +----------------------------+
-|  Mobile app (KMP)   | ------> |  Personal backend (user-   |
-|  on-device agent,   |  sync   |  owned VPS or self-hosted) |
+|  Mobile app (native) | ------> |  Personal backend (user-   |
+|  Android + iOS,      |  sync   |  owned VPS or self-hosted) |
 |  camera, sensors,   |         |  SQL + object storage      |
 |  check-ins          |         +-------------+--------------+
 +---------------------+                       |
@@ -56,7 +56,15 @@ While Kotlin Multiplatform (KMP) was the original architectural vision (as outli
 2. **Parallel Velocity:** Two pure native codebases allowed parallel development without blocking on shared module compilations.
 
 **Future Scaling Strategy:**
-If the product evolves to require deeply shared rendering logic, or if the team structure expands, the architecture will be re-evaluated. Depending on the team's affinities, we may migrate to **Flutter, React Native/Expo, or return to Kotlin Multiplatform**. However, to ensure rapid delivery and maximum stability during the MVP phase, maintaining a strictly mirrored native approach was the most pragmatic and efficient choice ;i think...
+If the product evolves to require deeply shared rendering logic, or if the team structure expands, the architecture will be re-evaluated. Depending on the team's affinities, we may migrate to **Flutter, React Native/Expo, or return to Kotlin Multiplatform**. However, to ensure rapid delivery and maximum stability during the MVP phase, maintaining a strictly mirrored native approach was the most pragmatic and efficient choice.
+
+**Repository layout (MVP):**
+
+| Path | Stack | Role |
+| --- | --- | --- |
+| `androidp1/` | Kotlin + Compose | Primary shipping target |
+| `iosp1/` | SwiftUI | Feature-parity clone |
+| `global-app-backend/` | Go + PostgreSQL on Cloud Run | Shared MVP API (auth, timeline, Gemini) |
 
 ### The on-device agent
 
