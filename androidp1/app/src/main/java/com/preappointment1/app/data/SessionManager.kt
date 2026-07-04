@@ -25,6 +25,11 @@ object SessionManager {
         return prefs.getString(KEY_TOKEN, null)
     }
 
+    fun clearToken() {
+        if (!this::prefs.isInitialized) return
+        prefs.edit().remove(KEY_TOKEN).apply()
+    }
+
     fun saveProfileId(profileId: String) {
         prefs.edit().putString(KEY_PROFILE_ID, profileId).apply()
     }

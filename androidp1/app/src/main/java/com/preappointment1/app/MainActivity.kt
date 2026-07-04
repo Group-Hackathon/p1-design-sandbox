@@ -75,7 +75,7 @@ class MainActivity : ComponentActivity() {
 
         CoroutineScope(Dispatchers.IO).launch {
             val ok = AuthHelper.ensureAuthenticated()
-            Log.d("LPM_APP", if (ok) "Auth OK" else "Auth failed")
+            Log.d("LPM_APP", if (ok) "Session ready" else "Session setup failed")
         }
 
         setContent {

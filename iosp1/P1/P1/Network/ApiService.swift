@@ -8,12 +8,22 @@ class ApiService {
     private init() {}
     
     // MARK: - Auth
-    func register(request: AuthRequest) async throws -> AuthResponse {
-        return try await client.performRequest(path: "api/v1/auth/register", method: "POST", body: request)
+    func register(request: AuthRequest, allowAuthRetry: Bool = true) async throws -> AuthResponse {
+        return try await client.performRequest(
+            path: "api/v1/auth/register",
+            method: "POST",
+            body: request,
+            allowAuthRetry: allowAuthRetry
+        )
     }
-    
-    func login(request: AuthRequest) async throws -> AuthResponse {
-        return try await client.performRequest(path: "api/v1/auth/login", method: "POST", body: request)
+
+    func login(request: AuthRequest, allowAuthRetry: Bool = true) async throws -> AuthResponse {
+        return try await client.performRequest(
+            path: "api/v1/auth/login",
+            method: "POST",
+            body: request,
+            allowAuthRetry: allowAuthRetry
+        )
     }
     
     func deleteAccount() async throws {

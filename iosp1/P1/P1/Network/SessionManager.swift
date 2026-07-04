@@ -19,6 +19,10 @@ class SessionManager {
     func getToken() -> String? {
         return defaults.string(forKey: keyToken)
     }
+
+    func clearToken() {
+        defaults.removeObject(forKey: keyToken)
+    }
     
     func saveProfileId(_ profileId: String) {
         defaults.set(profileId, forKey: keyProfileId)
