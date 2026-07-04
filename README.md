@@ -18,6 +18,8 @@ Healthcare data is fragmented, and the most valuable part of it — what happens
 
 ---
 
+## The mental health benefit
+
 Pre-Appointment 1 (P1) turns your daily symptoms into undeniable, medically useful facts. By tracking your condition in small, simple steps each day, it builds a foolproof record for your next visit.
 
 Don't just describe your symptoms from memory. Walk in with a clear, objective timeline so your doctor gets the full story, takes your pain seriously, and gives you the exact care you need.
