@@ -16,7 +16,16 @@ When a patient finally sits in front of a doctor, most of the useful information
 
 Healthcare data is fragmented, and the most valuable part of it — what happens to the patient between two appointments — is almost never captured.
 
+---
+
+Pre-Appointment 1 (P1) turns your daily symptoms into undeniable, medically useful facts. By tracking your condition in small, simple steps each day, it builds a foolproof record for your next visit.
+
+Don't just describe your symptoms from memory. Walk in with a clear, objective timeline so your doctor gets the full story, takes your pain seriously, and gives you the exact care you need.
+
+---
+
 ## What we are building
+
 
 **Pre-Appointment 1** is driven by an on-device protocol agent that collects medically useful data in the period before a medical appointment, or during a doctor-prescribed follow-up.
 
