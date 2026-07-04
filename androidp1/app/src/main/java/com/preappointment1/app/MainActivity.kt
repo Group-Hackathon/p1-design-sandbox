@@ -55,7 +55,9 @@ import com.preappointment1.app.ui.theme.Gray200
 import com.preappointment1.app.ui.theme.Gray400
 import com.preappointment1.app.ui.theme.White
 import com.preappointment1.app.ui.theme.LivingPatientMemoryTheme
-import com.preappointment1.app.data.model.TimelineEventResponse
+import com.preappointment1.app.data.repository.FollowUpRepository
+import com.preappointment1.app.data.repository.TimelineRepository
+import com.preappointment1.app.data.sync.SyncManager
 import com.preappointment1.app.schedule.ScheduleLogic
 import java.time.LocalTime
 import kotlinx.coroutines.CoroutineScope
@@ -70,6 +72,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         SessionManager.init(this)
         AuthHelper.init(this)
+        com.preappointment1.app.data.repository.FollowUpRepository.init(this)
+        com.preappointment1.app.data.repository.TimelineRepository.init(this)
+        com.preappointment1.app.data.repository.ReportRepository.init(this)
         BillingManager.initialize(this)
         NotificationHelper.createNotificationChannel(this)
         deepLinkState.value = NotificationIntents.from(intent)
@@ -125,7 +130,9 @@ private fun AppRoot(
     val scope = rememberCoroutineScope()
 
     var followUps by remember { mutableStateOf<List<FollowUpUi>>(emptyList()) }
-    var timelineEventsBySubId by remember { mutableStateOf<Map<String, List<TimelineEventResponse>>>(emptyMap()) }
+    var timelineEventsBySubId by remember { mutableStateOf<Map<String, List<com.preappointment1.app.data.model.TimelineEventResponse>>>(emptyMap()) }
+    var isOfflineMode by remember { mutableStateOf(false) }
+    var pendingSyncCount by remember { mutableIntStateOf(0) }
     var followUpsLoading by remember { mutableStateOf(false) }
     var followUpsLoadComplete by remember { mutableStateOf(false) }
     val now = remember { mutableStateOf(LocalTime.now()) }
@@ -166,19 +173,26 @@ private fun AppRoot(
         onDeepLinkHandled()
     }
 
+    LaunchedEffect(Unit) {
+        TimelineRepository.observePendingCount().collect { count ->
+            pendingSyncCount = count
+        }
+    }
+
     LaunchedEffect(refreshKey) {
         if (!hasSeenWelcome) return@LaunchedEffect
         followUpsLoading = true
         followUpsLoadComplete = false
         try {
-            val subscriptions = ApiClient.apiService.getSubscriptions()
-            val agents = ApiClient.apiService.getAgents().associateBy { it.id }
-            followUps = subscriptions.map { it.toFollowUpUi(agents) }
+            val (loadedFollowUps, synced) = FollowUpRepository.loadFollowUpsWithSync()
+            followUps = loadedFollowUps
+            isOfflineMode = !synced
             val active = followUps.filter { it.daysRemaining > 0 && it.schedule != null }
             timelineEventsBySubId = active.associate { followUp ->
-                followUp.id to runCatching {
-                    ApiClient.apiService.getTimeline(followUp.id)
-                }.getOrElse { emptyList() }
+                followUp.id to TimelineRepository.getEvents(followUp.id)
+            }
+            if (synced) {
+                SyncManager.scheduleSync(context)
             }
             ScheduleReminderManager.rescheduleActiveFollowUps(context, followUps)
 
@@ -234,6 +248,10 @@ private fun AppRoot(
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val drawerName = com.preappointment1.app.data.SessionManager.getUserName()
+                            ?.trim()
+                            ?.takeIf { it.isNotBlank() }
+                        val drawerInitial = drawerName?.take(1)?.uppercase() ?: "P"
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
@@ -241,11 +259,16 @@ private fun AppRoot(
                                 .background(Black),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("P", color = White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                            Text(drawerInitial, color = White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         }
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
-                            Text(stringResource(R.string.patient_name_placeholder), fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Black)
+                            Text(
+                                drawerName ?: stringResource(R.string.patient_name_placeholder),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp,
+                                color = Black
+                            )
                             Text(stringResource(R.string.view_profile), fontSize = 12.sp, color = com.preappointment1.app.ui.theme.Gray600)
                         }
                     }
@@ -333,12 +356,16 @@ private fun AppRoot(
                         title = stringResource(R.string.app_name),
                         onOpenDrawer = { scope.launch { drawerState.open() } },
                         hasPendingTasks = hasPendingCheckIn,
+                        pendingSyncCount = pendingSyncCount,
+                        isOfflineMode = isOfflineMode,
                         onOpenNotifications = { screen = AppScreen.Notifications }
                     )
                 }
             ) { padding ->
                 DashboardScreen(
                     followUps = followUps,
+                    timelineByFollowUpId = timelineEventsBySubId,
+                    patientName = SessionManager.getUserName(),
                     isLoading = followUpsLoading,
                     onNewFollowUp = { screen = AppScreen.NewFollowUp },
                     onOpenJourney = { followUp ->
@@ -437,10 +464,28 @@ fun MainTopBar(
     title: String,
     onOpenDrawer: () -> Unit,
     hasPendingTasks: Boolean = false,
+    pendingSyncCount: Int = 0,
+    isOfflineMode: Boolean = false,
     onOpenNotifications: (() -> Unit)? = null
 ) {
     androidx.compose.material3.TopAppBar(
-        title = { Text(title, fontWeight = FontWeight.Bold, fontSize = 22.sp, letterSpacing = (-1).sp) },
+        title = {
+            Column {
+                Text(title, fontWeight = FontWeight.Bold, fontSize = 22.sp, letterSpacing = (-1).sp)
+                if (isOfflineMode || pendingSyncCount > 0) {
+                    Text(
+                        text = when {
+                            pendingSyncCount > 0 && isOfflineMode ->
+                                "Offline · $pendingSyncCount waiting to sync"
+                            pendingSyncCount > 0 -> "$pendingSyncCount waiting to sync"
+                            else -> "Offline — your file works locally"
+                        },
+                        fontSize = 11.sp,
+                        color = com.preappointment1.app.ui.theme.Gray600
+                    )
+                }
+            }
+        },
         navigationIcon = {
             androidx.compose.material3.IconButton(onClick = onOpenDrawer) {
                 Icon(Icons.Outlined.Menu, contentDescription = "Menu")

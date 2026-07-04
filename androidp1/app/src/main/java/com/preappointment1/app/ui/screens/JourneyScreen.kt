@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,16 +33,20 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import com.preappointment1.app.R
 import com.preappointment1.app.MainTopBar
+import com.preappointment1.app.data.repository.FollowUpRepository
+import com.preappointment1.app.data.repository.TimelineRepository
+import com.preappointment1.app.data.sync.SyncManager
+import com.preappointment1.app.data.model.TimelineEventRequest
+import com.preappointment1.app.data.model.TimelineEventResponse
+import com.preappointment1.app.data.model.UpdateSubscriptionRequest
 import com.preappointment1.app.data.api.ApiClient
 import com.preappointment1.app.data.updateFollowUpSchedule
 import com.preappointment1.app.notifications.ScheduleReminderManager
 import com.preappointment1.app.schedule.MeasurementStep
 import com.preappointment1.app.schedule.ScheduleLogic
 import com.preappointment1.app.schedule.ScheduleSlot
-import com.preappointment1.app.data.model.TimelineEventRequest
-import com.preappointment1.app.data.model.TimelineEventResponse
-import com.preappointment1.app.data.model.UpdateSubscriptionRequest
 import com.preappointment1.app.ui.components.*
+import com.preappointment1.app.ui.support.FileStats
 import com.preappointment1.app.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -96,7 +101,16 @@ fun JourneyScreen(
     modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
-    var events by remember { mutableStateOf<List<TimelineEventResponse>>(emptyList()) }
+    val appContext = LocalContext.current
+
+    var currentFollowUp by remember { mutableStateOf(followUp) }
+    LaunchedEffect(followUp) {
+        currentFollowUp = followUp
+    }
+
+    val events by TimelineRepository.observeEvents(currentFollowUp.id).collectAsState(initial = emptyList())
+    val snackbarHostState = remember { SnackbarHostState() }
+
     var isFormMode by remember { mutableStateOf(false) }
     var formEffectiveDate by remember { mutableStateOf<LocalDate?>(null) }
     var formLabelOverride by remember { mutableStateOf<String?>(null) }
@@ -105,21 +119,18 @@ fun JourneyScreen(
     var showNoteSheet by remember { mutableStateOf(false) }
     var showExtraPicker by remember { mutableStateOf(false) }
 
-    // Mutable followUp state for date changes
-    var currentFollowUp by remember { mutableStateOf(followUp) }
-    LaunchedEffect(followUp) {
-        currentFollowUp = followUp
-    }
-    
-    var isLoading by remember { mutableStateOf(true) }
+    var isLoading by remember { mutableStateOf(false) }
 
-    // Menu state
+    LaunchedEffect(currentFollowUp.id) {
+        TimelineRepository.refreshFromRemote(currentFollowUp.id)
+        SyncManager.scheduleSync(appContext)
+    }
+
     var showMenu by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
     var showScheduleEditor by remember { mutableStateOf(false) }
     var isSavingSchedule by remember { mutableStateOf(false) }
-    val appContext = LocalContext.current
 
     var now by remember { mutableStateOf(LocalTime.now()) }
     LaunchedEffect(Unit) {
@@ -166,8 +177,6 @@ fun JourneyScreen(
     val nextWindowName = nextSlot?.timeKey?.let { stringResource(R.string.check_in_at, it) }
         ?: stringResource(R.string.next_check_in)
 
-    val snackbarHostState = remember { SnackbarHostState() }
-
     LaunchedEffect(openMeasurementFormOnLaunch, isLoading, showMeasurementButton, showStarterCheckIn, notificationScheduleKey) {
         if (!openMeasurementFormOnLaunch || isLoading) return@LaunchedEffect
 
@@ -200,25 +209,6 @@ fun JourneyScreen(
             }
         }
         onMeasurementFormLaunchHandled()
-    }
-
-    val refreshTimeline: suspend () -> Unit = {
-        val remoteEvents = ApiClient.apiService.getTimeline(currentFollowUp.id)
-        events = remoteEvents.sortedBy { it.effective_at ?: it.created_at }
-        isLoading = false
-    }
-
-    LaunchedEffect(currentFollowUp.id) {
-        isLoading = true
-        while (true) {
-            try {
-                refreshTimeline()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                isLoading = false
-            }
-            delay(3000)
-        }
     }
 
     // Compute appointment date from expiresAt
@@ -280,16 +270,10 @@ fun JourneyScreen(
                                     currentFollowUp.id,
                                     UpdateSubscriptionRequest(expires_at = newExpiresAt)
                                 )
-                                // Re-fetch to rebuild FollowUpUi
-                                val subscriptions = ApiClient.apiService.getSubscriptions()
-                                val agents = ApiClient.apiService.getAgents().associateBy { it.id }
-                                val refreshed = subscriptions
-                                    .map { it.toFollowUpUi(agents) }
-                                    .find { it.id == currentFollowUp.id }
-                                if (refreshed != null) {
-                                    currentFollowUp = refreshed
-                                    onFollowUpUpdated?.invoke(refreshed)
-                                }
+                                FollowUpRepository.saveFromRemote(updated)
+                                val refreshed = updated.toFollowUpUi(FollowUpRepository.getAgentsOrEmpty())
+                                currentFollowUp = refreshed
+                                onFollowUpUpdated?.invoke(refreshed)
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
@@ -318,10 +302,11 @@ fun JourneyScreen(
                     coroutineScope.launch {
                         try {
                             ApiClient.apiService.deleteSubscription(currentFollowUp.id)
-                            onBack()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
+                        } catch (_: Exception) {
+                            // Still remove local copy when offline
                         }
+                        FollowUpRepository.deleteLocal(currentFollowUp.id)
+                        onBack()
                     }
                 }) { Text(stringResource(R.string.action_delete), color = Color.Red) }
             },
@@ -339,7 +324,7 @@ fun JourneyScreen(
                     title = { Text(currentFollowUp.title, fontWeight = FontWeight.Bold, fontSize = 22.sp, letterSpacing = (-1).sp) },
                     navigationIcon = {
                         IconButton(onClick = onOpenDrawer) {
-                            Icon(Icons.Filled.MoreVert, contentDescription = "Menu", tint = Black)
+                            Icon(Icons.Outlined.Menu, contentDescription = "Menu", tint = Black)
                         }
                     },
                     actions = {
@@ -437,9 +422,7 @@ fun JourneyScreen(
                                         onDelete = { eventId ->
                                             coroutineScope.launch {
                                                 try {
-                                                    ApiClient.apiService.deleteTimelineEvent(currentFollowUp.id, eventId)
-                                                    val remoteEvents = ApiClient.apiService.getTimeline(currentFollowUp.id)
-                                                    events = remoteEvents.sortedBy { it.effective_at ?: it.created_at }
+                                                    TimelineRepository.deleteEvent(currentFollowUp.id, eventId)
                                                 } catch (e: Exception) {
                                                     e.printStackTrace()
                                                 }
@@ -513,11 +496,10 @@ fun JourneyScreen(
                 onSent = {
                     showNoteSheet = false
                     coroutineScope.launch {
-                        try {
-                            refreshTimeline()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
+                        snackbarHostState.showSnackbar(
+                            "Added to your file. Assistant replies when you're back online."
+                        )
+                        SyncManager.scheduleSync(appContext)
                     }
                 }
             )
@@ -547,11 +529,14 @@ fun JourneyScreen(
                         formStepsOverride = null
                         formScheduleKeyOverride = null
                         coroutineScope.launch {
-                            try {
-                                refreshTimeline()
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
+                            val localEvents = TimelineRepository.getEvents(currentFollowUp.id)
+                            val readiness = FileStats.compute(currentFollowUp, localEvents)
+                            snackbarHostState.showSnackbar(
+                                FileStats.checkInSuccessMessage(
+                                    currentFollowUp.daysRemaining,
+                                    readiness.readinessPercent
+                                )
+                            )
                         }
                     }
                 )
@@ -617,29 +602,58 @@ private fun EmptyStateWelcome() {
 
 @Composable
 private fun JourneySummary(followUp: FollowUpUi, events: List<TimelineEventResponse>, appointmentDate: LocalDate) {
-    val expectedMeasurements = followUp.totalDays * (followUp.schedule?.size ?: 1)
-    val actualMeasurements = events.count { it.type == "user" && !it.date_label.contains("Question") }
-    val progressPercent = if (expectedMeasurements > 0) {
-        ((actualMeasurements.toFloat() / expectedMeasurements.toFloat()) * 100).toInt().coerceAtMost(100)
-    } else 0
-    val progressFloat = if (expectedMeasurements > 0) {
-        (actualMeasurements.toFloat() / expectedMeasurements.toFloat()).coerceAtMost(1f)
-    } else 0f
-
+    val readiness = FileStats.compute(followUp, events)
+    val progressFloat = readiness.readinessPercent / 100f
     val formattedApptDate = appointmentDate.format(DateTimeFormatter.ofPattern("d MMM", java.util.Locale.ENGLISH))
 
     LpmCard(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp)) {
         Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                text = readiness.tagline,
+                style = MaterialTheme.typography.bodySmall,
+                color = Gray600,
+                lineHeight = 20.sp,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 SummaryItem(value = formattedApptDate, label = stringResource(R.string.summary_appt_date))
                 SummaryItem(value = "${followUp.daysRemaining}", label = stringResource(R.string.summary_days_left))
-                SummaryItem(value = "$progressPercent%", label = stringResource(R.string.summary_complete))
+                SummaryItem(value = "${readiness.readinessPercent}%", label = stringResource(R.string.summary_complete))
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             LpmProgressBar(progress = progressFloat)
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = stringResource(
+                    R.string.summary_file_contents,
+                    readiness.measurementCount,
+                    readiness.photoCount,
+                    readiness.noteCount
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = Gray600
+            )
+            if (readiness.dayStreak >= 2) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.file_streak, readiness.dayStreak),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Black
+                )
+            }
+            readiness.missingHint?.let { hint ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = hint,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Black,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }
@@ -1139,7 +1153,7 @@ private fun NoteBottomSheet(
                     isSending = true
                     coroutineScope.launch {
                         try {
-                            ApiClient.apiService.postTimelineEvent(
+                            TimelineRepository.addEvent(
                                 followUpId,
                                 TimelineEventRequest(content = text.trim(), date_label = "Question")
                             )
@@ -1260,7 +1274,7 @@ private fun FocusModeForm(
                     answers[MeasurementStep.Photo]?.let { appendLine("• Photo: $it") }
                 }
                 try {
-                    ApiClient.apiService.postTimelineEvent(
+                    TimelineRepository.addEvent(
                         followUp.id,
                         TimelineEventRequest(
                             content = content.trim(),
@@ -1273,7 +1287,7 @@ private fun FocusModeForm(
                 } catch (e: Exception) {
                     e.printStackTrace()
                     isSending = false
-                    submitError = "Could not save. Please try again."
+                    submitError = "Could not save locally."
                 }
             }
         }
@@ -1302,9 +1316,12 @@ private fun FocusModeForm(
         ) {
             Column(modifier = Modifier.padding(24.dp).fillMaxWidth()) {
                 val headerText = when {
-                    effectiveDate != null -> "Add missed measurement — ${effectiveDate.format(DateTimeFormatter.ofPattern("EEEE, MMM d"))}"
+                    effectiveDate != null -> stringResource(
+                        R.string.focus_form_missed,
+                        effectiveDate.format(DateTimeFormatter.ofPattern("EEEE, MMM d"))
+                    )
                     stepsOverride != null -> stringResource(measurementStepLabel(steps.first()))
-                    else -> "Please enter your measurement"
+                    else -> stringResource(R.string.focus_form_header)
                 }
                 Text(
                     headerText,

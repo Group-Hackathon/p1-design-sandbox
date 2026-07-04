@@ -101,23 +101,17 @@ struct DailyRoutineScreen: View {
             let content = lines.joined(separator: "\n")
             let dateLabel = "Routine"
 
-            do {
-                _ = try await ApiService.shared.postTimelineEvent(
-                    subscriptionId: followUpId,
-                    request: TimelineEventRequest(
-                        content: content,
-                        date_label: dateLabel,
-                        effective_date: nil
-                    )
+        Task {
+            _ = TimelineRepository.addEvent(
+                subscriptionId: followUpId,
+                request: TimelineEventRequest(
+                    content: content,
+                    date_label: dateLabel,
+                    effective_date: nil
                 )
-                await MainActor.run { isSaving = false }
-            } catch {
-                await MainActor.run {
-                    isSaving = false
-                    saveError = "Could not save. You can still finish."
-                    print("Timeline post failed: \(error)")
-                }
-            }
+            )
+            await MainActor.run { isSaving = false }
+        }
         }
     }
 }

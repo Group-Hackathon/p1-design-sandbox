@@ -10,12 +10,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.preappointment1.app.R
 import com.preappointment1.app.ui.components.LpmPrimaryButton
-import com.preappointment1.app.ui.components.LpmSecondaryButton
 import com.preappointment1.app.ui.theme.Black
 import com.preappointment1.app.ui.theme.Gray200
 import com.preappointment1.app.ui.theme.Gray500
@@ -28,15 +29,19 @@ fun WelcomeScreen(
     modifier: Modifier = Modifier
 ) {
     var currentSlide by remember { mutableIntStateOf(0) }
-    
+
     val slides = listOf(
         Pair(
-            "Prepare your medical appointments",
-            "Track symptoms, vitals, and photos daily. Your doctor gets a complete picture, ready at appointment time."
+            stringResource(R.string.welcome_slide_1_title),
+            stringResource(R.string.welcome_slide_1_body)
         ),
         Pair(
-            "Evidence-based tracking rules",
-            "Choose what to track (vitals, photos). We prepare the best personalized protocol based on thousands of medical records."
+            stringResource(R.string.welcome_slide_2_title),
+            stringResource(R.string.welcome_slide_2_body)
+        ),
+        Pair(
+            stringResource(R.string.welcome_slide_3_title),
+            stringResource(R.string.welcome_slide_3_body)
         )
     )
 
@@ -52,10 +57,8 @@ fun WelcomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            
             Spacer(modifier = Modifier.weight(1f))
-            
-            // Slide Content
+
             AnimatedContent(
                 targetState = currentSlide,
                 transitionSpec = {
@@ -88,7 +91,6 @@ fun WelcomeScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Dots indicator
             Row(
                 modifier = Modifier.padding(vertical = 32.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -104,14 +106,13 @@ fun WelcomeScreen(
                 }
             }
 
-            // Buttons
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 if (currentSlide < slides.size - 1) {
                     LpmPrimaryButton(
-                        text = "Next",
+                        text = stringResource(R.string.welcome_next),
                         onClick = { currentSlide++ }
                     )
                     TextButton(
@@ -119,14 +120,14 @@ fun WelcomeScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            "Skip — go to dashboard",
+                            stringResource(R.string.welcome_skip),
                             color = Gray500,
                             fontWeight = FontWeight.Medium
                         )
                     }
                 } else {
                     LpmPrimaryButton(
-                        text = "Start a new tracking",
+                        text = stringResource(R.string.welcome_start),
                         onClick = onStartTracking
                     )
                     TextButton(
@@ -134,7 +135,7 @@ fun WelcomeScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            "Go to Dashboard",
+                            stringResource(R.string.welcome_go_home),
                             color = Gray500,
                             fontWeight = FontWeight.Medium
                         )

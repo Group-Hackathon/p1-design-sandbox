@@ -67,40 +67,14 @@ struct ContentView: View {
                     onFollowUpCreated: { subscriptionId in
                         // Short delay then navigate directly to the new journey
                         Task {
-                            try? await Task.sleep(nanoseconds: 800_000_000) // 0.8s
-                            do {
-                                let subs = try await ApiService.shared.getSubscriptions()
-                                let agents = try await ApiService.shared.getAgents()
-                                if let sub = subs.first(where: { $0.id == subscriptionId }) {
-                                    let agent = agents.first(where: { $0.id == sub.agent_id })
-                                    let title = agent?.name ?? "My Tracking"
-                                    let formatter = ISO8601DateFormatter()
-                                    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                                    let start = formatter.date(from: sub.starts_at) ?? Date()
-                                    let end = formatter.date(from: sub.expires_at) ?? Calendar.current.date(byAdding: .day, value: 14, to: start)!
-                                    let totalSeconds = end.timeIntervalSince(start)
-                                    let elapsedSeconds = Date().timeIntervalSince(start)
-                                    let progress = max(0, min(1, Float(elapsedSeconds / totalSeconds)))
-                                    let daysRemaining = max(0, Int(end.timeIntervalSince(Date()) / 86400))
-                                    let followUp = FollowUpUi(
-                                        id: sub.id,
-                                        title: title,
-                                        daysRemaining: daysRemaining,
-                                        totalDays: Int(totalSeconds / 86400),
-                                        progress: progress,
-                                        isActive: Date() < end,
-                                        startsAt: sub.starts_at,
-                                        expiresAt: sub.expires_at,
-                                        rules: sub.parameters?.rules,
-                                        schedule: sub.parameters?.schedule
-                                    )
-                                    await MainActor.run {
-                                        currentRoute = .journey(followUp)
-                                    }
-                                } else {
-                                    await MainActor.run { currentRoute = .dashboard }
+                            try? await Task.sleep(nanoseconds: 800_000_000)
+                            let agents = (try? await ApiService.shared.getAgents()) ?? []
+                            let local = FollowUpRepository.getLocalFollowUps(agents: agents)
+                            if let followUp = local.first(where: { $0.id == subscriptionId }) {
+                                await MainActor.run {
+                                    currentRoute = .journey(followUp)
                                 }
-                            } catch {
+                            } else {
                                 await MainActor.run { currentRoute = .dashboard }
                             }
                         }

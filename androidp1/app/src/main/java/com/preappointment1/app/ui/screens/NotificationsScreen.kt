@@ -124,10 +124,10 @@ fun NotificationsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 LpmBodyText(
                     if (activeFollowUp != null) {
-                        "Reminders follow your ${activeFollowUp.title} protocol. " +
-                            "Edit times here or from the tracking menu."
+                        "Gentle reminders to keep building your file for ${activeFollowUp.title}. " +
+                            "Edit times here or from the file menu."
                     } else {
-                        "Default times apply to manual setup and new trackings without a custom schedule."
+                        "Default times apply when you prepare a new appointment file."
                     }
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -183,8 +183,8 @@ private fun sendTestNotification(context: android.content.Context, onSent: () ->
     NotificationHelper.createNotificationChannel(context)
     NotificationScheduler.scheduleRoutineReminder(
         context = context,
-        title = "P1 — Check-in reminder",
-        message = "Time for your scheduled measurements.",
+        title = "P1 — Time for your check-in",
+        message = "About 90 seconds to add today's entries to your file.",
         delayMinutes = 0
     )
     onSent()

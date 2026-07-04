@@ -3,80 +3,111 @@
     <string name="app_name">P1</string>
     <string name="patient_name_placeholder">Patient</string>
     <string name="view_profile">View profile</string>
-    <string name="my_trackings">MY TRACKINGS</string>
-    <string name="start_new_tracking">Start new tracking</string>
+    <string name="my_trackings">MY FILES</string>
+    <string name="start_new_tracking">Prepare a new appointment</string>
     <string name="pre_appointment">PRE-APPOINTMENT 1</string>
     <string name="profile_title">Profile</string>
-    
+
+    <!-- Welcome -->
+    <string name="welcome_slide_1_title">Never forget what to tell your doctor</string>
+    <string name="welcome_slide_1_body">Most useful details fade between visits. We help you capture them — simply, every day.</string>
+    <string name="welcome_slide_2_title">Capture what happens between visits</string>
+    <string name="welcome_slide_2_body">Short check-ins, photos, and notes. Under two minutes a day.</string>
+    <string name="welcome_slide_3_title">One clear page for your physician</string>
+    <string name="welcome_slide_3_body">On appointment day, everything is organized and ready to share.</string>
+    <string name="welcome_next">Next</string>
+    <string name="welcome_skip">Skip — go to home</string>
+    <string name="welcome_start">Prepare my next appointment</string>
+    <string name="welcome_go_home">Go to home</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_empty_title">Nothing to prepare yet</string>
+    <string name="dashboard_empty_body">When you have an upcoming appointment, start here. We\'ll help you build a clear file for your doctor — a few minutes a day.</string>
+    <string name="dashboard_empty_action">Prepare my next appointment</string>
+    <string name="dashboard_greeting">%1$s</string>
+    <string name="dashboard_greeting_named">%1$s, %2$s</string>
+    <string name="dashboard_subtitle">Your appointment files</string>
+    <string name="file_ready_percent">File %1$d%% ready</string>
+    <string name="file_contents">%1$d entries · %2$d photos · %3$d notes</string>
+    <string name="file_streak">%1$d-day streak</string>
+    <string name="file_appt_countdown">Appointment in %1$d days</string>
+    <string name="file_appt_today">Appointment today</string>
+    <string name="file_continue">Open file</string>
+    <string name="file_checkin_now">Today\'s check-in (~2 min)</string>
+
     <!-- Journey Screen -->
     <string name="check_in_at">Check-in at %1$s</string>
-    <string name="next_check_in">Next Check-in</string>
+    <string name="next_check_in">Next check-in</string>
     <string name="period_initial">Initial</string>
     <string name="period_routine">Routine</string>
-    
-    <string name="dialog_delete_tracking_title">Delete Tracking</string>
-    <string name="dialog_delete_tracking_desc">This will permanently delete this tracking and all its data. This cannot be undone.</string>
+
+    <string name="dialog_delete_tracking_title">Delete this file</string>
+    <string name="dialog_delete_tracking_desc">This will permanently delete this appointment file and all its data. This cannot be undone.</string>
     <string name="action_confirm">Confirm</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_delete">Delete</string>
-    
+
     <string name="menu_edit_schedule">Edit check-in times</string>
     <string name="menu_change_appt_date">Change appointment date</string>
     <string name="schedule_editor_title">Check-in schedule</string>
-    <string name="bottom_starter_title">Start your protocol</string>
-    <string name="btn_start_baseline">Start baseline check-in</string>
+    <string name="bottom_starter_title">Let\'s start your file</string>
+    <string name="btn_start_baseline">Start first check-in (~2 min)</string>
     <string name="notifications_edit_defaults">Edit default times</string>
     <string name="notifications_edit_protocol">Edit protocol times</string>
-    
-    <string name="menu_delete_tracking">Delete tracking</string>
-    
-    <string name="empty_state_welcome">Your personalized protocol has started. Let\'s begin your first measurement.</string>
-    
-    <string name="summary_appt_date">Appt Date</string>
+
+    <string name="menu_delete_tracking">Delete file</string>
+
+    <string name="empty_state_welcome">Your file has started. Take two minutes for your first check-in — it all adds up for your doctor.</string>
+
+    <string name="summary_appt_date">Appt date</string>
     <string name="summary_days_left">Days left</string>
-    <string name="summary_complete">Complete</string>
-    
-    <string name="status_ongoing">Ongoing</string>
-    <string name="status_completed">Completed</string>
-    
-    <string name="next_appt_in_days">Next Appt: In %1$d days</string>
-    <string name="next_action_now">Next Action: %1$s Check-in (Now)</string>
-    <string name="next_action_in">Next Action: %1$s (in %2$s)</string>
-    <string name="next_action_pending">Next Action: Check-in (Pending)</string>
-    <string name="next_action_done_today">Check-in completed. See you at the next scheduled time.</string>
-    <string name="measurement_step_progress">Step %1$d of %2$d</string>
-    
-    <string name="dialog_delete_record_title">Delete Record</string>
-    <string name="dialog_delete_record_desc">Are you sure you want to delete this record?</string>
-    
+    <string name="summary_complete">File ready</string>
+    <string name="summary_file_contents">%1$d entries · %2$d photos · %3$d notes</string>
+
+    <string name="status_ongoing">In progress</string>
+    <string name="status_completed">Complete</string>
+
+    <string name="next_appt_in_days">Appointment in %1$d days</string>
+    <string name="next_action_now">Ready now — %1$s check-in (~2 min)</string>
+    <string name="next_action_in">Next check-in: %1$s (in %2$s)</string>
+    <string name="next_action_pending">Check-in waiting — tap below when ready</string>
+    <string name="next_action_done_today">All set for today. See you at the next check-in.</string>
+    <string name="measurement_step_progress">Step %1$d of %2$d — almost done</string>
+
+    <string name="dialog_delete_record_title">Delete entry</string>
+    <string name="dialog_delete_record_desc">Remove this entry from your file?</string>
+
     <string name="timeline_missed">MISSED</string>
     <string name="timeline_upcoming">UPCOMING</string>
-    <string name="timeline_add_missed">+ Add missed measurement</string>
-    
-    <string name="btn_fill_measurements">📋 Fill measurements (%1$s)</string>
+    <string name="timeline_add_missed">+ Add missed entry</string>
 
-    <string name="bottom_checkin_now_title">Check-in time — %1$s</string>
-    <string name="bottom_checkin_will_ask">We will ask: %1$s</string>
-    <string name="bottom_next_measurement_at">Your next measurement at %1$s</string>
-    <string name="bottom_next_measurement_prepare">You will be asked: %1$s. Get ready.</string>
+    <string name="btn_fill_measurements">Check-in now (%1$s)</string>
+
+    <string name="bottom_checkin_now_title">Time for today — %1$s</string>
+    <string name="bottom_checkin_will_ask">We\'ll ask for: %1$s</string>
+    <string name="bottom_next_measurement_at">Next check-in at %1$s</string>
+    <string name="bottom_next_measurement_prepare">Coming up: %1$s. Get ready when you can.</string>
     <string name="bottom_countdown">Opens in %1$s</string>
 
     <string name="quick_action_note">Note</string>
     <string name="quick_action_extra">Extra</string>
     <string name="quick_action_report">Report</string>
 
-    <string name="note_sheet_title">Add a note</string>
-    <string name="note_sheet_desc">Your note will be sent to the care assistant and added to your timeline.</string>
-    <string name="note_sheet_placeholder">I have a note to record…</string>
-    <string name="note_sheet_send">Send to assistant</string>
+    <string name="note_sheet_title">Tell your doctor something</string>
+    <string name="note_sheet_desc">Anything you want them to know — symptoms, context, questions. Added to your file.</string>
+    <string name="note_sheet_placeholder">I want my doctor to know…</string>
+    <string name="note_sheet_send">Add to file</string>
 
-    <string name="extra_picker_title">Which measurement?</string>
-    <string name="extra_picker_desc">Choose one measurement from your tracking protocol.</string>
+    <string name="extra_picker_title">Add an extra measurement</string>
+    <string name="extra_picker_desc">Choose one measurement from your protocol.</string>
     <string name="measurement_type_pain">Pain level</string>
     <string name="measurement_type_temperature">Temperature</string>
     <string name="measurement_type_photo">Photo</string>
-    <string name="action_save">Save</string>
-    <string name="notification_checkin_pending">Reminder — check-in waiting</string>
-    <string name="notification_checkin_already_done">This check-in is already recorded for today.</string>
-    
+    <string name="action_save">Save to file</string>
+    <string name="notification_checkin_pending">Your check-in is waiting — about 2 minutes</string>
+    <string name="notification_checkin_already_done">Already recorded for today. See you at the next check-in.</string>
+
+    <string name="focus_form_header">Today\'s check-in</string>
+    <string name="focus_form_missed">Add missed entry — %1$s</string>
+
 </resources>

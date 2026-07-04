@@ -6,9 +6,10 @@ struct WelcomeScreen: View {
     
     @State private var currentSlide = 0
     
-    private let slides = [
-        ("Prepare your medical appointments", "Track symptoms, vitals, and photos daily. Your doctor gets a complete picture, ready at appointment time."),
-        ("Evidence-based tracking rules", "Choose what to track (vitals, photos). We prepare the best personalized protocol based on thousands of medical records.")
+    private let slides: [(String, String)] = [
+        (String(localized: "welcome_slide_1_title"), String(localized: "welcome_slide_1_body")),
+        (String(localized: "welcome_slide_2_title"), String(localized: "welcome_slide_2_body")),
+        (String(localized: "welcome_slide_3_title"), String(localized: "welcome_slide_3_body"))
     ]
     
     var body: some View {
@@ -23,7 +24,6 @@ struct WelcomeScreen: View {
             
             Spacer()
             
-            // Slide Content
             VStack(spacing: 16) {
                 Text(slides[currentSlide].0)
                     .font(.system(size: 32, weight: .heavy, design: .default))
@@ -37,7 +37,7 @@ struct WelcomeScreen: View {
                     .padding(.horizontal, 24)
                     .lineSpacing(6)
             }
-            .id(currentSlide) // Trigger animation on change
+            .id(currentSlide)
             .transition(.asymmetric(
                 insertion: .opacity.combined(with: .move(edge: .trailing)),
                 removal: .opacity.combined(with: .move(edge: .leading))
@@ -45,7 +45,6 @@ struct WelcomeScreen: View {
             
             Spacer()
             
-            // Dots indicator
             HStack(spacing: 8) {
                 ForEach(0..<slides.count, id: \.self) { index in
                     Circle()
@@ -56,26 +55,25 @@ struct WelcomeScreen: View {
             }
             .padding(.vertical, 32)
             
-            // Buttons
             VStack(spacing: 16) {
                 if currentSlide < slides.count - 1 {
-                    LpmPrimaryButton(text: "Next") {
+                    LpmPrimaryButton(text: String(localized: "welcome_next")) {
                         withAnimation {
                             currentSlide += 1
                         }
                     }
                     
                     Button(action: onGoToHome) {
-                        Text("Skip — go to dashboard")
+                        Text(String(localized: "welcome_skip"))
                             .fontWeight(.medium)
                             .foregroundColor(Color(UIColor.systemGray))
                     }
                     .padding(.vertical, 8)
                 } else {
-                    LpmPrimaryButton(text: "Start a new tracking", action: onStartTracking)
+                    LpmPrimaryButton(text: String(localized: "welcome_start"), action: onStartTracking)
                     
                     Button(action: onGoToHome) {
-                        Text("Go to Dashboard")
+                        Text(String(localized: "welcome_go_home"))
                             .fontWeight(.medium)
                             .foregroundColor(Color(UIColor.systemGray))
                     }

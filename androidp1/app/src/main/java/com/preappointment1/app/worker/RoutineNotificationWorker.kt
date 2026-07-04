@@ -19,7 +19,7 @@ class RoutineNotificationWorker(
 
     override suspend fun doWork(): Result {
         val title = inputData.getString("title") ?: "Time for your routine"
-        val message = inputData.getString("message") ?: "Please complete your daily follow-up check-in."
+        val message = inputData.getString("message") ?: "About 90 seconds — time to add today's entries to your file."
 
         showNotification(title, message)
         return Result.success()

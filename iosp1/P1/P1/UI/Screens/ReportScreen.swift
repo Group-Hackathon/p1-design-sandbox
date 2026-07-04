@@ -91,24 +91,14 @@ struct ReportScreen: View {
     }
     
     private func generateReport() async {
-        do {
-            let events = try await ApiService.shared.getTimeline(subscriptionId: followUp.id)
-            let patientName = SessionManager.shared.getUserName() ?? "Patient"
-            
-            // Generate PDF on background thread
-            let url = await Task.detached(priority: .userInitiated) {
-                PdfReportGenerator.generate(followUp: followUp, events: events, patientName: patientName)
-            }.value
-            
-            if let url = url {
-                self.pdfURL = url
-            } else {
-                self.errorMessage = "Failed to create PDF file."
-            }
-        } catch {
-            self.errorMessage = "Failed to fetch timeline: \(error.localizedDescription)"
+        let patientName = SessionManager.shared.getUserName() ?? "Patient"
+        if let url = await ReportRepository.generateOfflineReport(followUp: followUp, patientName: patientName) {
+            self.pdfURL = url
+        } else if let cached = LocalStore.shared.cachedReportURL(subscriptionId: followUp.id) {
+            self.pdfURL = cached
+        } else {
+            self.errorMessage = "Failed to create PDF file."
         }
-        
         self.isGenerating = false
     }
 }

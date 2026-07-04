@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import com.preappointment1.app.data.SessionManager
-import com.preappointment1.app.data.api.ApiClient
-import com.preappointment1.app.data.model.TimelineEventResponse
+import com.preappointment1.app.data.repository.ReportRepository
+import com.preappointment1.app.data.repository.TimelineRepository
 import com.preappointment1.app.report.PdfReportGenerator
 import com.preappointment1.app.ui.components.*
 import com.preappointment1.app.ui.theme.*
@@ -55,17 +55,21 @@ fun ReportScreen(
     LaunchedEffect(followUp.id) {
         try {
             val events = withContext(Dispatchers.IO) {
-                ApiClient.apiService.getTimeline(followUp.id)
+                TimelineRepository.getEvents(followUp.id)
             }
             val patientName = SessionManager.getUserName() ?: "Patient"
 
+            val persistentFile = File(ReportRepository.reportsDir(), "report_${followUp.id}.pdf")
             val file = withContext(Dispatchers.IO) {
-                PdfReportGenerator.generate(
+                val generated = PdfReportGenerator.generate(
                     context = context,
                     followUp = followUp,
                     events = events,
                     patientName = patientName
                 )
+                generated.copyTo(persistentFile, overwrite = true)
+                ReportRepository.cacheReport(followUp.id, persistentFile.absolutePath)
+                persistentFile
             }
             pdfFile = file
 

@@ -136,6 +136,7 @@ struct OnboardingScreen: View {
                                             parameters: params
                                         )
                                         let sub = try await ApiService.shared.createSubscription(request: req)
+                                        FollowUpRepository.saveFromRemote(sub)
                                         await MainActor.run {
                                             isAnalyzing = false
                                             onFollowUpCreated(sub.id)
@@ -177,6 +178,7 @@ struct OnboardingScreen: View {
                                             parameters: params
                                         )
                                         let sub = try await ApiService.shared.createSubscription(request: req)
+                                        FollowUpRepository.saveFromRemote(sub)
                                         await MainActor.run {
                                             isAnalyzing = false
                                             onFollowUpCreated(sub.id)

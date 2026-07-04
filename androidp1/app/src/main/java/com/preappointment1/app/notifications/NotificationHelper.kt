@@ -15,8 +15,8 @@ object NotificationHelper {
 
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Tracking Reminders"
-            val descriptionText = "Reminders for your daily health tracking"
+            val name = "Appointment reminders"
+            val descriptionText = "Gentle reminders to build your file before your appointment"
             val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText

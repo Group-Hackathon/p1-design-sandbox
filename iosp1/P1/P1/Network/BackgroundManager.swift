@@ -37,12 +37,7 @@ class BackgroundManager {
             let semaphore = DispatchSemaphore(value: 0)
             
             Task {
-                do {
-                    // Pull new timeline events or sync local metrics
-                    _ = try await ApiService.shared.getSubscriptions()
-                } catch {
-                    print("Background sync failed: \(error)")
-                }
+                await SyncManager.shared.syncAll()
                 semaphore.signal()
             }
             

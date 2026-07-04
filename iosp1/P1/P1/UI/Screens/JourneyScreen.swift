@@ -145,7 +145,7 @@ struct JourneyScreen: View {
                         // Summary Card (dynamic)
                         JourneySummaryCard(
                             followUp: currentFollowUp,
-                            completionPercent: completionPercent,
+                            events: events,
                             appointmentDateStr: appointmentDateString
                         )
                         .padding(.vertical, 16)
@@ -228,6 +228,10 @@ struct JourneyScreen: View {
             Task { await reloadTimeline() }
         }
         .task {
+            await MainActor.run {
+                events = TimelineRepository.getEvents(subscriptionId: currentFollowUp.id)
+                isLoading = false
+            }
             await reloadTimeline()
         }
         // Auto-refresh every 3s
@@ -303,39 +307,28 @@ struct JourneyScreen: View {
     }
 
     private func reloadTimeline() async {
-        do {
-            let fetched = try await ApiService.shared.getTimeline(subscriptionId: currentFollowUp.id)
-            await MainActor.run {
-                events = fetched.sorted { ($0.effective_at ?? $0.created_at) < ($1.effective_at ?? $1.created_at) }
-                isLoading = false
-            }
-        } catch {
-            print("Timeline fetch failed: \(error)")
-            await MainActor.run { isLoading = false }
+        _ = await TimelineRepository.refreshFromRemote(subscriptionId: currentFollowUp.id)
+        await MainActor.run {
+            events = TimelineRepository.getEvents(subscriptionId: currentFollowUp.id)
+            isLoading = false
         }
     }
 
     private func sendQuestion() async {
         isSending = true
-        do {
-            let request = TimelineEventRequest(content: chatText, date_label: "Question", effective_date: nil)
-            let newEvent = try await ApiService.shared.postTimelineEvent(subscriptionId: currentFollowUp.id, request: request)
-            await MainActor.run {
-                events.append(newEvent)
-                chatText = ""
-            }
-        } catch {
-            print("Failed to send question: \(error)")
+        let request = TimelineEventRequest(content: chatText, date_label: "Question", effective_date: nil)
+        _ = TimelineRepository.addEvent(subscriptionId: currentFollowUp.id, request: request)
+        await MainActor.run {
+            events = TimelineRepository.getEvents(subscriptionId: currentFollowUp.id)
+            chatText = ""
         }
         isSending = false
     }
     
     private func deleteEvent(_ id: String) async {
-        do {
-            try await ApiService.shared.deleteTimelineEvent(subscriptionId: currentFollowUp.id, eventId: id)
-            await reloadTimeline()
-        } catch {
-            print("Delete event failed: \(error)")
+        await TimelineRepository.deleteEvent(subscriptionId: currentFollowUp.id, eventId: id)
+        await MainActor.run {
+            events = TimelineRepository.getEvents(subscriptionId: currentFollowUp.id)
         }
     }
     
@@ -344,34 +337,14 @@ struct JourneyScreen: View {
         fmt.dateFormat = "yyyy-MM-dd"
         let dateStr = fmt.string(from: date)
         do {
-            _ = try await ApiService.shared.patchSubscription(
+            let updated = try await ApiService.shared.patchSubscription(
                 id: currentFollowUp.id,
                 request: UpdateSubscriptionRequest(expires_at: dateStr)
             )
-            // Re-fetch to update
-            let subs = try await ApiService.shared.getSubscriptions()
-            let agents = try await ApiService.shared.getAgents()
-            if let sub = subs.first(where: { $0.id == currentFollowUp.id }) {
-                let agent = agents.first(where: { $0.id == sub.agent_id })
-                let title = agent?.name ?? currentFollowUp.title
-                let isoFmt = ISO8601DateFormatter()
-                isoFmt.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                let start = isoFmt.date(from: sub.starts_at) ?? Date()
-                let end = isoFmt.date(from: sub.expires_at) ?? date
-                let totalSec = end.timeIntervalSince(start)
-                let elapsed = Date().timeIntervalSince(start)
-                let progress = max(0, min(1, Float(elapsed / totalSec)))
-                let daysLeft = max(0, Int(end.timeIntervalSince(Date()) / 86400))
-                await MainActor.run {
-                    currentFollowUp = FollowUpUi(
-                        id: sub.id, title: title,
-                        daysRemaining: daysLeft, totalDays: Int(totalSec / 86400),
-                        progress: progress, isActive: daysLeft > 0,
-                        startsAt: sub.starts_at, expiresAt: sub.expires_at,
-                        rules: sub.parameters?.rules,
-                        schedule: sub.parameters?.schedule
-                    )
-                }
+            FollowUpRepository.saveFromRemote(updated)
+            let agents = (try? await ApiService.shared.getAgents()) ?? []
+            await MainActor.run {
+                currentFollowUp = FollowUpRepository.followUpUi(from: updated, agents: agents)
             }
         } catch {
             print("Change appointment failed: \(error)")
@@ -381,10 +354,11 @@ struct JourneyScreen: View {
     private func deleteTracking() async {
         do {
             try await ApiService.shared.deleteSubscription(id: currentFollowUp.id)
-            await MainActor.run { onOpenDrawer() }
         } catch {
-            print("Delete tracking failed: \(error)")
+            print("Delete tracking remote failed: \(error)")
         }
+        FollowUpRepository.deleteLocal(id: currentFollowUp.id)
+        await MainActor.run { onOpenDrawer() }
     }
 
     private func updateMeasurementWindow() {
@@ -503,12 +477,21 @@ private struct FutureDayRow: View {
 
 private struct JourneySummaryCard: View {
     let followUp: FollowUpUi
-    let completionPercent: Int
+    let events: [TimelineEventResponse]
     let appointmentDateStr: String
+
+    private var readiness: FileReadiness {
+        FileStats.compute(followUp: followUp, events: events)
+    }
 
     var body: some View {
         LpmCard {
-            VStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(readiness.tagline)
+                    .font(.caption)
+                    .foregroundColor(Color(UIColor.systemGray))
+                    .fixedSize(horizontal: false, vertical: true)
+
                 HStack {
                     VStack {
                         Text(String(localized: "summary_appt_date"))
@@ -532,21 +515,35 @@ private struct JourneySummaryCard: View {
                         Text(String(localized: "summary_complete"))
                             .font(.caption)
                             .foregroundColor(.gray)
-                        Text("\(completionPercent)%")
+                        Text("\(readiness.readinessPercent)%")
                             .font(.title3)
                             .fontWeight(.bold)
                     }
                 }
 
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        Capsule().frame(height: 8).foregroundColor(Color(UIColor.systemGray5))
-                        Capsule()
-                            .frame(width: geometry.size.width * CGFloat(followUp.progress), height: 8)
-                            .foregroundColor(.black)
-                    }
+                ProgressView(value: Double(readiness.readinessPercent), total: 100)
+                    .tint(.black)
+
+                Text(String(
+                    format: String(localized: "summary_file_contents"),
+                    readiness.measurementCount,
+                    readiness.photoCount,
+                    readiness.noteCount
+                ))
+                .font(.caption)
+                .foregroundColor(Color(UIColor.systemGray))
+
+                if readiness.dayStreak >= 2 {
+                    Text(String(format: String(localized: "file_streak"), readiness.dayStreak))
+                        .font(.caption)
+                        .fontWeight(.semibold)
                 }
-                .frame(height: 8)
+
+                if let hint = readiness.missingHint {
+                    Text(hint)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
             }
             .padding()
         }
@@ -763,25 +760,19 @@ private struct MissedMeasurementForm: View {
         if !tempValue.isEmpty { lines.append("• Temperature: \(tempValue) °C") }
         let content = lines.joined(separator: "\n")
         
-        let isoFmt = ISO8601DateFormatter()
-        isoFmt.formatOptions = [.withInternetDateTime]
-        let effectiveDateStr = isoFmt.string(from: effectiveDate)
-        
         Task {
-            do {
-                _ = try await ApiService.shared.postTimelineEvent(
-                    subscriptionId: followUpId,
-                    request: TimelineEventRequest(
-                        content: content,
-                        date_label: dateLabel,
-                        effective_date: effectiveDateStr
-                    )
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd"
+            let effectiveDateStr = df.string(from: effectiveDate)
+            _ = TimelineRepository.addEvent(
+                subscriptionId: followUpId,
+                request: TimelineEventRequest(
+                    content: content,
+                    date_label: dateLabel,
+                    effective_date: effectiveDateStr
                 )
-                await MainActor.run { onClose() }
-            } catch {
-                print("Missed measurement save failed: \(error)")
-                await MainActor.run { isSaving = false }
-            }
+            )
+            await MainActor.run { onClose() }
         }
     }
 }

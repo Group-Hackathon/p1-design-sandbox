@@ -31,6 +31,7 @@ import com.preappointment1.app.notifications.ScheduleReminderManager
 import com.preappointment1.app.schedule.ScheduleDefaults
 import com.preappointment1.app.schedule.ScheduleLogic
 import com.preappointment1.app.data.AuthHelper
+import com.preappointment1.app.data.repository.FollowUpRepository
 import com.preappointment1.app.data.api.ApiClient
 import com.preappointment1.app.data.model.RecommendRequest
 import com.preappointment1.app.data.model.SubscriptionRequest
@@ -117,6 +118,7 @@ fun OnboardingScreen(
                             parameters = params
                         )
                     )
+                    FollowUpRepository.saveFromRemote(response)
                     onFollowUpCreated(response.id)
                     generatedSchedule?.let { schedule ->
                         ScheduleReminderManager.scheduleForFollowUp(
@@ -275,6 +277,7 @@ fun OnboardingScreen(
                                             parameters = params
                                         )
                                     )
+                                    FollowUpRepository.saveFromRemote(response)
                                     onFollowUpCreated(response.id)
                                     ScheduleReminderManager.scheduleForFollowUp(
                                         context, response.id, customTitle, customSchedule
@@ -532,7 +535,7 @@ private fun PremiumPreviewStep(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.Check, contentDescription = "Analyzed", tint = Color(0xFF4CAF50), modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Analyzed from thousands of medical records", style = MaterialTheme.typography.labelMedium, color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold)
+            Text("Analyzed from thousands of medical records", style = MaterialTheme.typography.labelMedium, color = Gray600, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(12.dp))
         

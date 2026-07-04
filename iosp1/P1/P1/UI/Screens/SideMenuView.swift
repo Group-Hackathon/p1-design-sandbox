@@ -125,28 +125,8 @@ struct SideMenuView: View {
     }
     
     private func loadData() async {
-        do {
-            if SessionManager.shared.getToken() == nil { return }
-            let subscriptions = try await ApiService.shared.getSubscriptions()
-            let agents = try await ApiService.shared.getAgents()
-            self.followUps = subscriptions.map { sub in
-                let agent = agents.first(where: { $0.id == sub.agent_id })
-                let formatter = ISO8601DateFormatter()
-                formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                let start = formatter.date(from: sub.starts_at) ?? Date()
-                let end = formatter.date(from: sub.expires_at) ?? Calendar.current.date(byAdding: .day, value: 14, to: start)!
-                let remainingSeconds = end.timeIntervalSince(Date())
-                let daysRemaining = max(0, Int(remainingSeconds / 86400))
-                
-                return FollowUpUi(
-                    id: sub.id, title: agent?.name ?? "Tracking",
-                    daysRemaining: daysRemaining, totalDays: 14,
-                    progress: 0, isActive: Date() < end,
-                    startsAt: sub.starts_at, expiresAt: sub.expires_at,
-                    rules: sub.parameters?.rules,
-                    schedule: sub.parameters?.schedule
-                )
-            }
-        } catch {}
+        guard SessionManager.shared.getToken() != nil else { return }
+        let result = await FollowUpRepository.loadFollowUpsWithSync()
+        self.followUps = result.followUps
     }
 }

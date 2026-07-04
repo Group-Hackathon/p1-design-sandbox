@@ -1,6 +1,7 @@
 package com.preappointment1.app.notifications
 
 import android.content.Context
+import com.preappointment1.app.data.SessionManager
 import com.preappointment1.app.ui.screens.FollowUpUi
 import java.time.LocalTime
 
@@ -88,16 +89,19 @@ object ScheduleReminderManager {
         slots.forEachIndexed { index, (timeInfo, actions) ->
             val (timeKey, hour, minute) = timeInfo
             val measures = formatActions(actions)
-            val notifTitle = "Check-in — $timeKey"
+            val firstName = SessionManager.getUserName()?.trim()?.split(" ")?.firstOrNull()
+            val notifTitle = if (firstName != null) {
+                "Hi $firstName — check-in time"
+            } else {
+                "Time for your check-in"
+            }
             val message = buildString {
-                append("Time for your ")
-                append(title)
-                append(" check-in at ")
-                append(timeKey)
+                append("About 90 seconds to add today")
                 if (measures.isNotBlank()) {
-                    append(" — ")
-                    append(measures)
+                    append(" ($measures)")
                 }
+                append(" to your file for ")
+                append(title)
                 append('.')
             }
             NotificationHelper.scheduleDailyReminder(

@@ -7,22 +7,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DateRange
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.preappointment1.app.data.api.ApiClient
+import com.preappointment1.app.R
 import com.preappointment1.app.data.model.AgentResponse
 import com.preappointment1.app.data.model.SubscriptionResponse
+import com.preappointment1.app.data.model.TimelineEventResponse
 import com.preappointment1.app.ui.components.*
+import com.preappointment1.app.ui.support.FileReadiness
+import com.preappointment1.app.ui.support.FileStats
 import com.preappointment1.app.ui.theme.*
 import java.time.Instant
 import java.time.LocalDate
@@ -46,6 +46,8 @@ data class FollowUpUi(
 @Composable
 fun DashboardScreen(
     followUps: List<FollowUpUi>,
+    timelineByFollowUpId: Map<String, List<TimelineEventResponse>>,
+    patientName: String?,
     isLoading: Boolean,
     onNewFollowUp: () -> Unit,
     onOpenJourney: (FollowUpUi) -> Unit,
@@ -59,9 +61,8 @@ fun DashboardScreen(
     }
 
     val activeFollowUps = followUps.filter { it.isActive }
-    val today = LocalDate.now().format(
-        DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.ENGLISH)
-    )
+    val greeting = FileStats.greetingPrefix()
+    val firstName = patientName?.trim()?.split(" ")?.firstOrNull()?.takeIf { it.isNotBlank() }
 
     Scaffold(
         containerColor = White,
@@ -74,7 +75,7 @@ fun DashboardScreen(
                     .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
-                androidx.compose.material3.CircularProgressIndicator(color = Black)
+                CircularProgressIndicator(color = Black)
             }
         } else if (activeFollowUps.isEmpty()) {
             Box(
@@ -90,7 +91,7 @@ fun DashboardScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Welcome to Pre-Appointment 1",
+                        text = stringResource(R.string.dashboard_empty_title),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Black,
                         color = Black,
@@ -98,62 +99,54 @@ fun DashboardScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "You have no active trackings selected. Select a conversation from the top right menu, or start a new tracking protocol.",
+                        text = stringResource(R.string.dashboard_empty_body),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Gray600,
                         textAlign = TextAlign.Center,
                         lineHeight = 24.sp
                     )
                     Spacer(modifier = Modifier.height(32.dp))
-                    LpmPrimaryButton(text = "Start a new tracking", onClick = onNewFollowUp)
+                    LpmPrimaryButton(
+                        text = stringResource(R.string.dashboard_empty_action),
+                        onClick = onNewFollowUp
+                    )
                 }
             }
         } else {
-            androidx.compose.foundation.lazy.LazyColumn(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
-                contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp)
+                contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)
             ) {
-                items(activeFollowUps) { followUp ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onOpenJourney(followUp) }
-                            .padding(horizontal = 24.dp, vertical = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .background(Gray200, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = followUp.title.take(1).uppercase(),
-                                fontWeight = FontWeight.Bold,
-                                color = Gray600
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column {
-                            Text(
-                                text = followUp.title,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Black
-                            )
-                            Text(
-                                text = "Active tracking protocol",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Gray400
-                            )
-                        }
+                item {
+                    Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
+                        Text(
+                            text = if (firstName != null) {
+                                stringResource(R.string.dashboard_greeting_named, greeting, firstName)
+                            } else {
+                                stringResource(R.string.dashboard_greeting, greeting)
+                            },
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Black,
+                            color = Black
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = stringResource(R.string.dashboard_subtitle),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Gray600
+                        )
                     }
-                    androidx.compose.material3.Divider(
-                        color = Gray200,
-                        thickness = 0.5.dp,
-                        modifier = Modifier.padding(horizontal = 24.dp)
+                }
+
+                items(activeFollowUps) { followUp ->
+                    val events = timelineByFollowUpId[followUp.id] ?: emptyList()
+                    val readiness = FileStats.compute(followUp, events)
+                    FollowUpFileCard(
+                        followUp = followUp,
+                        readiness = readiness,
+                        onClick = { onOpenJourney(followUp) }
                     )
                 }
             }
@@ -161,9 +154,102 @@ fun DashboardScreen(
     }
 }
 
+@Composable
+private fun FollowUpFileCard(
+    followUp: FollowUpUi,
+    readiness: FileReadiness,
+    onClick: () -> Unit
+) {
+    LpmCard(
+        modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+        onClick = onClick
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = followUp.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Black
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = if (followUp.daysRemaining == 0) {
+                            stringResource(R.string.file_appt_today)
+                        } else {
+                            stringResource(R.string.file_appt_countdown, followUp.daysRemaining)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Gray600
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.file_ready_percent, readiness.readinessPercent),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Black,
+                    color = Black
+                )
+            }
 
+            Spacer(modifier = Modifier.height(12.dp))
+            LpmProgressBar(progress = readiness.readinessPercent / 100f)
 
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = stringResource(
+                    R.string.file_contents,
+                    readiness.measurementCount,
+                    readiness.photoCount,
+                    readiness.noteCount
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = Gray600
+            )
 
+            if (readiness.dayStreak >= 2) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.file_streak, readiness.dayStreak),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Black
+                )
+            }
+
+            readiness.missingHint?.let { hint ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = hint,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Gray600,
+                    lineHeight = 20.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = readiness.tagline,
+                style = MaterialTheme.typography.bodySmall,
+                color = Black,
+                fontWeight = FontWeight.Medium,
+                lineHeight = 20.sp
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = stringResource(R.string.file_continue),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = Black
+            )
+        }
+    }
+}
 
 @Composable
 fun ComingSoonDialog(onDismiss: () -> Unit) {
