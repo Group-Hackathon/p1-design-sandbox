@@ -1,6 +1,10 @@
 # Pre-Appointment 1
 
-**Pre-Appointment 1 (P1)** is a mobile companion that prepares your medical appointments for you — by capturing what happens *between* two visits, not just what you remember in the waiting room.
+**P1** is a mobile app agent that helps you track your symptoms before your appointment — in small, simple daily steps — so you don't walk in unprepared.
+
+Think of it as building a **"file for your doctor"** between today and appointment day.
+
+And if memory gaps, stress, or a physical or mental condition make it hard to recall symptoms accurately, P1 keeps a reliable, day-by-day record — so your doctor gets the facts.
 
 **Current release:** [v1.0.7](https://github.com/Group-Hackathon/p1/releases/latest) · Android (primary) · iOS (TestFlight-ready clone)
 
