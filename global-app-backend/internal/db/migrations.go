@@ -76,6 +76,35 @@ func RunMigrations(ctx context.Context, pool *pgxpool.Pool) error {
 		// Add effective_at for retroactive measurements
 		`ALTER TABLE timeline_events ADD COLUMN IF NOT EXISTS effective_at TIMESTAMP WITH TIME ZONE`,
 
+		// Device identity auth (RankMyAura-style, Neon/Postgres)
+		`CREATE TABLE IF NOT EXISTS devices (
+			id VARCHAR(128) PRIMARY KEY,
+			user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			public_key TEXT NOT NULL,
+			hardware_binding_id VARCHAR(128) UNIQUE NOT NULL,
+			hardware_platform VARCHAR(32) NOT NULL DEFAULT 'unknown',
+			created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+		)`,
+
+		`CREATE TABLE IF NOT EXISTS auth_nonces (
+			device_id VARCHAR(128) PRIMARY KEY,
+			intent VARCHAR(20) NOT NULL,
+			nonce VARCHAR(64) NOT NULL,
+			expires_at TIMESTAMP WITH TIME ZONE NOT NULL
+		)`,
+
+		`CREATE TABLE IF NOT EXISTS auth_sessions (
+			id VARCHAR(64) PRIMARY KEY,
+			user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			refresh_token_hash VARCHAR(64) NOT NULL,
+			expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+			created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+		)`,
+
+		`CREATE INDEX IF NOT EXISTS idx_auth_sessions_user ON auth_sessions(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_devices_user ON devices(user_id)`,
+
 		// Seed the wound-monitoring agent
 		`INSERT INTO agent_catalog (id, name, version, category, description, price_cents, duration_days_min, duration_days_max, duration_days_default, gemini_model, system_prompt)
 		VALUES (

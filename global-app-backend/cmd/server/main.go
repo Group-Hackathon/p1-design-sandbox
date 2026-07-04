@@ -109,6 +109,11 @@ func main() {
 		r.Use(ratelimitmw.AuthPerIP())
 		r.Post("/api/v1/auth/register", h.Register)
 		r.Post("/api/v1/auth/login", h.Login)
+		r.Post("/api/v1/auth/challenge", h.DeviceChallenge)
+		r.Post("/api/v1/auth/device/register", h.DeviceRegister)
+		r.Post("/api/v1/auth/device/verify", h.DeviceVerify)
+		r.Post("/api/v1/auth/device/recover", h.DeviceRecover)
+		r.Post("/api/v1/auth/refresh", h.RefreshTokens)
 	})
 
 	// Protected routes (JWT required)

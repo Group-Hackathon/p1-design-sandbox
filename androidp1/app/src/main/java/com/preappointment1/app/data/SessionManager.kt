@@ -6,6 +6,8 @@ import android.content.SharedPreferences
 object SessionManager {
     private const val PREFS_NAME = "lpm_prefs"
     private const val KEY_TOKEN = "auth_token"
+    private const val KEY_ACCESS_TOKEN = "access_token"
+    private const val KEY_REFRESH_TOKEN = "refresh_token"
     private const val KEY_DEVICE_ID = "device_id"
     private const val KEY_PROFILE_ID = "profile_id"
     private const val KEY_USER_NAME = "user_name"
@@ -17,17 +19,39 @@ object SessionManager {
     }
 
     fun saveToken(token: String) {
-        prefs.edit().putString(KEY_TOKEN, token).apply()
+        saveTokens(accessToken = token, refreshToken = null)
     }
 
-    fun getToken(): String? {
+    fun saveTokens(accessToken: String, refreshToken: String?) {
+        prefs.edit()
+            .putString(KEY_ACCESS_TOKEN, accessToken)
+            .putString(KEY_TOKEN, accessToken)
+            .apply()
+        if (refreshToken != null) {
+            prefs.edit().putString(KEY_REFRESH_TOKEN, refreshToken).apply()
+        }
+    }
+
+    fun getRefreshToken(): String? {
         if (!this::prefs.isInitialized) return null
-        return prefs.getString(KEY_TOKEN, null)
+        return prefs.getString(KEY_REFRESH_TOKEN, null)
+    }
+
+    fun getToken(): String? = getAccessToken()
+
+    fun getAccessToken(): String? {
+        if (!this::prefs.isInitialized) return null
+        return prefs.getString(KEY_ACCESS_TOKEN, null)
+            ?: prefs.getString(KEY_TOKEN, null)
     }
 
     fun clearToken() {
         if (!this::prefs.isInitialized) return
-        prefs.edit().remove(KEY_TOKEN).apply()
+        prefs.edit()
+            .remove(KEY_TOKEN)
+            .remove(KEY_ACCESS_TOKEN)
+            .remove(KEY_REFRESH_TOKEN)
+            .apply()
     }
 
     fun saveProfileId(profileId: String) {

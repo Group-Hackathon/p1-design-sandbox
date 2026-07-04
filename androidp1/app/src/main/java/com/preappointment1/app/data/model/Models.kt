@@ -6,8 +6,54 @@ data class AuthRequest(
 )
 
 data class AuthResponse(
-    val token: String,
+    val token: String? = null,
+    val accessToken: String? = null,
+    val refreshToken: String? = null,
     val user: User
+)
+
+data class DeviceChallengeRequest(
+    val deviceId: String,
+    val intent: String = "verify"
+)
+
+data class DeviceChallengeResponse(
+    val nonce: String,
+    val deviceId: String
+)
+
+data class DeviceRegisterRequest(
+    val deviceId: String,
+    val publicKey: String,
+    val timestamp: Long,
+    val nonce: String,
+    val signature: String,
+    val hardwareBindingId: String,
+    val hardwarePlatform: String
+)
+
+data class DeviceVerifyRequest(
+    val deviceId: String,
+    val nonce: String,
+    val signature: String
+)
+
+data class DeviceAuthResponse(
+    val accessToken: String,
+    val refreshToken: String,
+    val deviceId: String,
+    val user: User,
+    val isNew: Boolean? = null,
+    val recovered: Boolean? = null
+)
+
+data class RefreshTokenRequest(
+    val refreshToken: String
+)
+
+data class RefreshTokenResponse(
+    val accessToken: String,
+    val refreshToken: String
 )
 
 data class RecommendRequest(

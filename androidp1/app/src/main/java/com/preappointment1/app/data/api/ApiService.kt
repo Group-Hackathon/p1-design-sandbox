@@ -15,6 +15,21 @@ interface ApiService {
     @POST("api/v1/auth/login")
     suspend fun login(@Body request: AuthRequest): AuthResponse
 
+    @POST("api/v1/auth/challenge")
+    suspend fun deviceChallenge(@Body request: DeviceChallengeRequest): DeviceChallengeResponse
+
+    @POST("api/v1/auth/device/register")
+    suspend fun deviceRegister(@Body request: DeviceRegisterRequest): DeviceAuthResponse
+
+    @POST("api/v1/auth/device/verify")
+    suspend fun deviceVerify(@Body request: DeviceVerifyRequest): DeviceAuthResponse
+
+    @POST("api/v1/auth/device/recover")
+    suspend fun deviceRecover(@Body request: DeviceRegisterRequest): DeviceAuthResponse
+
+    @POST("api/v1/auth/refresh")
+    suspend fun refreshTokens(@Body request: RefreshTokenRequest): RefreshTokenResponse
+
     @POST("api/v1/agents/recommend")
     suspend fun recommendAgent(@Body request: RecommendRequest): AgentResponse
 

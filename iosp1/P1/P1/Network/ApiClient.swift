@@ -27,7 +27,7 @@ class ApiClient {
         var request = URLRequest(url: url)
         request.httpMethod = method
 
-        if let token = SessionManager.shared.getToken() {
+        if let token = SessionManager.shared.getAccessToken() {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
 

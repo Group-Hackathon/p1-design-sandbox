@@ -13,15 +13,31 @@ class SessionManager {
     private init() {}
     
     func saveToken(_ token: String) {
-        defaults.set(token, forKey: keyToken)
+        saveTokens(access: token, refresh: nil)
     }
-    
+
+    func saveTokens(access: String, refresh: String?) {
+        defaults.set(access, forKey: keyToken)
+        defaults.set(access, forKey: "access_token")
+        if let refresh { defaults.set(refresh, forKey: "refresh_token") }
+    }
+
+    func getRefreshToken() -> String? {
+        defaults.string(forKey: "refresh_token")
+    }
+
+    func getAccessToken() -> String? {
+        defaults.string(forKey: "access_token") ?? defaults.string(forKey: keyToken)
+    }
+
     func getToken() -> String? {
-        return defaults.string(forKey: keyToken)
+        getAccessToken()
     }
 
     func clearToken() {
         defaults.removeObject(forKey: keyToken)
+        defaults.removeObject(forKey: "access_token")
+        defaults.removeObject(forKey: "refresh_token")
     }
     
     func saveProfileId(_ profileId: String) {

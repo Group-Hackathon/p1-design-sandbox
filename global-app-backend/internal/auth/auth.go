@@ -24,7 +24,7 @@ func NewService(secret string) *Service {
 	return &Service{secret: []byte(secret)}
 }
 
-// GenerateToken creates a signed JWT for a given user ID.
+// GenerateToken creates a signed JWT for a given user ID (legacy email/password flow).
 func (s *Service) GenerateToken(userID string) (string, error) {
 	claims := jwt.MapClaims{
 		"sub": userID,
@@ -64,6 +64,12 @@ func (s *Service) Middleware(next http.Handler) http.Handler {
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			http.Error(w, `{"error":"invalid token claims"}`, http.StatusUnauthorized)
+			return
+		}
+
+		// Reject refresh tokens used as bearer; legacy tokens have no typ claim.
+		if typ, ok := claims["typ"].(string); ok && typ != "access" {
+			http.Error(w, `{"error":"invalid or expired token"}`, http.StatusUnauthorized)
 			return
 		}
 

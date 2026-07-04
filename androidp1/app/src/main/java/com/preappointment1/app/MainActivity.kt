@@ -69,6 +69,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         SessionManager.init(this)
+        AuthHelper.init(this)
         BillingManager.initialize(this)
         NotificationHelper.createNotificationChannel(this)
         deepLinkState.value = NotificationIntents.from(intent)

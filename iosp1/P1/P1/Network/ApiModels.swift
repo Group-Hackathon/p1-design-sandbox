@@ -7,8 +7,54 @@ struct AuthRequest: Codable {
 }
 
 struct AuthResponse: Codable {
-    let token: String
+    let token: String?
+    let accessToken: String?
+    let refreshToken: String?
     let user: User
+}
+
+struct DeviceChallengeRequest: Codable {
+    let deviceId: String
+    let intent: String?
+}
+
+struct DeviceChallengeResponse: Codable {
+    let nonce: String
+    let deviceId: String
+}
+
+struct DeviceRegisterRequest: Codable {
+    let deviceId: String
+    let publicKey: String
+    let timestamp: Int64
+    let nonce: String
+    let signature: String
+    let hardwareBindingId: String
+    let hardwarePlatform: String
+}
+
+struct DeviceVerifyRequest: Codable {
+    let deviceId: String
+    let nonce: String
+    let signature: String
+}
+
+struct DeviceAuthResponse: Codable {
+    let accessToken: String
+    let refreshToken: String
+    let deviceId: String
+    let user: User
+    let isNew: Bool?
+    let recovered: Bool?
+}
+
+struct RefreshTokenRequest: Codable {
+    let refreshToken: String
+}
+
+struct RefreshTokenResponse: Codable {
+    let accessToken: String
+    let refreshToken: String
 }
 
 struct User: Codable {

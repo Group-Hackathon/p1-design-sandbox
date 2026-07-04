@@ -25,7 +25,52 @@ class ApiService {
             allowAuthRetry: allowAuthRetry
         )
     }
-    
+
+    func deviceChallenge(request: DeviceChallengeRequest, allowAuthRetry: Bool = false) async throws -> DeviceChallengeResponse {
+        return try await client.performRequest(
+            path: "api/v1/auth/challenge",
+            method: "POST",
+            body: request,
+            allowAuthRetry: allowAuthRetry
+        )
+    }
+
+    func deviceRegister(request: DeviceRegisterRequest, allowAuthRetry: Bool = false) async throws -> DeviceAuthResponse {
+        return try await client.performRequest(
+            path: "api/v1/auth/device/register",
+            method: "POST",
+            body: request,
+            allowAuthRetry: allowAuthRetry
+        )
+    }
+
+    func deviceVerify(request: DeviceVerifyRequest, allowAuthRetry: Bool = false) async throws -> DeviceAuthResponse {
+        return try await client.performRequest(
+            path: "api/v1/auth/device/verify",
+            method: "POST",
+            body: request,
+            allowAuthRetry: allowAuthRetry
+        )
+    }
+
+    func deviceRecover(request: DeviceRegisterRequest, allowAuthRetry: Bool = false) async throws -> DeviceAuthResponse {
+        return try await client.performRequest(
+            path: "api/v1/auth/device/recover",
+            method: "POST",
+            body: request,
+            allowAuthRetry: allowAuthRetry
+        )
+    }
+
+    func refreshTokens(request: RefreshTokenRequest, allowAuthRetry: Bool = false) async throws -> RefreshTokenResponse {
+        return try await client.performRequest(
+            path: "api/v1/auth/refresh",
+            method: "POST",
+            body: request,
+            allowAuthRetry: allowAuthRetry
+        )
+    }
+
     func deleteAccount() async throws {
         try await client.performRequest(path: "api/v1/auth/delete", method: "DELETE")
     }

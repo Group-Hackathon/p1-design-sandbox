@@ -1,40 +1,44 @@
 package com.preappointment1.app.data
 
+import android.content.Context
 import android.util.Log
 import com.preappointment1.app.data.api.ApiClient
-import com.preappointment1.app.data.model.AuthRequest
+import com.preappointment1.app.data.model.RefreshTokenRequest
 
 object AuthHelper {
     private const val TAG = "LPM_AUTH"
-    private const val DEVICE_PASSWORD = "secret_device_password"
+    private lateinit var appContext: Context
+
+    fun init(context: Context) {
+        appContext = context.applicationContext
+    }
 
     suspend fun ensureAuthenticated(): Boolean {
-        if (SessionManager.getToken() != null) return true
+        if (SessionManager.getAccessToken() != null) return true
         return refreshToken()
     }
 
-    /** Clears stale token and obtains a fresh JWT (login, then register fallback). */
+    /** Refresh via refresh token, else device Ed25519 sign-in (RankMyAura-style). */
     suspend fun refreshToken(): Boolean {
-        SessionManager.clearToken()
-        val email = "${SessionManager.getOrCreateDeviceId()}@local.device"
-        val request = AuthRequest(email = email, password = DEVICE_PASSWORD)
-
-        return try {
-            val response = ApiClient.authApiService.login(request)
-            SessionManager.saveToken(response.token)
-            Log.d(TAG, "Token refreshed (login)")
-            true
-        } catch (e: Exception) {
+        SessionManager.getRefreshToken()?.let { refresh ->
             try {
-                val response = ApiClient.authApiService.register(request)
-                SessionManager.saveToken(response.token)
-                Log.d(TAG, "Token refreshed (register)")
-                true
-            } catch (registerError: Exception) {
-                Log.e(TAG, "Token refresh failed", registerError)
-                false
+                val response = ApiClient.authApiService.refreshTokens(
+                    RefreshTokenRequest(refreshToken = refresh)
+                )
+                SessionManager.saveTokens(response.accessToken, response.refreshToken)
+                Log.d(TAG, "Token refreshed (refresh token)")
+                return true
+            } catch (e: Exception) {
+                Log.w(TAG, "Refresh token invalid, falling back to device auth", e)
             }
         }
+
+        SessionManager.clearToken()
+        if (!::appContext.isInitialized) {
+            Log.e(TAG, "AuthHelper not initialized")
+            return false
+        }
+        return DeviceAuth.signIn(appContext)
     }
 
     suspend fun ensureProfile(): String? {
