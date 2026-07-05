@@ -244,31 +244,53 @@ object PdfReportGenerator {
                         ensureSpace(LINE_HEIGHT + 2f)
                         canvas.drawText(time, MARGIN_LEFT + 10f, y, bodyPaint)
                         
-                        // Word-wrap long lines
-                        val maxLineWidth = USABLE_WIDTH - 70f
-                        val textToDraw = cleanLine
-                        if (bodyPaint.measureText(textToDraw) <= maxLineWidth) {
-                            canvas.drawText(textToDraw, MARGIN_LEFT + 60f, y, bodyPaint)
-                            y += LINE_HEIGHT
+                        val photoMatch = Regex("(?i)photo.*?([\\w\\d_-]+\\.jpg)").find(cleanLine)
+                        if (photoMatch != null) {
+                            val filename = photoMatch.groupValues[1]
+                            val imgFile = File(context.filesDir, filename)
+                            if (imgFile.exists()) {
+                                try {
+                                    val bitmap = android.graphics.BitmapFactory.decodeFile(imgFile.absolutePath)
+                                    if (bitmap != null) {
+                                        canvas.drawText("Photo attached:", MARGIN_LEFT + 60f, y, bodyPaint)
+                                        y += LINE_HEIGHT
+                                        ensureSpace(110f)
+                                        val destRect = android.graphics.RectF(MARGIN_LEFT + 60f, y, MARGIN_LEFT + 60f + 100f, y + 100f)
+                                        canvas.drawBitmap(bitmap, null, destRect, null)
+                                        y += 110f
+                                    }
+                                } catch (e: Exception) { e.printStackTrace() }
+                            } else {
+                                canvas.drawText("[Photo attached but unavailable on this device]", MARGIN_LEFT + 60f, y, bodyPaint)
+                                y += LINE_HEIGHT
+                            }
                         } else {
-                            // Simple word wrap
-                            val words = textToDraw.split(" ")
-                            var currentLine = ""
-                            for (word in words) {
-                                val test = if (currentLine.isEmpty()) word else "$currentLine $word"
-                                if (bodyPaint.measureText(test) <= maxLineWidth) {
-                                    currentLine = test
-                                } else {
+                            // Word-wrap long lines
+                            val maxLineWidth = USABLE_WIDTH - 70f
+                            val textToDraw = cleanLine
+                            if (bodyPaint.measureText(textToDraw) <= maxLineWidth) {
+                                canvas.drawText(textToDraw, MARGIN_LEFT + 60f, y, bodyPaint)
+                                y += LINE_HEIGHT
+                            } else {
+                                // Simple word wrap
+                                val words = textToDraw.split(" ")
+                                var currentLine = ""
+                                for (word in words) {
+                                    val test = if (currentLine.isEmpty()) word else "$currentLine $word"
+                                    if (bodyPaint.measureText(test) <= maxLineWidth) {
+                                        currentLine = test
+                                    } else {
+                                        ensureSpace(LINE_HEIGHT)
+                                        canvas.drawText(currentLine, MARGIN_LEFT + 60f, y, bodyPaint)
+                                        y += LINE_HEIGHT
+                                        currentLine = word
+                                    }
+                                }
+                                if (currentLine.isNotEmpty()) {
                                     ensureSpace(LINE_HEIGHT)
                                     canvas.drawText(currentLine, MARGIN_LEFT + 60f, y, bodyPaint)
                                     y += LINE_HEIGHT
-                                    currentLine = word
                                 }
-                            }
-                            if (currentLine.isNotEmpty()) {
-                                ensureSpace(LINE_HEIGHT)
-                                canvas.drawText(currentLine, MARGIN_LEFT + 60f, y, bodyPaint)
-                                y += LINE_HEIGHT
                             }
                         }
                     }

@@ -1,18 +1,6 @@
 package com.preappointment1.app.ui.screens
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -24,17 +12,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
 import com.preappointment1.app.data.model.FollowUpRules
 import com.preappointment1.app.ui.components.*
 import com.preappointment1.app.ui.theme.Black
@@ -66,6 +49,7 @@ fun DailyRoutineScreen(
     }
 
     var stepIndex by remember { mutableIntStateOf(0) }
+    var photoFilename by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = { LpmTopBar(title = followUpTitle, onBack = onBack) },
@@ -83,7 +67,10 @@ fun DailyRoutineScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             when (steps[stepIndex]) {
-                RoutineStepType.Photo -> PhotoStep(onPhotoTaken = { stepIndex++ })
+                RoutineStepType.Photo -> PhotoStep(onPhotoTaken = { filename ->
+                    photoFilename = filename
+                    stepIndex++
+                })
                 RoutineStepType.Pain -> PainStep(onContinue = { stepIndex++ })
                 RoutineStepType.Vitals -> VitalsStep(rules = rules, onContinue = { stepIndex++ })
                 RoutineStepType.Done -> DoneStep(onFinish = onComplete)
@@ -93,92 +80,30 @@ fun DailyRoutineScreen(
 }
 
 @Composable
-private fun PhotoStep(onPhotoTaken: () -> Unit) {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    var hasPermission by remember { mutableStateOf(false) }
-
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { granted -> hasPermission = granted }
-    )
-
-    LaunchedEffect(Unit) {
-        hasPermission = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.CAMERA
-        ) == PackageManager.PERMISSION_GRANTED
-        if (!hasPermission) permissionLauncher.launch(Manifest.permission.CAMERA)
-    }
-
-    if (!hasPermission) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            LpmBodyText(
-                "Camera access is required to take your daily photo.",
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            LpmPrimaryButton(
-                text = "Allow camera",
-                onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
-        }
-        return
-    }
-
+private fun PhotoStep(onPhotoTaken: (String?) -> Unit) {
     Column(modifier = Modifier.fillMaxSize()) {
-        LpmBodyText("Place the area to track inside the white frame.")
-        Spacer(modifier = Modifier.height(12.dp))
+        var photoSaved by remember { mutableStateOf<String?>(null) }
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            AndroidView(
-                factory = { ctx ->
-                    val previewView = PreviewView(ctx)
-                    val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
-                    cameraProviderFuture.addListener({
-                        val cameraProvider = cameraProviderFuture.get()
-                        val preview = Preview.Builder().build().also {
-                            it.setSurfaceProvider(previewView.surfaceProvider)
-                        }
-                        val imageCapture = ImageCapture.Builder().build()
-                        try {
-                            cameraProvider.unbindAll()
-                            cameraProvider.bindToLifecycle(
-                                lifecycleOwner,
-                                CameraSelector.DEFAULT_BACK_CAMERA,
-                                preview,
-                                imageCapture
-                            )
-                        } catch (exc: Exception) {
-                            Log.e("CameraX", "Binding failed", exc)
-                        }
-                    }, ContextCompat.getMainExecutor(ctx))
-                    previewView
+        if (photoSaved == null) {
+            MeasurementPhotoCapture(
+                onPhotoCaptured = { fileName ->
+                    photoSaved = fileName
                 },
-                modifier = Modifier.fillMaxSize()
+                previewHeight = 280
             )
-
+        } else {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.85f)
-                    .aspectRatio(1f)
-                    .align(Alignment.Center)
-                    .alpha(0.4f)
-                    .border(2.dp, White, RoundedCornerShape(4.dp))
-            )
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .background(Color(0xFFE8F5E9), RoundedCornerShape(8.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("✓ Photo saved", color = Color(0xFF2E7D32), fontWeight = FontWeight.SemiBold)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            LpmPrimaryButton(text = "Continue", onClick = { onPhotoTaken(photoSaved) })
         }
-
-        Spacer(modifier = Modifier.height(20.dp))
-        LpmPrimaryButton(text = "Take photo", onClick = onPhotoTaken)
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 

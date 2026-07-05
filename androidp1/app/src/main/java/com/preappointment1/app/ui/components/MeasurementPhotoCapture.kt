@@ -70,81 +70,81 @@ fun MeasurementPhotoCapture(
                 text = "Allow camera",
                 onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }
             )
-            return@Column
-        }
-
-        LpmBodyText("Place the area to track inside the frame.")
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(previewHeight.dp)
-        ) {
-            AndroidView(
-                factory = { ctx ->
-                    val previewView = PreviewView(ctx)
-                    val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
-                    cameraProviderFuture.addListener({
-                        val cameraProvider = cameraProviderFuture.get()
-                        val preview = Preview.Builder().build().also {
-                            it.setSurfaceProvider(previewView.surfaceProvider)
-                        }
-                        try {
-                            cameraProvider.unbindAll()
-                            cameraProvider.bindToLifecycle(
-                                lifecycleOwner,
-                                CameraSelector.DEFAULT_BACK_CAMERA,
-                                preview,
-                                imageCapture
-                            )
-                        } catch (exc: Exception) {
-                            Log.e("MeasurementPhoto", "Camera bind failed", exc)
-                        }
-                    }, ContextCompat.getMainExecutor(ctx))
-                    previewView
-                },
-                modifier = Modifier.fillMaxSize()
-            )
+        } else {
+            LpmBodyText("Place the area to track inside the frame.")
+            Spacer(modifier = Modifier.height(8.dp))
 
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.85f)
-                    .aspectRatio(1f)
-                    .align(Alignment.Center)
-                    .alpha(0.4f)
-                    .border(2.dp, White, RoundedCornerShape(4.dp))
+                    .fillMaxWidth()
+                    .height(previewHeight.dp)
+            ) {
+                AndroidView(
+                    factory = { ctx ->
+                        val previewView = PreviewView(ctx)
+                        val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
+                        cameraProviderFuture.addListener({
+                            val cameraProvider = cameraProviderFuture.get()
+                            val preview = Preview.Builder().build().also {
+                                it.setSurfaceProvider(previewView.surfaceProvider)
+                            }
+                            try {
+                                cameraProvider.unbindAll()
+                                cameraProvider.bindToLifecycle(
+                                    lifecycleOwner,
+                                    CameraSelector.DEFAULT_BACK_CAMERA,
+                                    preview,
+                                    imageCapture
+                                )
+                            } catch (exc: Exception) {
+                                Log.e("MeasurementPhoto", "Camera bind failed", exc)
+                            }
+                        }, ContextCompat.getMainExecutor(ctx))
+                        previewView
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.85f)
+                        .aspectRatio(1f)
+                        .align(Alignment.Center)
+                        .alpha(0.4f)
+                        .border(2.dp, White, RoundedCornerShape(4.dp))
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            LpmPrimaryButton(
+                text = if (isCapturing) "Capturing…" else "Take photo",
+                onClick = {
+                    if (isCapturing) return@LpmPrimaryButton
+                    isCapturing = true
+                    val photoFile = File(
+                        context.filesDir,
+                        "measurement_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())}.jpg"
+                    )
+                    photoFile.parentFile?.mkdirs()
+                    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+                    imageCapture.takePicture(
+                        outputOptions,
+                        ContextCompat.getMainExecutor(context),
+                        object : ImageCapture.OnImageSavedCallback {
+                            override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                                isCapturing = false
+                                onPhotoCaptured(photoFile.name)
+                            }
+
+                            override fun onError(exception: ImageCaptureException) {
+                                Log.e("MeasurementPhoto", "Capture failed", exception)
+                                isCapturing = false
+                            }
+                        }
+                    )
+                },
+                enabled = !isCapturing
             )
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        LpmPrimaryButton(
-            text = if (isCapturing) "Capturing…" else "Take photo",
-            onClick = {
-                if (isCapturing) return@LpmPrimaryButton
-                isCapturing = true
-                val photoFile = File(
-                    context.filesDir,
-                    "measurement_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())}.jpg"
-                )
-                val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-                imageCapture.takePicture(
-                    outputOptions,
-                    ContextCompat.getMainExecutor(context),
-                    object : ImageCapture.OnImageSavedCallback {
-                        override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                            isCapturing = false
-                            onPhotoCaptured(photoFile.name)
-                        }
-
-                        override fun onError(exception: ImageCaptureException) {
-                            Log.e("MeasurementPhoto", "Capture failed", exception)
-                            isCapturing = false
-                        }
-                    }
-                )
-            },
-            enabled = !isCapturing
-        )
     }
 }

@@ -608,11 +608,9 @@ private struct TimelineEventRow: View {
                     .fontWeight(.bold)
                     .foregroundColor(.gray)
 
-                Text(event.content)
-                    .font(.subheadline)
+                TimelineContentWithPhoto(content: event.content)
                     .padding(14)
                     .background(event.type == "ai" ? Color.blue.opacity(0.1) : Color(UIColor.systemGray6))
-                    .foregroundColor(.black)
                     .clipShape(
                         UnevenRoundedRectangle(
                             topLeadingRadius: event.type == "ai" ? 4 : 16,
@@ -628,6 +626,51 @@ private struct TimelineEventRow: View {
             Spacer()
         }
         .padding(.horizontal, 20)
+    }
+}
+
+private struct TimelineContentWithPhoto: View {
+    let content: String
+    
+    private var photoFilename: String? {
+        let pattern = "(?i)Photo:\\s*([\\w\\d_-]+\\.jpg)"
+        guard let regex = try? NSRegularExpression(pattern: pattern),
+              let match = regex.firstMatch(in: content, range: NSRange(content.startIndex..., in: content)),
+              let range = Range(match.range(at: 1), in: content) else { return nil }
+        return String(content[range])
+    }
+    
+    private var displayText: String {
+        guard photoFilename != nil else { return content }
+        return content.components(separatedBy: "\n")
+            .filter { !$0.localizedCaseInsensitiveContains("Photo:") || !$0.contains(".jpg") }
+            .joined(separator: "\n")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            if !displayText.isEmpty {
+                Text(displayText)
+                    .font(.subheadline)
+                    .foregroundColor(.black)
+            }
+            
+            if let filename = photoFilename {
+                let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(filename)
+                if let data = try? Data(contentsOf: url), let uiImage = UIImage(data: data) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(maxWidth: .infinity, maxHeight: 120)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                } else {
+                    Text("📷 Photo attached")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+            }
+        }
     }
 }
 

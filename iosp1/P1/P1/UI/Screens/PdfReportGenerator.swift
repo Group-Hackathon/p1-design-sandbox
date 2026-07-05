@@ -100,14 +100,40 @@ class PdfReportGenerator {
         let sender = isAi ? "Assistant (\(event.date_label))" : "Patient (\(event.date_label))"
         let color = isAi ? UIColor.systemBlue : UIColor.black
         
+        var currentTop = top
+        
         let senderAttr = NSAttributedString(string: sender, attributes: [.font: dateFont, .foregroundColor: color])
-        senderAttr.draw(at: CGPoint(x: 36, y: top))
+        senderAttr.draw(at: CGPoint(x: 36, y: currentTop))
+        currentTop += 16
         
         let contentAttr = NSAttributedString(string: event.content, attributes: [.font: contentFont])
         let contentRect = contentAttr.boundingRect(with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude), options: .usesLineFragmentOrigin, context: nil)
         
-        contentAttr.draw(in: CGRect(x: 36, y: top + 16, width: maxWidth, height: contentRect.height))
+        contentAttr.draw(in: CGRect(x: 36, y: currentTop, width: maxWidth, height: contentRect.height))
+        currentTop += contentRect.height
         
-        return top + 16 + contentRect.height
+        let regex = try? NSRegularExpression(pattern: "(?i)photo.*?([\\w\\d_-]+\\.jpg)")
+        if let match = regex?.firstMatch(in: event.content, range: NSRange(event.content.startIndex..., in: event.content)) {
+            if let range = Range(match.range(at: 1), in: event.content) {
+                let photoName = String(event.content[range])
+                let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(photoName)
+                if let data = try? Data(contentsOf: url), let image = UIImage(data: data) {
+                    currentTop += 10
+                    // Draw thumbnail maintaining aspect ratio
+                    let aspect = image.size.width / image.size.height
+                    let height: CGFloat = 100
+                    let width = height * aspect
+                    let imgRect = CGRect(x: 36, y: currentTop, width: width, height: height)
+                    image.draw(in: imgRect)
+                    currentTop += height
+                } else {
+                    currentTop += 4
+                    NSAttributedString(string: "[Photo unavailable]", attributes: [.font: contentFont, .foregroundColor: UIColor.gray]).draw(at: CGPoint(x: 36, y: currentTop))
+                    currentTop += 16
+                }
+            }
+        }
+        
+        return currentTop
     }
 }

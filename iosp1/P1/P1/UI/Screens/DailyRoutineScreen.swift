@@ -19,6 +19,7 @@ struct DailyRoutineScreen: View {
     @State private var tempValue: String = ""
     @State private var bpValue: String = ""
     @State private var hrValue: String = ""
+    @State private var capturedImage: UIImage? = nil
 
     @State private var isSaving = false
     @State private var saveError: String? = nil
@@ -37,7 +38,7 @@ struct DailyRoutineScreen: View {
                     if stepIndex < steps.count {
                         switch steps[stepIndex] {
                         case .photo:
-                            PhotoStep(onPhotoTaken: { stepIndex += 1 })
+                            PhotoStep(capturedImage: $capturedImage, onPhotoTaken: { stepIndex += 1 })
                         case .pain:
                             PainStep(painLevel: $painLevel, onContinue: { stepIndex += 1 })
                         case .vitals:
@@ -94,14 +95,17 @@ struct DailyRoutineScreen: View {
             if !hrValue.isEmpty {
                 lines.append("• Heart Rate: \(hrValue) bpm")
             }
-            if steps.contains(.photo) {
-                lines.append("• Photo: taken")
+            if steps.contains(.photo), let image = capturedImage {
+                if let filename = saveImage(image) {
+                    lines.append("• Photo: \(filename)")
+                } else {
+                    lines.append("• Photo: failed to save")
+                }
             }
 
             let content = lines.joined(separator: "\n")
             let dateLabel = "Routine"
 
-        Task {
             _ = TimelineRepository.addEvent(
                 subscriptionId: followUpId,
                 request: TimelineEventRequest(
@@ -112,6 +116,17 @@ struct DailyRoutineScreen: View {
             )
             await MainActor.run { isSaving = false }
         }
+    }
+
+    private func saveImage(_ image: UIImage) -> String? {
+        guard let data = image.jpegData(compressionQuality: 0.8) else { return nil }
+        let filename = "measurement_\(Int(Date().timeIntervalSince1970)).jpg"
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(filename)
+        do {
+            try data.write(to: url)
+            return filename
+        } catch {
+            return nil
         }
     }
 }
@@ -119,9 +134,9 @@ struct DailyRoutineScreen: View {
 // MARK: - Steps
 
 private struct PhotoStep: View {
+    @Binding var capturedImage: UIImage?
     let onPhotoTaken: () -> Void
     @State private var showCamera = false
-    @State private var capturedImage: UIImage? = nil
 
     var body: some View {
         VStack(spacing: 20) {

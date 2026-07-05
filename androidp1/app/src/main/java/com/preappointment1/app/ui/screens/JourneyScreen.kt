@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -793,7 +794,7 @@ private fun CentralTimelineEvent(userEvent: TimelineEventResponse, aiEvent: Time
                             onLongClick = { if (userEvent.type == "user") showDeleteConfirm = true }
                         )
                 ) {
-                    Text(userEvent.content, style = MaterialTheme.typography.bodySmall, color = Black)
+                    TimelineContentWithPhoto(content = userEvent.content)
                 }
             }
         }
@@ -830,6 +831,54 @@ private fun CentralTimelineEvent(userEvent: TimelineEventResponse, aiEvent: Time
                     Box(modifier = Modifier.size(10.dp).background(Color(0xFF4CAF50), CircleShape)) // Green dot
                 }
                 Spacer(modifier = Modifier.weight(0.45f))
+            }
+        }
+    }
+}
+
+@Composable
+private fun TimelineContentWithPhoto(content: String) {
+    val context = LocalContext.current
+    val photoRegex = remember { Regex("(?i)Photo:\\s*([\\w\\d_-]+\\.jpg)") }
+    val photoMatch = photoRegex.find(content)
+    
+    Column {
+        // Display text without the raw photo filename line
+        val displayText = if (photoMatch != null) {
+            content.lines().filter { line ->
+                !photoRegex.containsMatchIn(line)
+            }.joinToString("\n").trim()
+        } else {
+            content
+        }
+        
+        if (displayText.isNotBlank()) {
+            Text(displayText, style = MaterialTheme.typography.bodySmall, color = Black)
+        }
+        
+        // Display photo thumbnail if found
+        if (photoMatch != null) {
+            val filename = photoMatch.groupValues[1]
+            val imgFile = java.io.File(context.filesDir, filename)
+            if (imgFile.exists()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                val bitmap = remember(filename) {
+                    android.graphics.BitmapFactory.decodeFile(imgFile.absolutePath)
+                }
+                if (bitmap != null) {
+                    androidx.compose.foundation.Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "Photo",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                    )
+                }
+            } else {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text("📷 Photo attached", style = MaterialTheme.typography.labelSmall, color = Gray400)
             }
         }
     }
