@@ -13,7 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material.icons.outlined.Edit
@@ -332,7 +332,7 @@ fun JourneyScreen(
                         // PDF Report icon
                         IconButton(onClick = { onOpenReport?.invoke() }) {
                             Icon(
-                                Icons.Filled.List,
+                                Icons.AutoMirrored.Filled.List,
                                 contentDescription = "Medical Report",
                                 tint = Black
                             )
@@ -1114,7 +1114,7 @@ private fun BottomMeasurementBar(
                     enabled = !showMeasurementButton
                 )
                 JourneyQuickAction(
-                    icon = { Icon(Icons.Filled.List, contentDescription = null, tint = Black, modifier = Modifier.size(22.dp)) },
+                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null, tint = Black, modifier = Modifier.size(22.dp)) },
                     label = stringResource(R.string.quick_action_report),
                     onClick = onOpenReport
                 )
@@ -1305,7 +1305,7 @@ private fun FocusModeForm(
 
     var currentStepIndex by remember { mutableIntStateOf(0) }
 
-    val advanceOrClose = {
+    val advanceOrClose: () -> Unit = {
         if (currentStepIndex < steps.size - 1) {
             currentStepIndex++
         } else {

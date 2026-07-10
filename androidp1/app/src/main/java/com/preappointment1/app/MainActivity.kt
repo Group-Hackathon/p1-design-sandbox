@@ -387,7 +387,6 @@ private fun AppRoot(
                 }
             ) { padding ->
                 ProfileScreen(
-                    onBack = { screen = AppScreen.Home },
                     onLogout = {
                         hasSeenWelcome = false
                         screen = AppScreen.Welcome

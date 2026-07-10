@@ -12,9 +12,11 @@ struct CameraView: UIViewControllerRepresentable {
         // Ensure camera is available on the device
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
             picker.sourceType = .camera
-        } else {
+        } else if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
             // Fallback to photo library for Simulator testing
             picker.sourceType = .photoLibrary
+        } else {
+            print("Warning: Neither camera nor photo library is available.")
         }
         
         return picker

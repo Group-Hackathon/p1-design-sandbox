@@ -418,8 +418,6 @@ object PdfReportGenerator {
             .toSortedMap()
 
         // Plot points
-        var prevX = -1f
-        var prevY = -1f
         val path = android.graphics.Path()
         var isFirst = true
 
