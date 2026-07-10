@@ -3,6 +3,7 @@ package com.preappointment1.app.ui.screens
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
@@ -108,8 +109,21 @@ fun WelcomeScreen(
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+                Text(
+                    text = "By continuing, you accept our Terms of Use & Privacy Policy",
+                    fontSize = 12.sp,
+                    color = Gray500,
+                    textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                        .clickable { uriHandler.openUri("https://p1-privacy-policy.pages.dev/") }
+                )
+
                 if (currentSlide < slides.size - 1) {
                     LpmPrimaryButton(
                         text = stringResource(R.string.welcome_next),

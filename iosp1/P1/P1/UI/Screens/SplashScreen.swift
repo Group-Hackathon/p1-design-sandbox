@@ -28,6 +28,12 @@ struct SplashScreen: View {
 
             VStack {
                 Spacer()
+                Link("Terms of Use & Privacy Policy", destination: URL(string: "https://p1-privacy-policy.pages.dev/")!)
+                    .font(.system(size: 11))
+                    .foregroundColor(Color(UIColor.systemGray))
+                    .underline()
+                    .padding(.bottom, 8)
+                    
                 Text("v\(appVersion)")
                     .font(.system(size: 11))
                     .foregroundColor(Color(UIColor.systemGray))

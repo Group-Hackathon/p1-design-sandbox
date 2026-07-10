@@ -78,6 +78,11 @@ struct ProfileScreen: View {
                     // Account
                     VStack(alignment: .leading, spacing: 0) {
                         SectionTitle(title: "ACCOUNT")
+                        MenuRow(label: "Terms of Use & Privacy Policy") {
+                            if let url = URL(string: "https://p1-privacy-policy.pages.dev/") {
+                                UIApplication.shared.open(url)
+                            }
+                        }
                         MenuRow(label: "Export my data")
                         MenuRow(label: "Sign out") {
                             SessionManager.shared.clearSession()

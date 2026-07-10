@@ -56,6 +56,12 @@ struct WelcomeScreen: View {
             .padding(.vertical, 32)
             
             VStack(spacing: 16) {
+                Link("By continuing, you accept our Terms of Use & Privacy Policy", destination: URL(string: "https://p1-privacy-policy.pages.dev/")!)
+                    .font(.system(size: 11))
+                    .foregroundColor(Color(UIColor.systemGray))
+                    .underline()
+                    .padding(.bottom, 8)
+                    
                 if currentSlide < slides.count - 1 {
                     LpmPrimaryButton(text: String(localized: "welcome_next")) {
                         withAnimation {

@@ -53,6 +53,7 @@ import com.preappointment1.app.ui.screens.*
 import com.preappointment1.app.ui.theme.Black
 import com.preappointment1.app.ui.theme.Gray200
 import com.preappointment1.app.ui.theme.Gray400
+import com.preappointment1.app.ui.theme.Gray500
 import com.preappointment1.app.ui.theme.White
 import com.preappointment1.app.ui.theme.LivingPatientMemoryTheme
 import com.preappointment1.app.data.repository.FollowUpRepository
@@ -554,14 +555,28 @@ private fun SplashScreen() {
                 }
             }
         }
-        Text(
-            text = "v$versionName",
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 28.dp),
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Normal,
-            color = Gray400
-        )
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+            Text(
+                text = "Terms of Use & Privacy Policy",
+                fontSize = 11.sp,
+                color = Gray500,
+                textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .clickable { uriHandler.openUri("https://p1-privacy-policy.pages.dev/") }
+            )
+            Text(
+                text = "v$versionName",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Normal,
+                color = Gray400
+            )
+        }
     }
 }

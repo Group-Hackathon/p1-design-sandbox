@@ -16,6 +16,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.KeyboardActions
 import kotlinx.coroutines.launch
@@ -127,6 +128,10 @@ fun ProfileScreen(
 
             item {
                 SectionTitle("ACCOUNT")
+                val uriHandler = LocalUriHandler.current
+                MenuRow(label = "Terms of Use & Privacy Policy", onClick = {
+                    uriHandler.openUri("https://p1-privacy-policy.pages.dev/")
+                })
                 MenuRow(label = "Export my data")
                 MenuRow(label = "Sign out", isDestructive = false, onClick = {
                     com.preappointment1.app.data.SessionManager.clearSession()
