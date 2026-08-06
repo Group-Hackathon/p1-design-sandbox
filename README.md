@@ -6,7 +6,7 @@ Think of it as building a **"file for your doctor"** between today and appointme
 
 And if memory gaps, stress, or a physical or mental condition make it hard to recall symptoms accurately, P1 keeps a reliable, day-by-day record — so your doctor gets the facts.
 
-**Current release:** [v1.0.7](https://github.com/Group-Hackathon/p1/releases/latest) · Android (primary) · iOS (TestFlight-ready clone)
+**Current release:** [v1.0.9](https://github.com/Group-Hackathon/p1/releases/latest) · Android (primary) · iOS (TestFlight-ready clone)
 
 ---
 
@@ -79,14 +79,14 @@ The application is free to try; premium analysis agents are purchased per follow
 
 ## Pain check-in: the 3D body map
 
-Pain entries follow the PainDiary model (locate → rate → qualify), with a 3D twist: a monochrome 3D mannequin (Three.js, fully offline, no network permission) lets the patient rotate the body and tap the areas that hurt — front and back — then rate intensity (0–10) and pick pain qualities (burning, stabbing, throbbing…). Zones and qualities land in the timeline and in the physician briefing.
-
-The 3D module lives once in `shared-bodymap/` and is embedded in both apps via a WebView bridge (Android WebView / WKWebView). Run `shared-bodymap/build.sh` after editing it to rebuild and redistribute the single-file HTML.
+Pain entries follow the PainDiary model (locate → rate → qualify), with a 3D twist: a monochrome 3D mannequin (Three.js / Google Filament, fully offline) lets the patient rotate the body and tap targeted body regions — front and back — to mark pain intensity (0–10), pick pain qualities, or capture targeted photos.
 
 ## Recent releases (Android)
 
 | Version | Highlights |
 | --- | --- |
+| **1.0.9** | Native Filament 3D Mannequin with targeted body-part tap sheet & camera photo capture. Pure monochrome styling. |
+| **1.0.8** | Full-page 3D spatial check-in viewport, camera integration, billing updates. |
 | **1.0.7** | Version label on splash screen, doc sync across repo |
 | **1.0.6** | Notification deep links to the right check-in slot, timeline-aware home badge, single API fetch |
 | **1.0.5** | Smart schedule (first check-in from launch time), editable reminders, Gemini local time |
