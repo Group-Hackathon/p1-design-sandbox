@@ -12,11 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.preappointment1.app.ui.theme.Black
-import com.preappointment1.app.ui.theme.Gray200
-import com.preappointment1.app.ui.theme.Gray400
-import com.preappointment1.app.ui.theme.Gray600
-import com.preappointment1.app.ui.theme.White
+import com.preappointment1.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,37 +50,32 @@ fun LpmTopBar(
 
 @Composable
 fun LpmStepIndicator(currentStep: Int, totalSteps: Int, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        repeat(totalSteps) { index ->
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(3.dp)
-                    .then(
-                        if (index < currentStep) {
-                            Modifier
-                        } else {
-                            Modifier
-                        }
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            repeat(totalSteps) { index ->
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(4.dp)
+                ) {
+                    HorizontalDivider(
+                        modifier = Modifier.fillMaxWidth(),
+                        thickness = 4.dp,
+                        color = if (index < currentStep) MedicalBlue else Gray200
                     )
-            ) {
-                HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth(),
-                    thickness = 3.dp,
-                    color = if (index < currentStep) Black else Gray200
-                )
+                }
             }
         }
+        Text(
+            text = "Step $currentStep of $totalSteps",
+            style = MaterialTheme.typography.labelMedium,
+            color = Gray500,
+            modifier = Modifier.padding(top = 8.dp)
+        )
     }
-    Text(
-        text = "Step $currentStep of $totalSteps",
-        style = MaterialTheme.typography.labelMedium,
-        color = Gray400,
-        modifier = Modifier.padding(top = 8.dp)
-    )
 }
 
 @Composable
@@ -101,7 +92,7 @@ fun LpmPrimaryButton(
             .fillMaxWidth()
             .height(52.dp),
         enabled = enabled && !loading,
-        shape = RoundedCornerShape(4.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Black,
             contentColor = White,
@@ -134,10 +125,11 @@ fun LpmSecondaryButton(
             .fillMaxWidth()
             .height(52.dp),
         enabled = enabled,
-        shape = RoundedCornerShape(4.dp),
-        border = BorderStroke(1.dp, Black),
+        shape = RoundedCornerShape(14.dp),
+        border = BorderStroke(1.dp, CardBorder),
         colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = Black
+            contentColor = Black,
+            containerColor = White
         )
     ) {
         Text(text, fontSize = 15.sp, fontWeight = FontWeight.Medium)
@@ -155,16 +147,16 @@ fun LpmCard(
         OutlinedCard(
             onClick = onClick,
             modifier = cardModifier,
-            shape = RoundedCornerShape(4.dp),
-            border = BorderStroke(1.dp, Gray200),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, CardBorder),
             colors = CardDefaults.outlinedCardColors(containerColor = White),
             content = content
         )
     } else {
         OutlinedCard(
             modifier = cardModifier,
-            shape = RoundedCornerShape(4.dp),
-            border = BorderStroke(1.dp, Gray200),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, CardBorder),
             colors = CardDefaults.outlinedCardColors(containerColor = White),
             content = content
         )
@@ -198,8 +190,8 @@ fun LpmProgressBar(progress: Float, modifier: Modifier = Modifier) {
         progress = progress.coerceIn(0f, 1f),
         modifier = modifier
             .fillMaxWidth()
-            .height(4.dp),
-        color = Black,
+            .height(6.dp),
+        color = MedicalBlue,
         trackColor = Gray200
     )
 }

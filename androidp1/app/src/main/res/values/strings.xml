@@ -92,6 +92,28 @@
     <string name="quick_action_note">Note</string>
     <string name="quick_action_extra">Extra</string>
     <string name="quick_action_report">Report</string>
+    <string name="action_open_folder">File folder</string>
+
+    <string name="documents_title">File folder</string>
+    <string name="documents_empty_title">Nothing stored yet</string>
+    <string name="documents_empty_body">Save reports, photos, and PDFs here — kept on this device only.</string>
+    <string name="documents_add_photo">Add photo</string>
+    <string name="documents_add_pdf">Add PDF</string>
+    <string name="documents_add_any">Add file</string>
+    <string name="documents_added">Added to your file folder</string>
+    <string name="documents_add_failed">Could not add file: %1$s</string>
+    <string name="documents_delete_title">Remove from folder?</string>
+    <string name="documents_delete_body">This deletes the local copy from your device.</string>
+    <string name="documents_source_report">Report</string>
+    <string name="documents_source_photo">Photo</string>
+    <string name="documents_source_pdf">PDF</string>
+    <string name="documents_source_other">File</string>
+    <string name="documents_open">Open</string>
+    <string name="documents_open_failed">Could not open: %1$s</string>
+    <string name="documents_missing_file">File not found on device</string>
+    <string name="report_save_to_folder">Save</string>
+    <string name="report_saved_to_folder">Saved to your file folder</string>
+    <string name="report_save_failed">Could not save to folder</string>
 
     <string name="note_sheet_title">Tell your doctor something</string>
     <string name="note_sheet_desc">Anything you want them to know — symptoms, context, questions. Added to your file.</string>

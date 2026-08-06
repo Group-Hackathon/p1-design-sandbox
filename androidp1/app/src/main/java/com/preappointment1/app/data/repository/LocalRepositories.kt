@@ -50,6 +50,9 @@ object FollowUpRepository {
         followUpDao.deleteById(id)
         db.timelineEventDao().deleteAllForSubscription(id)
         db.cachedReportDao().deleteForSubscription(id)
+        db.localDocumentDao().deleteForFollowUp(id)
+        val docsDir = java.io.File(appContext.filesDir, "documents/$id")
+        if (docsDir.exists()) docsDir.deleteRecursively()
     }
 
     /**

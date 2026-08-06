@@ -64,7 +64,18 @@ If the product evolves to require deeply shared rendering logic, or if the team 
 | --- | --- | --- |
 | `androidp1/` | Kotlin + Compose | Primary shipping target |
 | `iosp1/` | SwiftUI | Feature-parity clone |
+| `shared-bodymap/` | Three.js (vendored r149) | Offline 3D body map, embedded in both apps |
 | `global-app-backend/` | Go + PostgreSQL on Cloud Run | Shared MVP API (auth, timeline, Gemini) |
+
+### The 3D body map (shared-bodymap/)
+
+Pain tracking follows the Privacy Friendly Pain Diary model — locate, rate, qualify — with the location step done on a 3D mannequin instead of a 2D silhouette.
+
+- **One codebase, two platforms.** The module is plain JS + vendored Three.js, built by `build.sh` into a single self-contained `bodymap.html` (no CDN, no network, works in airplane mode — consistent with the privacy model). It is shipped as an Android asset (`androidp1/app/src/main/assets/bodymap/`) and an iOS bundle resource (`iosp1/P1/P1/Resources/`, auto-included by the Xcode synchronized folder).
+- **Procedural monochrome mannequin.** ~25 meshes (spheres, half-sphere shells, capsules) form a stylized clinical body in the app's strict black-and-white palette; selected regions turn black. Front and back of the torso (chest/upper back, abdomen/lower back, pelvis/buttocks) are separate shells, so each side is selectable independently. No external 3D asset is needed, which avoids licensing and binary-size issues.
+- **Interaction.** Drag rotates the body (with a native front/back flip button), tap raycasts to a region and toggles it. If WebGL is unavailable, the module degrades to an accessible list of region buttons — the feature never breaks.
+- **Bridge.** JS → native: `AndroidBodyMap.onEvent(json)` on Android, `webkit.messageHandlers.bodymap` on iOS (`ready` + `selection` events). Native → JS: `bodymapSetRegions`, `bodymapReset`, `bodymapSetView`, `bodymapGetRegions`. Kotlin side: `ui/components/BodyMapView.kt`; Swift side: `UI/Components/BodyMapView.swift`.
+- **Data.** The check-in (`PainDiaryStep` on both platforms) collects zones, intensity 0–10 and qualities; they are written into the timeline event (`Pain Level` / `Pain Areas` / `Pain Type` lines) and therefore flow into the physician briefing with no backend change.
 
 ### The on-device agent
 

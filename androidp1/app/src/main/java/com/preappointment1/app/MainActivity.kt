@@ -76,6 +76,7 @@ class MainActivity : ComponentActivity() {
         com.preappointment1.app.data.repository.FollowUpRepository.init(this)
         com.preappointment1.app.data.repository.TimelineRepository.init(this)
         com.preappointment1.app.data.repository.ReportRepository.init(this)
+        com.preappointment1.app.data.repository.DocumentsRepository.init(this)
         BillingManager.initialize(this)
         NotificationHelper.createNotificationChannel(this)
         deepLinkState.value = NotificationIntents.from(intent)
@@ -109,7 +110,7 @@ class MainActivity : ComponentActivity() {
 }
 
 private enum class AppScreen {
-    Splash, Welcome, Home, NewFollowUp, Journey, Notifications, Profile, Report
+    Splash, Welcome, Home, NewFollowUp, Journey, Notifications, Profile, Report, Documents
 }
 
 @Composable
@@ -419,6 +420,7 @@ private fun AppRoot(
                         },
                         onOpenDrawer = { scope.launch { drawerState.open() } },
                         onOpenReport = { screen = AppScreen.Report },
+                        onOpenDocuments = { screen = AppScreen.Documents },
                         onFollowUpUpdated = { updated ->
                             selectedFollowUp = updated
                             followUps = followUps.map { if (it.id == updated.id) updated else it }
@@ -449,6 +451,18 @@ private fun AppRoot(
                     screen = AppScreen.Journey
                 } else {
                     ReportScreen(
+                        followUp = followUp,
+                        onBack = { screen = AppScreen.Journey }
+                    )
+                }
+            }
+
+            AppScreen.Documents -> {
+                val followUp = selectedFollowUp
+                if (followUp == null) {
+                    screen = AppScreen.Journey
+                } else {
+                    DocumentsScreen(
                         followUp = followUp,
                         onBack = { screen = AppScreen.Journey }
                     )

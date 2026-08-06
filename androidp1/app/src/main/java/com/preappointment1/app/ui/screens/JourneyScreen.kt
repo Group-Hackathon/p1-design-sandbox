@@ -10,14 +10,17 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -93,6 +96,7 @@ fun JourneyScreen(
     onBack: () -> Unit,
     onOpenDrawer: () -> Unit,
     onOpenReport: (() -> Unit)? = null,
+    onOpenDocuments: (() -> Unit)? = null,
     onFollowUpUpdated: ((FollowUpUi) -> Unit)? = null,
     openMeasurementFormOnLaunch: Boolean = false,
     onMeasurementFormLaunchHandled: () -> Unit = {},
@@ -329,11 +333,10 @@ fun JourneyScreen(
                         }
                     },
                     actions = {
-                        // PDF Report icon
-                        IconButton(onClick = { onOpenReport?.invoke() }) {
+                        IconButton(onClick = { onOpenDocuments?.invoke() }) {
                             Icon(
-                                Icons.AutoMirrored.Filled.List,
-                                contentDescription = "Medical Report",
+                                painter = painterResource(R.drawable.ic_folder),
+                                contentDescription = stringResource(R.string.action_open_folder),
                                 tint = Black
                             )
                         }
@@ -470,7 +473,12 @@ fun JourneyScreen(
                         isFormMode = true
                     },
                     onAddNote = { showNoteSheet = true },
-                    onExtraMeasurement = { showExtraPicker = true },
+                    onExtraMeasurement = {
+                        formLabelOverride = "Extra - ${java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))}"
+                        formStepsOverride = listOf(MeasurementStep.Pain, MeasurementStep.Temperature, MeasurementStep.Photo)
+                        formEffectiveDate = null
+                        isFormMode = true
+                    },
                     onOpenReport = { onOpenReport?.invoke() }
                 )
             }
@@ -507,21 +515,21 @@ fun JourneyScreen(
         }
 
         if (isFormMode) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Black.copy(alpha = 0.5f))
-            ) {
-                FocusModeForm(
-                    followUp = currentFollowUp,
-                    scheduleKey = formScheduleKeyOverride ?: measurementContext.formScheduleKey,
-                    effectiveDate = formEffectiveDate,
-                    labelOverride = formLabelOverride,
-                    stepsOverride = formStepsOverride,
-                    onClose = {
-                        isFormMode = false
-                        formLabelOverride = null
-                        formStepsOverride = null
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Black.copy(alpha = 0.5f))
+        ) {
+            FocusModeForm(
+                followUp = currentFollowUp,
+                scheduleKey = formScheduleKeyOverride ?: measurementContext.formScheduleKey,
+                effectiveDate = formEffectiveDate,
+                labelOverride = formLabelOverride,
+                stepsOverride = formStepsOverride,
+                onClose = {
+                    isFormMode = false
+                    formLabelOverride = null
+                    formStepsOverride = null
                         formScheduleKeyOverride = null
                     },
                     onSubmitted = {
@@ -840,11 +848,20 @@ private fun CentralTimelineEvent(userEvent: TimelineEventResponse, aiEvent: Time
 private fun TimelineContentWithPhoto(content: String) {
     val context = LocalContext.current
     val photoRegex = remember { Regex("(?i)Photo:\\s*([\\w\\d_-]+\\.jpg)") }
-    val photoMatch = photoRegex.find(content)
+    val allPhotos = photoRegex.findAll(content).map { it.groupValues[1] }.toList()
+    var fullscreenPhotoFile by remember { mutableStateOf<java.io.File?>(null) }
+
+    // Detect recorded body regions for 3D thumbnail preview
+    val allRegions = listOf("Head", "Neck", "Chest", "Back", "Abdomen", "Pelvis", "Shoulder", "Arm", "Hand", "Thigh", "Calf", "Foot")
+    val recordedRegions = remember(content) {
+        allRegions.filter { region ->
+            content.contains(region, ignoreCase = true)
+        }
+    }
     
     Column {
-        // Display text without the raw photo filename line
-        val displayText = if (photoMatch != null) {
+        // Display text without the raw photo filename lines
+        val displayText = if (allPhotos.isNotEmpty()) {
             content.lines().filter { line ->
                 !photoRegex.containsMatchIn(line)
             }.joinToString("\n").trim()
@@ -855,30 +872,130 @@ private fun TimelineContentWithPhoto(content: String) {
         if (displayText.isNotBlank()) {
             Text(displayText, style = MaterialTheme.typography.bodySmall, color = Black)
         }
-        
-        // Display photo thumbnail if found
-        if (photoMatch != null) {
-            val filename = photoMatch.groupValues[1]
-            val imgFile = java.io.File(context.filesDir, filename)
-            if (imgFile.exists()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                val bitmap = remember(filename) {
-                    android.graphics.BitmapFactory.decodeFile(imgFile.absolutePath)
+
+        // Display 3D Mannequin Thumbnail Card if pain regions recorded
+        if (recordedRegions.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = SurfaceLight,
+                border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
+                modifier = Modifier.fillMaxWidth().height(150.dp)
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    val engine = io.github.sceneview.rememberEngine()
+                    val modelLoader = io.github.sceneview.rememberModelLoader(engine)
+                    val cameraNode = io.github.sceneview.rememberCameraNode(engine).apply {
+                        position = io.github.sceneview.math.Position(0.0f, 1.4f, 22.0f)
+                    }
+                    val modelNode = io.github.sceneview.rememberNode {
+                        io.github.sceneview.node.ModelNode(
+                            modelInstance = modelLoader.createModelInstance("mannequin_pbr.glb"),
+                            scaleToUnits = 0.075f,
+                            centerOrigin = io.github.sceneview.math.Position(0.0f, 0.0f, 0.0f)
+                        )
+                    }
+                    LaunchedEffect(Unit) {
+                        var animTime = 0f
+                        while (true) {
+                            kotlinx.coroutines.delay(16)
+                            animTime += 0.0015f
+                            modelNode.modelInstance?.animator?.apply {
+                                if (animationCount > 0) {
+                                    applyAnimation(0, animTime % getAnimationDuration(0))
+                                }
+                            }
+                        }
+                    }
+                    io.github.sceneview.Scene(
+                        modifier = Modifier.fillMaxSize(),
+                        engine = engine,
+                        modelLoader = modelLoader,
+                        cameraNode = cameraNode,
+                        childNodes = listOf(modelNode)
+                    )
+                    
+                    // Semi-transparent overlay to prevent interaction
+                    Box(modifier = Modifier.fillMaxSize().background(Color.Transparent))
+                    
+                    Surface(
+                        modifier = Modifier.align(Alignment.BottomStart).padding(6.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        color = Black.copy(alpha = 0.8f)
+                    ) {
+                        Text(
+                            "3D Snapshot",
+                            color = White,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
                 }
+            }
+        }
+        
+        // Display all photo thumbnails
+        if (allPhotos.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            androidx.compose.foundation.lazy.LazyRow(
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp)
+            ) {
+                items(allPhotos.size) { index ->
+                    val filename = allPhotos[index]
+                    val imgFile = java.io.File(context.filesDir, filename)
+                    if (imgFile.exists()) {
+                        val bitmap = remember(filename) {
+                            android.graphics.BitmapFactory.decodeFile(imgFile.absolutePath)
+                        }
+                        if (bitmap != null) {
+                            androidx.compose.foundation.Image(
+                                bitmap = bitmap.asImageBitmap(),
+                                contentDescription = "Photo",
+                                modifier = Modifier
+                                    .size(72.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable { fullscreenPhotoFile = imgFile },
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // Fullscreen photo viewer (expanded in-place)
+        if (fullscreenPhotoFile != null) {
+            val file = fullscreenPhotoFile!!
+            val bitmap = remember(file) {
+                android.graphics.BitmapFactory.decodeFile(file.absolutePath)
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { fullscreenPhotoFile = null }
+            ) {
                 if (bitmap != null) {
                     androidx.compose.foundation.Image(
                         bitmap = bitmap.asImageBitmap(),
                         contentDescription = "Photo",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(120.dp)
+                            .padding(vertical = 4.dp)
                             .clip(RoundedCornerShape(8.dp)),
-                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        contentScale = androidx.compose.ui.layout.ContentScale.FillWidth
                     )
                 }
-            } else {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text("📷 Photo attached", style = MaterialTheme.typography.labelSmall, color = Gray400)
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(4.dp)
+                        .size(24.dp)
+                        .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                        .clickable { fullscreenPhotoFile = null }
+                )
             }
         }
     }
@@ -1108,7 +1225,14 @@ private fun BottomMeasurementBar(
                     onClick = onAddNote
                 )
                 JourneyQuickAction(
-                    icon = { Icon(Icons.Outlined.AddCircle, contentDescription = null, tint = Black, modifier = Modifier.size(22.dp)) },
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_body_mannequin),
+                            contentDescription = null,
+                            tint = Black,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    },
                     label = stringResource(R.string.quick_action_extra),
                     onClick = onExtraMeasurement,
                     enabled = !showMeasurementButton
@@ -1264,6 +1388,7 @@ private fun ExtraMeasurementPickerSheet(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun FocusModeForm(
     followUp: FollowUpUi,
@@ -1275,7 +1400,6 @@ private fun FocusModeForm(
     onSubmitted: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val answers = remember { androidx.compose.runtime.mutableStateMapOf<MeasurementStep, String>() }
     var isSending by remember { mutableStateOf(false) }
     var submitError by remember { mutableStateOf<String?>(null) }
 
@@ -1303,205 +1427,75 @@ private fun FocusModeForm(
         return
     }
 
-    var currentStepIndex by remember { mutableIntStateOf(0) }
+    val hasPain = steps.contains(MeasurementStep.Pain)
+    val hasTemp = steps.contains(MeasurementStep.Temperature)
+    val hasPhoto = steps.contains(MeasurementStep.Photo)
 
-    val advanceOrClose: () -> Unit = {
-        if (currentStepIndex < steps.size - 1) {
-            currentStepIndex++
-        } else {
-            isSending = true
-            coroutineScope.launch {
-                val dateLabel = labelOverride ?: if (effectiveDate != null) {
-                    "Retroactive - ${effectiveDate.format(DateTimeFormatter.ofPattern("MMM d"))}"
-                } else {
-                    scheduleKey
-                }
-                val content = buildString {
-                    appendLine("Routine Check-in ($dateLabel):")
-                    answers[MeasurementStep.Pain]?.let { appendLine("• Pain Level: $it/10") }
-                    answers[MeasurementStep.Temperature]?.let { appendLine("• Temperature: $it °C") }
-                    answers[MeasurementStep.Photo]?.let { appendLine("• Photo: $it") }
-                }
-                try {
-                    TimelineRepository.addEvent(
-                        followUp.id,
-                        TimelineEventRequest(
-                            content = content.trim(),
-                            date_label = dateLabel,
-                            effective_date = effectiveDate?.format(DateTimeFormatter.ISO_LOCAL_DATE)
-                        )
-                    )
-                    isSending = false
-                    onSubmitted()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    isSending = false
-                    submitError = "Could not save locally."
-                }
-            }
-        }
-    }
+    // Flat state — all fields on one screen, no step-by-step.
+    var painLevel by remember { mutableFloatStateOf(0f) }
+    var zoneIds by remember { mutableStateOf<List<String>>(emptyList()) }
+    var zoneLabels by remember { mutableStateOf<List<String>>(emptyList()) }
+    var painQualities by remember { mutableStateOf(setOf<String>()) }
+    var viewSide by remember { mutableStateOf("front") }
+    var tempValue by remember { mutableStateOf("") }
+    var photoFilename by remember { mutableStateOf<String?>(null) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClose
-            )
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = White
     ) {
-        Surface(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = {} // Consume click
-                ),
-            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-            color = White
-        ) {
-            Column(modifier = Modifier.padding(24.dp).fillMaxWidth()) {
-                val headerText = when {
-                    effectiveDate != null -> stringResource(
-                        R.string.focus_form_missed,
-                        effectiveDate.format(DateTimeFormatter.ofPattern("EEEE, MMM d"))
-                    )
-                    stepsOverride != null -> stringResource(measurementStepLabel(steps.first()))
-                    else -> stringResource(R.string.focus_form_header)
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (isSending) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Black)
                 }
-                Text(
-                    headerText,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Black,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                if (effectiveDate == null && steps.size > 1) {
-                    Text(
-                        stringResource(R.string.measurement_step_progress, currentStepIndex + 1, steps.size),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Gray600,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                } else {
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-
-                if (submitError != null) {
-                    Text(
-                        submitError!!,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                }
-
-                val submitLabel = if (steps.size == 1) stringResource(R.string.action_save) else null
-
-                if (isSending) {
-                    Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = Black)
-                    }
-                } else {
-                    AnimatedContent(
-                        targetState = currentStepIndex,
-                        transitionSpec = {
-                            (slideInHorizontally(animationSpec = tween(300)) { width -> width } + fadeIn(tween(300))).togetherWith(
-                                slideOutHorizontally(animationSpec = tween(300)) { width -> -width } + fadeOut(tween(300))
-                            )
-                        },
-                        label = "StepTransition"
-                    ) { stepIndex ->
-                        when (steps[stepIndex]) {
-                            MeasurementStep.Pain -> {
-                                Column {
-                                    var pain by remember { mutableFloatStateOf(0f) }
-                                    Text("Pain Level (0-10)", style = MaterialTheme.typography.labelMedium)
-                                    Slider(
-                                        value = pain,
-                                        onValueChange = { pain = it },
-                                        valueRange = 0f..10f,
-                                        steps = 9,
-                                        colors = SliderDefaults.colors(thumbColor = Black, activeTrackColor = Black)
-                                    )
-                                    Text("${pain.toInt()}/10", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
-                                    Spacer(modifier = Modifier.height(24.dp))
-                                    LpmPrimaryButton(submitLabel ?: "Next", onClick = {
-                                        answers[MeasurementStep.Pain] = pain.toInt().toString()
-                                        advanceOrClose()
-                                    })
+            } else {
+                com.preappointment1.app.ui.components.checkin.CheckInScreen(
+                    submitLabel = stringResource(R.string.action_save),
+                    onClose = onClose,
+                    onSubmit = { level, temp, zoneIds, zoneLabels, qualities, mobility, pattern ->
+                        isSending = true
+                        coroutineScope.launch {
+                            val dateLabel = labelOverride ?: if (effectiveDate != null) {
+                                "Retroactive - ${effectiveDate.format(DateTimeFormatter.ofPattern("MMM d"))}"
+                            } else {
+                                scheduleKey
+                            }
+                            val content = buildString {
+                                appendLine("Routine Check-in ($dateLabel):")
+                                appendLine("• Pain Level: $level/10")
+                                if (zoneLabels.isNotEmpty()) {
+                                    appendLine("• Pain Areas: ${zoneLabels.joinToString(", ")}")
+                                }
+                                appendLine("• Body Temp: ${String.format(java.util.Locale.US, "%.1f", temp)}°C")
+                                appendLine("• Mobility Impact: $mobility")
+                                appendLine("• Temporal Pattern: $pattern")
+                                if (qualities.isNotEmpty()) {
+                                    appendLine("• Characteristics: ${qualities.joinToString(", ")}")
                                 }
                             }
-                            MeasurementStep.Temperature -> {
-                                Column {
-                                    var temp by remember { mutableStateOf("") }
-                                    Text("Quick Select", style = MaterialTheme.typography.bodySmall, color = Gray600)
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        listOf("36.5", "37.0", "37.5", "38.0").forEach { preset ->
-                                            androidx.compose.material3.FilterChip(
-                                                selected = temp == preset,
-                                                onClick = { temp = preset },
-                                                label = { Text("$preset°") },
-                                                colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
-                                                    selectedContainerColor = Black,
-                                                    selectedLabelColor = White
-                                                )
-                                            )
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.height(16.dp))
-
-                                    OutlinedTextField(
-                                        value = temp,
-                                        onValueChange = { temp = it },
-                                        label = { Text("Or enter specific (°C)") },
-                                        modifier = Modifier.fillMaxWidth(),
-                                        singleLine = true,
-                                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
+                            try {
+                                TimelineRepository.addEvent(
+                                    followUp.id,
+                                    TimelineEventRequest(
+                                        content = content.trim(),
+                                        date_label = dateLabel,
+                                        effective_date = effectiveDate?.format(DateTimeFormatter.ISO_LOCAL_DATE)
                                     )
-                                    Spacer(modifier = Modifier.height(24.dp))
-                                    LpmPrimaryButton(submitLabel ?: "Next", onClick = {
-                                        answers[MeasurementStep.Temperature] = temp
-                                        advanceOrClose()
-                                    })
-                                }
-                            }
-                            MeasurementStep.Photo -> {
-                                var photoSaved by remember { mutableStateOf(answers[MeasurementStep.Photo]) }
-                                Column {
-                                    if (photoSaved == null) {
-                                        MeasurementPhotoCapture(
-                                            onPhotoCaptured = { fileName ->
-                                                photoSaved = fileName
-                                                answers[MeasurementStep.Photo] = fileName
-                                            },
-                                            previewHeight = 200
-                                        )
-                                    } else {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(120.dp)
-                                                .background(Color(0xFFE8F5E9), RoundedCornerShape(8.dp)),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text("Photo saved", color = Color(0xFF2E7D32), fontWeight = FontWeight.SemiBold)
-                                        }
-                                        Spacer(modifier = Modifier.height(12.dp))
-                                        LpmPrimaryButton(submitLabel ?: "Finish", onClick = { advanceOrClose() })
-                                    }
-                                }
+                                )
+                                isSending = false
+                                onSubmitted()
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                isSending = false
+                                submitError = "Could not save locally."
                             }
                         }
                     }
-                }
+                )
             }
         }
     }

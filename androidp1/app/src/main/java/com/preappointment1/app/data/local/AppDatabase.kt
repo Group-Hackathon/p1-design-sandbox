@@ -6,14 +6,20 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [FollowUpEntity::class, TimelineEventEntity::class, CachedReportEntity::class],
-    version = 1,
+    entities = [
+        FollowUpEntity::class,
+        TimelineEventEntity::class,
+        CachedReportEntity::class,
+        LocalDocumentEntity::class
+    ],
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun followUpDao(): FollowUpDao
     abstract fun timelineEventDao(): TimelineEventDao
     abstract fun cachedReportDao(): CachedReportDao
+    abstract fun localDocumentDao(): LocalDocumentDao
 
     companion object {
         @Volatile
@@ -25,7 +31,10 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "p1_local.db"
-                ).build().also { instance = it }
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
+                    .also { instance = it }
             }
         }
     }

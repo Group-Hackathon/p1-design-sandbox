@@ -34,3 +34,21 @@ data class CachedReportEntity(
     val pdfPath: String,
     val generatedAt: Long = System.currentTimeMillis()
 )
+
+@Entity(tableName = "local_documents")
+data class LocalDocumentEntity(
+    @PrimaryKey val id: String,
+    val followUpId: String,
+    val title: String,
+    val mimeType: String,
+    val relativePath: String,
+    val source: String,
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+object DocumentSource {
+    const val REPORT = "report"
+    const val PHOTO = "photo"
+    const val PDF = "pdf"
+    const val OTHER = "other"
+}

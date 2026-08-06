@@ -21,12 +21,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
+import com.preappointment1.app.R
 import com.preappointment1.app.data.SessionManager
+import com.preappointment1.app.data.repository.DocumentsRepository
 import com.preappointment1.app.data.repository.ReportRepository
 import com.preappointment1.app.data.repository.TimelineRepository
 import com.preappointment1.app.report.PdfReportGenerator
@@ -50,6 +54,7 @@ fun ReportScreen(
     var pdfFile by remember { mutableStateOf<File?>(null) }
     var pageBitmaps by remember { mutableStateOf<List<Bitmap>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isSaving by remember { mutableStateOf(false) }
 
     // Generate the PDF on screen load
     LaunchedEffect(followUp.id) {
@@ -197,9 +202,59 @@ fun ReportScreen(
                             shape = RoundedCornerShape(8.dp),
                             border = androidx.compose.foundation.BorderStroke(1.dp, Black)
                         ) {
-                            Icon(Icons.Filled.Check, contentDescription = null, tint = Black, modifier = Modifier.size(20.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Print", color = Black, fontWeight = FontWeight.SemiBold)
+                            Icon(Icons.Filled.Check, contentDescription = null, tint = Black, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Print", color = Black, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                val file = pdfFile ?: return@OutlinedButton
+                                if (isSaving) return@OutlinedButton
+                                isSaving = true
+                                coroutineScope.launch {
+                                    try {
+                                        withContext(Dispatchers.IO) {
+                                            DocumentsRepository.saveReportPdf(
+                                                followUpId = followUp.id,
+                                                sourcePdf = file,
+                                                title = "Medical report — ${followUp.title}"
+                                            )
+                                        }
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(R.string.report_saved_to_folder),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } catch (_: Exception) {
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(R.string.report_save_failed),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } finally {
+                                        isSaving = false
+                                    }
+                                }
+                            },
+                            enabled = pdfFile != null && !isSaving,
+                            modifier = Modifier.weight(1f).height(50.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Black)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_folder),
+                                contentDescription = null,
+                                tint = Black,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                stringResource(R.string.report_save_to_folder),
+                                color = Black,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 13.sp
+                            )
                         }
 
                         Button(
@@ -227,9 +282,9 @@ fun ReportScreen(
                             shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Black)
                         ) {
-                            Icon(Icons.Filled.Share, contentDescription = null, tint = White, modifier = Modifier.size(20.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Share", color = White, fontWeight = FontWeight.SemiBold)
+                            Icon(Icons.Filled.Share, contentDescription = null, tint = White, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Share", color = White, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
                         }
                     }
                 }

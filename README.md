@@ -68,6 +68,7 @@ The application is free to try; premium analysis agents are purchased per follow
 | --- | --- |
 | `androidp1/` | **Primary** — Kotlin + Jetpack Compose Android app |
 | `iosp1/` | Native SwiftUI iOS app (feature parity in progress) |
+| `shared-bodymap/` | 3D body map module (Three.js, offline) shared by both apps |
 | `global-app-backend/` | Go API on Cloud Run (auth, subscriptions, Gemini, timeline) |
 | `deploy-your-own-backend/` | Docker Compose template for a private user-owned node |
 | `web-privacy-policy/` | Public privacy policy page |
@@ -75,6 +76,12 @@ The application is free to try; premium analysis agents are purchased per follow
 | `manifest/` | Product principles, agent templates, business model |
 | `ARCHITECTURE.md` | Technical stack and system design |
 | `RELEASE_AND_ROADMAP.md` | Changelog and roadmap |
+
+## Pain check-in: the 3D body map
+
+Pain entries follow the PainDiary model (locate → rate → qualify), with a 3D twist: a monochrome 3D mannequin (Three.js, fully offline, no network permission) lets the patient rotate the body and tap the areas that hurt — front and back — then rate intensity (0–10) and pick pain qualities (burning, stabbing, throbbing…). Zones and qualities land in the timeline and in the physician briefing.
+
+The 3D module lives once in `shared-bodymap/` and is embedded in both apps via a WebView bridge (Android WebView / WKWebView). Run `shared-bodymap/build.sh` after editing it to rebuild and redistribute the single-file HTML.
 
 ## Recent releases (Android)
 

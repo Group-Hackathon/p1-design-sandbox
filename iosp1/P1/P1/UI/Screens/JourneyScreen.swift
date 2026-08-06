@@ -733,7 +733,6 @@ private struct MissedMeasurementForm: View {
     let followUpId: String
     let onClose: () -> Void
     
-    @State private var painLevel: Double = 5
     @State private var tempValue = ""
     @State private var isSaving = false
     
@@ -763,43 +762,33 @@ private struct MissedMeasurementForm: View {
                 .padding(.horizontal, 24)
             
             VStack(alignment: .leading, spacing: 16) {
-                Text("Pain level: \(Int(painLevel))/10")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                Slider(value: $painLevel, in: 0...10, step: 1).tint(.black)
-                
                 TextField("Temperature (°C) - optional", text: $tempValue)
                     .keyboardType(.decimalPad)
                     .padding()
                     .background(Color(UIColor.systemGray6))
                     .cornerRadius(8)
+
+                if isSaving {
+                    ProgressView().frame(maxWidth: .infinity).padding()
+                } else {
+                    PainDiaryStep(submitLabel: "Save") { level, zones, qualities in
+                        saveMissed(level: level, zones: zones, qualities: qualities)
+                    }
+                }
             }
             .padding(.horizontal, 24)
-            
-            if isSaving {
-                ProgressView().frame(maxWidth: .infinity).padding()
-            } else {
-                Button(action: saveMissed) {
-                    Text("Save")
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.black)
-                        .cornerRadius(12)
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 32)
-            }
+            .padding(.bottom, 32)
         }
         .background(Color.white)
         .cornerRadius(24, corners: [.topLeft, .topRight])
     }
-    
-    private func saveMissed() {
+
+    private func saveMissed(level: Int, zones: [String], qualities: [String]) {
         isSaving = true
         var lines = ["Routine Check-in (\(dateLabel)):"]
-        lines.append("• Pain Level: \(Int(painLevel))/10")
+        lines.append("• Pain Level: \(level)/10")
+        if !zones.isEmpty { lines.append("• Pain Areas: \(zones.joined(separator: ", "))") }
+        if !qualities.isEmpty { lines.append("• Pain Type: \(qualities.joined(separator: ", "))") }
         if !tempValue.isEmpty { lines.append("• Temperature: \(tempValue) °C") }
         let content = lines.joined(separator: "\n")
         

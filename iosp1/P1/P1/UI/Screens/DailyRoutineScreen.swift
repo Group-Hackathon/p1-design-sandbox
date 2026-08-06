@@ -16,6 +16,8 @@ struct DailyRoutineScreen: View {
 
     // Collected measurements passed between steps
     @State private var painLevel: Double = 0
+    @State private var painZones: [String] = []
+    @State private var painQualities: [String] = []
     @State private var tempValue: String = ""
     @State private var bpValue: String = ""
     @State private var hrValue: String = ""
@@ -40,7 +42,12 @@ struct DailyRoutineScreen: View {
                         case .photo:
                             PhotoStep(capturedImage: $capturedImage, onPhotoTaken: { stepIndex += 1 })
                         case .pain:
-                            PainStep(painLevel: $painLevel, onContinue: { stepIndex += 1 })
+                            PainDiaryStep(submitLabel: "Save") { level, zones, qualities in
+                                painLevel = Double(level)
+                                painZones = zones
+                                painQualities = qualities
+                                stepIndex += 1
+                            }
                         case .vitals:
                             VitalsStep(
                                 rules: rules,
@@ -85,6 +92,12 @@ struct DailyRoutineScreen: View {
             var lines: [String] = ["Routine Check-in:"]
             if steps.contains(.pain) {
                 lines.append("• Pain Level: \(Int(painLevel))/10")
+                if !painZones.isEmpty {
+                    lines.append("• Pain Areas: \(painZones.joined(separator: ", "))")
+                }
+                if !painQualities.isEmpty {
+                    lines.append("• Pain Type: \(painQualities.joined(separator: ", "))")
+                }
             }
             if !tempValue.isEmpty {
                 lines.append("• Temperature: \(tempValue) °C")
@@ -179,42 +192,6 @@ private struct PhotoStep: View {
         .fullScreenCover(isPresented: $showCamera) {
             CameraView(selectedImage: $capturedImage)
                 .edgesIgnoringSafeArea(.all)
-        }
-    }
-}
-
-private struct PainStep: View {
-    @Binding var painLevel: Double
-    let onContinue: () -> Void
-
-    var body: some View {
-        VStack(spacing: 24) {
-            Text("Pain Assessment")
-                .font(.system(size: 11, weight: .bold))
-                .kerning(1.2)
-                .foregroundColor(.gray)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            Text("Pain level today")
-                .font(.title3)
-                .fontWeight(.semibold)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            HStack {
-                Text("0").foregroundColor(.gray).font(.caption)
-                Spacer()
-                Text("10").foregroundColor(.gray).font(.caption)
-            }
-
-            Slider(value: $painLevel, in: 0...10, step: 1)
-                .tint(.black)
-
-            Text("\(Int(painLevel)) / 10")
-                .font(.title)
-                .fontWeight(.bold)
-
-            Spacer()
-            LpmPrimaryButton(text: "Save", action: onContinue)
         }
     }
 }

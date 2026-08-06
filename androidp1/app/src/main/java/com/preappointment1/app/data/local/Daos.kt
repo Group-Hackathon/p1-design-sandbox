@@ -83,3 +83,36 @@ interface CachedReportDao {
     @Query("DELETE FROM cached_reports WHERE subscriptionId = :subscriptionId")
     suspend fun deleteForSubscription(subscriptionId: String)
 }
+
+@Dao
+interface LocalDocumentDao {
+    @Query(
+        """
+        SELECT * FROM local_documents
+        WHERE followUpId = :followUpId
+        ORDER BY createdAt DESC
+        """
+    )
+    fun observeForFollowUp(followUpId: String): Flow<List<LocalDocumentEntity>>
+
+    @Query(
+        """
+        SELECT * FROM local_documents
+        WHERE followUpId = :followUpId
+        ORDER BY createdAt DESC
+        """
+    )
+    suspend fun getForFollowUp(followUpId: String): List<LocalDocumentEntity>
+
+    @Query("SELECT * FROM local_documents WHERE id = :id LIMIT 1")
+    suspend fun getById(id: String): LocalDocumentEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(entity: LocalDocumentEntity)
+
+    @Query("DELETE FROM local_documents WHERE id = :id")
+    suspend fun deleteById(id: String)
+
+    @Query("DELETE FROM local_documents WHERE followUpId = :followUpId")
+    suspend fun deleteForFollowUp(followUpId: String)
+}
