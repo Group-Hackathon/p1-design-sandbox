@@ -6,7 +6,7 @@ Think of it as building a **"file for your doctor"** between today and appointme
 
 And if memory gaps, stress, or a physical or mental condition make it hard to recall symptoms accurately, P1 keeps a reliable, day-by-day record — so your doctor gets the facts.
 
-**Current release:** [v1.0.9](https://github.com/Group-Hackathon/p1/releases/latest) · Android (primary) · iOS (TestFlight-ready clone)
+**Current release:** [v1.0.10](https://github.com/Group-Hackathon/p1/releases/latest) · Android (primary) · iOS (TestFlight-ready clone)
 
 ---
 
@@ -85,6 +85,7 @@ Pain entries follow the PainDiary model (locate → rate → qualify), with a 3D
 
 | Version | Highlights |
 | --- | --- |
+| **1.0.10** | Fix Play Console 16 KB memory page size alignment for native 3D engine libraries (`useLegacyPackaging = true`). |
 | **1.0.9** | Native Filament 3D Mannequin with targeted body-part tap sheet & camera photo capture. Pure monochrome styling. |
 | **1.0.8** | Full-page 3D spatial check-in viewport, camera integration, billing updates. |
 | **1.0.7** | Version label on splash screen, doc sync across repo |
