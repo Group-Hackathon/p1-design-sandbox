@@ -93,7 +93,7 @@ It is a preparation tool: **better meetings, because the facts arrived with you.
 ## Support
 
 - Play Store: [Pre-Appointment 1](https://play.google.com/store/apps/details?id=com.preappointment1.app)
-- Email: [contact@livingpatientmemory.com](mailto:contact@livingpatientmemory.com)
+- Email: [contact@livingpatientmemory.com](mailto:opendatahive@gmail.com)
 
 ---
 
