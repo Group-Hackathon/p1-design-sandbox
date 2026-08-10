@@ -15,8 +15,8 @@ android {
         applicationId = "com.preappointment1.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 10
-        versionName = "1.0.10"
+        versionCode = 14
+        versionName = "1.0.14"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -64,11 +64,17 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+            excludes += "META-INF/versions/**/OSGI-INF/MANIFEST.MF"
         }
         jniLibs {
-            useLegacyPackaging = true
+            // AGP 8.5+ zip-aligns uncompressed .so on 16 KB boundaries.
+            useLegacyPackaging = false
         }
     }
+
+    // Rewrite ELF PT_LOAD alignment for any remaining 4 KB-aligned prebuilts.
+    experimentalProperties["android.nativeLibraryAlignmentPageSize"] = "16k"
 }
 
 dependencies {
@@ -88,8 +94,8 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
 
-    // CameraX
-    val cameraxVersion = "1.3.3"
+    // CameraX (1.5+ ships 16 KB-aligned image_processing_util JNI)
+    val cameraxVersion = "1.5.3"
     implementation("androidx.camera:camera-core:${cameraxVersion}")
     implementation("androidx.camera:camera-camera2:${cameraxVersion}")
     implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")

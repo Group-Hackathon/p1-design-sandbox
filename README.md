@@ -1,101 +1,100 @@
 # Pre-Appointment 1
 
-**P1** is a mobile app agent that helps you track your symptoms before your appointment — in small, simple daily steps — so you don't walk in unprepared.
+**Walk into your next appointment with a file ready — not with half-remembered details.**
 
-Think of it as building a **"file for your doctor"** between today and appointment day.
+[Pre-Appointment 1](https://play.google.com/store/apps/details?id=com.preappointment1.app) (P1) is your daily companion for the days and weeks before an important meeting with a doctor, specialist, or advisor. It turns short check-ins into a clear briefing so those precious minutes are spent on decisions, not reconstruction.
 
-And if memory gaps, stress, or a physical or mental condition make it hard to recall symptoms accurately, P1 keeps a reliable, day-by-day record — so your doctor gets the facts.
+<p align="center">
+  <a href="https://play.google.com/store/apps/details?id=com.preappointment1.app">
+    <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="64"/>
+  </a>
+</p>
 
-**Current release:** [v1.0.10](https://github.com/Group-Hackathon/p1/releases/latest) · Android (primary) · iOS (TestFlight-ready clone)
+**Current release:** v1.0.14 · Android on [Google Play](https://play.google.com/store/apps/details?id=com.preappointment1.app) · iOS coming soon
 
----
+<p align="center">
+  <img src="store-assets/presentation/03_checkin.png" alt="3D check-in — pain, temp, photo" width="280"/>
+  &nbsp;
+  <img src="store-assets/presentation/02_journey.png" alt="Appointment file journey" width="280"/>
+</p>
 
-## The problem
+<p align="center"><em>Daily check-in with 3D body map · Your file building toward appointment day</em></p>
 
-When a patient finally sits in front of a doctor, most of the useful information is already gone. Symptoms that appeared three weeks ago are half-forgotten, the evolution of a wound or a rash exists only in memory, fever curves were never written down, and the few minutes of consultation are spent reconstructing history instead of making decisions.
-
-Healthcare data is fragmented, and the most valuable part of it — what happens to the patient between two appointments — is almost never captured.
-
----
-
-## The mental health benefit
-
-Pre-Appointment 1 (P1) turns your daily symptoms into undeniable, medically useful facts. By tracking your condition in small, simple steps each day, it builds a foolproof record for your next visit.
-
-Don't just describe your symptoms from memory. Walk in with a clear, objective timeline so your doctor gets the full story, takes your pain seriously, and gives you the exact care you need.
+Mini walkthrough: [`store-assets/presentation/p1_presentation.mp4`](store-assets/presentation/p1_presentation.mp4)
 
 ---
 
-## What we are building
+## Why it exists
 
+When you finally sit down with a specialist, the useful information is often already gone.
 
-**Pre-Appointment 1** is driven by an on-device protocol agent that collects medically useful data in the period before a medical appointment, or during a doctor-prescribed follow-up.
+Pain that peaked three weeks ago lives only in memory. A rash that changed day by day was never photographed. Temperature spikes were never logged. The consultation becomes archaeology — and decisions wait.
 
-Every day, the agent:
-
-- Prompts the patient for short, targeted check-ins (symptoms, pain level, mood, sleep).
-- Captures photos of evolving conditions (wounds, skin, swelling) on a fixed schedule.
-- Pulls available data from the phone and connected sources (steps, heart rate, sleep, temperature entries).
-- Produces a daily micro-report.
-
-These micro-reports are not shown to the patient as medical conclusions. The application never diagnoses and never alarms. Instead, all collected data is compiled, graphed over time, and summarized into a single structured briefing intended for a real physician, delivered at the time of the appointment.
-
-The doctor opens one page and sees: what happened, when it started, how it evolved, with photos, curves and patient-reported context.
-
-## How data is stored
-
-Medical data is the most sensitive data there is. Our long-term vision is a **self-deployed backend** per user (see `deploy-your-own-backend/`).
-
-**MVP (current):** a centralized Go API on **Google Cloud Run** (`global-app-backend/`) handles auth, subscriptions, timelines and Gemini plan generation. Patient photos stay on-device as filenames in the timeline until private VPC sync ships.
-
-See `ARCHITECTURE.md` for the full technical picture.
-
-## How analysis works
-
-Raw data alone is not a briefing. Analysis is performed by specialized cloud analysis agents (Gemini-based), each customized for a type of medical follow-up. The agent reads subscription parameters and timeline events, then produces check-in schedules and physician briefings.
-
-The application is free to try; premium analysis agents are purchased per follow-up period. See `manifest/business-model.md`.
-
-## What this is not
-
-- It is not a diagnostic tool. It never tells the patient what they have.
-- It is not a replacement for a doctor. Its only output is a better-informed consultation.
-- It is not a data company by design — the architecture moves toward user-owned storage.
-
-## Repository structure
-
-| Path | Content |
-| --- | --- |
-| `androidp1/` | **Primary** — Kotlin + Jetpack Compose Android app |
-| `iosp1/` | Native SwiftUI iOS app (feature parity in progress) |
-| `shared-bodymap/` | 3D body map module (Three.js, offline) shared by both apps |
-| `global-app-backend/` | Go API on Cloud Run (auth, subscriptions, Gemini, timeline) |
-| `deploy-your-own-backend/` | Docker Compose template for a private user-owned node |
-| `web-privacy-policy/` | Public privacy policy page |
-| `store-assets/` | Play Store / App Store graphics |
-| `manifest/` | Product principles, agent templates, business model |
-| `ARCHITECTURE.md` | Technical stack and system design |
-| `RELEASE_AND_ROADMAP.md` | Changelog and roadmap |
-
-## Pain check-in: the 3D body map
-
-Pain entries follow the PainDiary model (locate → rate → qualify), with a 3D twist: a monochrome 3D mannequin (Three.js / Google Filament, fully offline) lets the patient rotate the body and tap targeted body regions — front and back — to mark pain intensity (0–10), pick pain qualities, or capture targeted photos.
-
-## Recent releases (Android)
-
-| Version | Highlights |
-| --- | --- |
-| **1.0.10** | Fix Play Console 16 KB memory page size alignment for native 3D engine libraries (`useLegacyPackaging = true`). |
-| **1.0.9** | Native Filament 3D Mannequin with targeted body-part tap sheet & camera photo capture. Pure monochrome styling. |
-| **1.0.8** | Full-page 3D spatial check-in viewport, camera integration, billing updates. |
-| **1.0.7** | Version label on splash screen, doc sync across repo |
-| **1.0.6** | Notification deep links to the right check-in slot, timeline-aware home badge, single API fetch |
-| **1.0.5** | Smart schedule (first check-in from launch time), editable reminders, Gemini local time |
-
-Download APKs from [GitHub Releases](https://github.com/Group-Hackathon/p1/releases).
-
-## Status
-
-Hackathon project for **XPRIZE Gemini**, category Professional Services Access. Android closed testing on Google Play; iOS TestFlight build in progress.
+**P1 captures what happens between appointments**, so your advisor sees the full story in one place.
 
 ---
+
+## What you get
+
+### A file that builds itself
+
+Each day, P1 asks for a short update — about two minutes. Pain level. Temperature. A photo when something is changing. Over time, that becomes a structured file for appointment day.
+
+### See it. Mark it. Capture it.
+
+A 3D mannequin lets you show *where* something hurts, not just describe it. Floating instruments for pain and temperature. Photos linked to the exact spot on the body.
+
+### One briefing for your doctor
+
+Graphs, photos, and daily notes compiled into a single page. Open it together. Skip the “when did it start?” scramble.
+
+### Built for real life
+
+Reminders that fit your schedule. Works when you are tired, stressed, or simply forgetful. No diagnosis. No alarms. Just a reliable record you control.
+
+---
+
+## Who it is for
+
+- Anyone preparing for a medical appointment or follow-up
+- People who want their pain and symptoms taken seriously with facts, not only memory
+- Caregivers helping a loved one keep a consistent log between visits
+
+---
+
+## Privacy, simply
+
+Your observations matter. This beta uses a secure cloud backend so early features can ship and improve. You can request full deletion of your data at any time.
+
+The long-term vision is a **private, user-owned setup** — so your file stays yours. That path is already designed into the product.
+
+---
+
+## Get started
+
+1. [Install on Google Play](https://play.google.com/store/apps/details?id=com.preappointment1.app)
+2. Open your appointment file
+3. Do today’s check-in — pain, temp, photo if needed
+4. Keep going until appointment day
+5. Share the briefing with your doctor
+
+---
+
+## What P1 is not
+
+- Not a diagnostic tool
+- Not a replacement for a clinician
+- Not another place for your health data to disappear into a black box
+
+It is a preparation tool: **better meetings, because the facts arrived with you.**
+
+---
+
+## Support
+
+- Play Store: [Pre-Appointment 1](https://play.google.com/store/apps/details?id=com.preappointment1.app)
+- Email: [contact@livingpatientmemory.com](mailto:contact@livingpatientmemory.com)
+
+---
+
+*Hackathon project for XPRIZE Gemini · Productivity · Updated August 2026*

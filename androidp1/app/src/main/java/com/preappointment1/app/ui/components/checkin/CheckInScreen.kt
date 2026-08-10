@@ -1,9 +1,12 @@
 package com.preappointment1.app.ui.components.checkin
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -80,7 +84,79 @@ private fun savePhotoToFile(context: android.content.Context, uri: Uri): String?
 private fun createTempImageUri(context: android.content.Context): Uri {
     val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
     val photoFile = File(context.filesDir, "capture_$timestamp.jpg")
+    // Some OEM camera apps refuse to write into a target that does not exist yet.
+    photoFile.parentFile?.mkdirs()
+    if (!photoFile.exists()) photoFile.createNewFile()
     return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", photoFile)
+}
+
+/**
+ * Readout and stepper that sits directly under one of the floating 3D instruments.
+ * Monochrome by design so it reads as part of the same instrument.
+ */
+@Composable
+private fun GadgetReadout(
+    label: String,
+    value: String,
+    unit: String,
+    onDecrement: () -> Unit,
+    onIncrement: () -> Unit,
+    onUnitClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.width(104.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = Color.White.copy(alpha = 0.45f),
+            letterSpacing = 3.sp
+        )
+        Text(
+            value,
+            fontSize = 30.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = Color.White
+        )
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .then(if (onUnitClick != null) Modifier.clickable { onUnitClick() } else Modifier)
+                .padding(horizontal = 6.dp, vertical = 1.dp)
+        ) {
+            Text(
+                unit,
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White.copy(alpha = 0.45f),
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            StepperButton("−", onDecrement)
+            StepperButton("+", onIncrement)
+        }
+    }
+}
+
+@Composable
+private fun StepperButton(glyph: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(34.dp)
+            .clip(CircleShape)
+            .background(Color.White.copy(alpha = 0.07f))
+            .border(1.dp, Color.White.copy(alpha = 0.22f), CircleShape)
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(glyph, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 17.sp)
+    }
 }
 
 /**
@@ -123,6 +199,7 @@ fun CheckInScreen(
     var frameOffsetX by remember { mutableFloatStateOf(0f) }
     var frameOffsetY by remember { mutableFloatStateOf(0f) }
     var cameraUri by remember { mutableStateOf<Uri?>(null) }
+    var cameraError by remember { mutableStateOf<String?>(null) }
     var fullscreenPhotoIndex by remember { mutableStateOf(-1) }
     val carouselState = rememberLazyListState()
     val thumbPositions = remember { mutableStateMapOf<Int, Offset>() }
@@ -169,6 +246,65 @@ fun CheckInScreen(
         }
     }
 
+    /**
+     * Starts the capture intent. The manifest declares CAMERA, and Android refuses to
+     * start ACTION_IMAGE_CAPTURE from an app that declares the permission without
+     * holding it — so this must only run once the grant is in hand. The launch is
+     * guarded anyway: an OEM camera that rejects the intent should surface a message,
+     * not take the process down.
+     */
+    /** Drops the placeholder left by Confirm when a capture never happens. */
+    fun dropPendingDraft() {
+        val idx = photoEntries.indexOfLast { it.filename == "__pending__" }
+        if (idx >= 0) photoEntries = photoEntries.toMutableList().apply { removeAt(idx) }
+    }
+
+    fun launchCamera() {
+        try {
+            val uri = createTempImageUri(context)
+            cameraUri = uri
+            cameraLauncher.launch(uri)
+        } catch (e: Exception) {
+            Log.e("CheckInScreen", "Camera launch failed", e)
+            cameraUri = null
+            dropPendingDraft()
+            cameraError = "Camera unavailable — pick from the gallery instead."
+        }
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            launchCamera()
+        } else {
+            dropPendingDraft()
+            cameraError = "Camera permission denied — pick from the gallery instead."
+        }
+    }
+
+    fun takePhoto() {
+        val granted = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+        if (granted) launchCamera() else cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+    }
+
+    /** Discards a draft photo: drops the entry, its file, and any stale references. */
+    fun removePhotoAt(index: Int) {
+        val entry = photoEntries.getOrNull(index) ?: return
+        photoEntries = photoEntries.toMutableList().apply { removeAt(index) }
+        if (photoFilename == entry.filename) {
+            photoFilename = photoEntries.lastOrNull { it.filename != "__pending__" }?.filename
+        }
+        if (entry.filename != "__pending__") {
+            runCatching { File(context.filesDir, entry.filename).delete() }
+        }
+        // Indices shift after a removal, so the cached dot/line anchors are stale.
+        thumbPositions.clear()
+        fullscreenPhotoIndex = -1
+    }
+
     val allRegions = listOf(
         "head" to "Head",
         "neck" to "Neck",
@@ -185,7 +321,7 @@ fun CheckInScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Black)
+            .background(Color(0xE6000000))
             .onGloballyPositioned { coords ->
                 val pos = coords.positionInWindow()
                 rootWindowOffset = Offset(pos.x, pos.y)
@@ -217,14 +353,19 @@ fun CheckInScreen(
         }
 
         LaunchedEffect(modelNode) {
-            modelNode.modelInstance?.materialInstances?.forEach { material ->
-                try {
-                    material.setParameter("baseColorFactor", 0.75f, 0.75f, 0.75f, 1.0f)
-                } catch (_: Exception) {}
-            }
+            // Texture baked into GLB — no runtime baseColorFactor override needed
             modelNode.playingAnimations.forEach { (_, anim) ->
                 anim.speed = 0.2f
             }
+        }
+
+        // Floating monochrome 3D instruments either side of the mannequin
+        val painLadder = rememberPainLadderGadget(modelLoader)
+        val thermometer = rememberThermometerGadget(modelLoader)
+
+        LaunchedEffect(level) { painLadder.update(level) }
+        LaunchedEffect(temperature) {
+            thermometer.update(temperatureFraction(temperature))
         }
 
         Scene(
@@ -233,14 +374,15 @@ fun CheckInScreen(
             modelLoader = modelLoader,
             cameraNode = cameraNode,
             mainLightNode = mainLightNode,
-            childNodes = listOf(modelNode)
+            childNodes = listOf(modelNode) + painLadder.nodes + thermometer.nodes
         )
 
-        // Interaction overlay (between Scene and HUD): drag=rotate, tap=photo mode
+        // Interaction overlay (between Scene and HUD): drag to spin the mannequin.
+        // Photo capture is driven by the dedicated shutter button, so a stray tap
+        // anywhere on the scene no longer drops the user into photo mode.
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clickable { photoMode = true }
                 .pointerInput(Unit) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()
@@ -328,40 +470,57 @@ fun CheckInScreen(
                         .border(2.dp, White, RoundedCornerShape(8.dp))
                 )
 
-                // Bottom buttons - above save button area
+                // Compact actions, parked in the gap between the mannequin's feet and
+                // the readouts so they never cover the PAIN / TEMP labels.
                 Row(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = 180.dp)
+                        .padding(bottom = 232.dp)
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Surface(
-                        modifier = Modifier.clickable {
-                            photoMode = false
-                            frameOffsetX = 0f
-                            frameOffsetY = 0f
-                        },
-                        shape = RoundedCornerShape(10.dp),
-                        color = Color(0xFF444444)
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                            .clickable {
+                                photoMode = false
+                                frameOffsetX = 0f
+                                frameOffsetY = 0f
+                            }
+                            .padding(horizontal = 16.dp, vertical = 7.dp)
                     ) {
-                        Text("Cancel", modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp), color = White, fontWeight = FontWeight.Bold)
+                        Text(
+                            "CANCEL",
+                            color = Color.White.copy(alpha = 0.75f),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.5.sp
+                        )
                     }
-                    Spacer(modifier = Modifier.width(20.dp))
-                    Surface(
-                        modifier = Modifier.clickable {
-                            val savedX = frameOffsetX
-                            val savedY = frameOffsetY
-                            photoMode = false
-                            frameOffsetX = 0f
-                            frameOffsetY = 0f
-                            photoEntries = photoEntries + PhotoEntry("__pending__", savedX, savedY)
-                            showCameraSheet = true
-                        },
-                        shape = RoundedCornerShape(10.dp),
-                        color = White
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color.White)
+                            .clickable {
+                                val savedX = frameOffsetX
+                                val savedY = frameOffsetY
+                                photoMode = false
+                                frameOffsetX = 0f
+                                frameOffsetY = 0f
+                                photoEntries = photoEntries + PhotoEntry("__pending__", savedX, savedY)
+                                showCameraSheet = true
+                            }
+                            .padding(horizontal = 16.dp, vertical = 7.dp)
                     ) {
-                        Text("Confirm", modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp), color = Black, fontWeight = FontWeight.Bold)
+                        Text(
+                            "CONFIRM",
+                            color = Color.Black,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.5.sp
+                        )
                     }
                 }
             }
@@ -382,214 +541,157 @@ fun CheckInScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (onClose != null) {
-                    Surface(
-                        modifier = Modifier.clickable { onClose() },
-                        shape = CircleShape,
-                        color = Color(0xFF222222)
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.08f))
+                            .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
+                            .clickable { onClose() },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(modifier = Modifier.padding(10.dp)) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Close",
-                                tint = White,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = Color.White.copy(alpha = 0.7f),
+                            modifier = Modifier.size(16.dp)
+                        )
                     }
                 }
             }
 
-            // --- MIDDLE WIDGETS (Pain & Temp Floating Cards) ---
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // LEFT HUD: Pain Intensity
-                Surface(
-                    modifier = Modifier.width(96.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    color = Color(0xFF141414),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF333333)),
-                    shadowElevation = 6.dp
+            // --- MIDDLE: readouts + steppers sitting under the 3D instruments ---
+            Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
                 ) {
-                    Column(
-                        modifier = Modifier.padding(8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                    // LEFT: pain readout + stepper, under the 3D ladder
+                    GadgetReadout(
+                        label = "PAIN",
+                        value = "$level",
+                        unit = "/ 10",
+                        onDecrement = { if (level > 0) level -= 1 },
+                        onIncrement = { if (level < 10) level += 1 }
+                    )
+
+                    // CENTRE: photo shutter, directly below the mannequin's feet so it
+                    // never overlaps either instrument or the carousel.
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            "PAIN",
+                            "PHOTO",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFAAAAAA),
-                            letterSpacing = 1.sp
+                            color = Color.White.copy(alpha = 0.45f),
+                            letterSpacing = 3.sp
                         )
-                        Text(
-                            "$level/10",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = White
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(3.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            listOf(0, 2, 4, 6, 8, 10).forEach { l ->
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(24.dp)
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .background(if (level == l) White else Color(0xFF262626))
-                                        .clickable { level = l },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        "$l",
-                                        color = if (level == l) Black else White,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // RIGHT HUD: Temperature
-                val displayTemp = if (isCelsius) temperature else temperature * 9f / 5f + 32f
-                val tempUnit = if (isCelsius) "°C" else "°F"
-                Surface(
-                    modifier = Modifier.width(96.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    color = Color(0xFF141414),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF333333)),
-                    shadowElevation = 6.dp
-                ) {
-                    Column(
-                        modifier = Modifier.padding(8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            "TEMP",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFAAAAAA),
-                            letterSpacing = 1.sp
-                        )
-                        Text(
-                            "%.1f%s".format(displayTemp, tempUnit),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = White
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Surface(
-                                modifier = Modifier.size(28.dp).clickable {
-                                    if (temperature > 35.5f) temperature -= 0.2f
-                                },
-                                shape = CircleShape,
-                                color = Color(0xFF262626)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text("-", fontWeight = FontWeight.Bold, color = White)
-                                }
-                            }
-                            Surface(
-                                modifier = Modifier.size(28.dp).clickable {
-                                    if (temperature < 41.0f) temperature += 0.2f
-                                },
-                                shape = CircleShape,
-                                color = White
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text("+", fontWeight = FontWeight.Bold, color = Black)
-                                }
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Surface(
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .clickable { isCelsius = !isCelsius },
-                            color = Color(0xFF262626)
+                                .size(52.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.07f))
+                                .border(1.dp, Color.White.copy(alpha = 0.25f), CircleShape)
+                                .clickable { photoMode = true },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                if (isCelsius) "°C → °F" else "°F → °C",
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFFAAAAAA),
-                                fontWeight = FontWeight.Bold
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .border(1.dp, Color.White.copy(alpha = 0.55f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Add photo",
+                                    tint = Color.White.copy(alpha = 0.85f),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                         }
                     }
+
+                    // RIGHT: temperature readout + stepper, under the 3D thermometer
+                    val displayTemp = if (isCelsius) temperature else temperature * 9f / 5f + 32f
+                    GadgetReadout(
+                        label = "TEMP",
+                        value = "%.1f".format(displayTemp),
+                        unit = if (isCelsius) "°C" else "°F",
+                        onUnitClick = { isCelsius = !isCelsius },
+                        onDecrement = { if (temperature > 35.5f) temperature -= 0.2f },
+                        onIncrement = { if (temperature < 41.0f) temperature += 0.2f }
+                    )
                 }
             }
+
 
             // --- BOTTOM SECTION: PHOTOS + ZONES + SAVE ---
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // + Photo button
-                Surface(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .clickable { photoMode = true },
-                    color = Color(0xFF1A1A1A),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF444444))
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("+", color = White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            "Photo",
-                            color = White,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-
-                // Photo carousel
+                // Photo carousel — occupies the slot the shutter used to sit in
                 if (photoEntries.isNotEmpty()) {
                     LazyRow(
                         state = carouselState,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         itemsIndexed(photoEntries) { index, entry ->
-                            Surface(
-                                modifier = Modifier
-                                    .size(52.dp)
-                                    .onGloballyPositioned { coords ->
-                                        val pos = coords.positionInWindow()
-                                        val sz = coords.size
-                                        thumbPositions[index] = Offset(pos.x + sz.width / 2f, pos.y + sz.height / 2f)
-                                    }
-                                    .clickable { fullscreenPhotoIndex = index },
-                                shape = RoundedCornerShape(8.dp),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, White)
-                            ) {
-                                val photoFile = File(LocalContext.current.filesDir, entry.filename)
-                                AsyncImage(
-                                    model = photoFile,
-                                    contentDescription = "Photo",
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
+                            // Extra top/end padding leaves room for the delete badge to
+                            // overhang the thumbnail without being clipped.
+                            Box(modifier = Modifier.padding(top = 6.dp, end = 6.dp)) {
+                                Surface(
+                                    modifier = Modifier
+                                        .size(52.dp)
+                                        .onGloballyPositioned { coords ->
+                                            val pos = coords.positionInWindow()
+                                            val sz = coords.size
+                                            thumbPositions[index] = Offset(
+                                                pos.x + sz.width / 2f,
+                                                pos.y + sz.height / 2f
+                                            )
+                                        }
+                                        .clickable { fullscreenPhotoIndex = index },
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = Color.White.copy(alpha = 0.06f),
+                                    border = androidx.compose.foundation.BorderStroke(
+                                        1.dp, Color.White.copy(alpha = 0.5f)
+                                    )
+                                ) {
+                                    val photoFile = File(LocalContext.current.filesDir, entry.filename)
+                                    AsyncImage(
+                                        model = photoFile,
+                                        contentDescription = "Photo",
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
+
+                                // Discard this draft
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .offset(x = 6.dp, y = (-6).dp)
+                                        .size(20.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.Black)
+                                        .border(1.dp, Color.White.copy(alpha = 0.6f), CircleShape)
+                                        .clickable { removePhotoAt(index) },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Delete photo",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(11.dp)
+                                    )
+                                }
                             }
                         }
                     }
@@ -638,47 +740,48 @@ fun CheckInScreen(
                     }
                 }
 
-                // Save Action Button
-                Button(
-                    onClick = {
-                        val finalQualities = PAIN_QUALITIES.filter { qualities.contains(it) }.toMutableList()
-                        photoFilename?.let { finalQualities.add("Photo: $it") }
-                        photoEntries.forEach { entry ->
-                            finalQualities.add("Photo: ${entry.filename}")
-                        }
-
-                        onSubmit(
-                            level,
-                            temperature,
-                            zoneIds,
-                            zoneLabels,
-                            finalQualities,
-                            mobilityImpact,
-                            temporalPattern
-                        )
-                    },
+                // Save Action Button — frosted glass
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = White,
-                        contentColor = Black
-                    ),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                        .height(52.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White)
+                        .clickable {
+                            val finalQualities = PAIN_QUALITIES
+                                .filter { qualities.contains(it) }
+                                .toMutableList()
+                            // The carousel is the single source of truth, so discarded
+                            // drafts stay out and nothing is recorded twice. Placeholders
+                            // for shots that were never taken are skipped.
+                            photoEntries
+                                .map { it.filename }
+                                .filter { it != "__pending__" }
+                                .distinct()
+                                .forEach { finalQualities.add("Photo: $it") }
+                            onSubmit(
+                                level, temperature, zoneIds, zoneLabels,
+                                finalQualities, mobilityImpact, temporalPattern
+                            )
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        submitLabel.uppercase(),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = Color.Black,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            submitLabel.uppercase(),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 2.sp,
+                            color = Color.Black
+                        )
+                    }
                 }
             }
         }
@@ -706,9 +809,7 @@ fun CheckInScreen(
                     OutlinedButton(
                         onClick = {
                             showCameraSheet = false
-                            val uri = createTempImageUri(context)
-                            cameraUri = uri
-                            cameraLauncher.launch(uri)
+                            takePhoto()
                         },
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                         shape = RoundedCornerShape(10.dp),
@@ -729,6 +830,32 @@ fun CheckInScreen(
                         Text("Choose from Gallery", fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 4.dp))
                     }
                 }
+            }
+        }
+
+        // --- 4. TRANSIENT CAMERA MESSAGE ---
+        cameraError?.let { message ->
+            LaunchedEffect(message) {
+                kotlinx.coroutines.delay(3500)
+                cameraError = null
+            }
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 120.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xF01A1A1A))
+                    .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(12.dp))
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Text(
+                    message,
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
 
@@ -760,6 +887,34 @@ fun CheckInScreen(
                         .align(Alignment.Center),
                     contentScale = ContentScale.Fit
                 )
+
+                // Discard from the preview itself, so a draft can be dropped without
+                // hunting for the small badge on the thumbnail.
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 48.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(14.dp))
+                        .clickable { removePhotoAt(fullscreenPhotoIndex) }
+                        .padding(horizontal = 20.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        "DELETE",
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp
+                    )
+                }
             }
         }
     }

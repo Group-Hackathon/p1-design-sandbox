@@ -52,3 +52,17 @@ iosp1/**/xcuserdata/
 *.hmap
 *.ipa
 *.xcuserstate
+
+# Local Python tooling (mesh/texture bake scripts)
+.venv/
+.venv-*/
+venv/
+
+# ADB / bake debug dumps (keep play_shot_* and presentation finals)
+store-assets/adb_*.png
+store-assets/tex_*.png
+store-assets/texture_preview.png
+store-assets/uv_debug.png
+store-assets/debug_*.png
+store-assets/presentation/n_*.png
+store-assets/presentation/slides.txt
