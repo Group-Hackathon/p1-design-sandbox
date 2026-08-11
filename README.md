@@ -93,7 +93,9 @@ It is a preparation tool: **better meetings, because the facts arrived with you.
 ## Support
 
 - Play Store: [Pre-Appointment 1](https://play.google.com/store/apps/details?id=com.preappointment1.app)
-- Email: [contact@livingpatientmemory.com](mailto:opendatahive@gmail.com)
+- Website: [p1-website-9fb.pages.dev](https://p1-website-9fb.pages.dev)
+- Email: [contact@livingpatientmemory.com](mailto:contact@livingpatientmemory.com)
+- GitHub: [Group-Hackathon](https://github.com/Group-Hackathon)
 
 ---
 
