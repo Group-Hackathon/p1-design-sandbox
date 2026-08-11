@@ -1,6 +1,0 @@
-.git
-.gitignore
-.env
-/server
-*.md
-docker-compose.yml
