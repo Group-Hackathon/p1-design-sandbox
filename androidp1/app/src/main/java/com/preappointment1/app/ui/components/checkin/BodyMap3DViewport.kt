@@ -64,14 +64,14 @@ fun BodyMap3DViewport(
                     playingAnimations.clear()
                     onSingleTapUp = { _ ->
                         val regionList = listOf(
-                            "head" to "Tête",
-                            "chest" to "Poitrine",
+                            "head" to "Head",
+                            "chest" to "Chest",
                             "abdomen" to "Abdomen",
-                            "back" to "Dos",
-                            "arm_left" to "Bras Gauche",
-                            "arm_right" to "Bras Droit",
-                            "leg_left" to "Jambe Gauche",
-                            "leg_right" to "Jambe Droite"
+                            "back" to "Back",
+                            "arm_left" to "Left Arm",
+                            "arm_right" to "Right Arm",
+                            "leg_left" to "Left Leg",
+                            "leg_right" to "Right Leg"
                         )
                         val nextRegion = regionList.firstOrNull { it.first !in zoneIds } ?: regionList.first()
                         onSelectionChanged(listOf(nextRegion.first), listOf(nextRegion.second))

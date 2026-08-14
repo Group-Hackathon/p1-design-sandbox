@@ -1,30 +1,30 @@
 # P1 — Design Sandbox
 
-Sandbox de design pour **Pre-Appointment 1**. Ce repo est un fork allégé du [repo principal P1](https://github.com/Group-Hackathon/p1), contenant uniquement le code Android pour expérimenter des variations de design radicales.
+Design sandbox for **Pre-Appointment 1**. This repo is a lightweight fork of the [main P1 repo](https://github.com/Group-Hackathon/p1), containing only the Android code to experiment with radical design variations.
 
-## Contenu
+## Contents
 
-- `androidp1/` — Code Android (Kotlin + Compose)
-- `main` — Copie du design actuel de production
-- Branches de design — Une branche par variation de design
+- `androidp1/` — Android code (Kotlin + Compose)
+- `main` — Copy of the current production design
+- Design branches — One branch per design variation
 
 ## Branches
 
-| Branche | Description |
+| Branch | Description |
 |---------|-------------|
-| `main` | Point de départ — design actuel |
-| `v1-current` | Snapshot du design v1 de production |
+| `main` | Starting point — current design |
+| `v1-current` | Snapshot of production v1 design |
 
-## Utilisation
+## Usage
 
 ```bash
 git clone https://github.com/Group-Hackathon/p1-design-sandbox.git
 cd p1-design-sandbox
-# Créer une branche pour ton design
-git checkout -b design/ta-variation
-# Ouvrir androidp1/ dans Android Studio
+# Create a branch for your design
+git checkout -b design/your-variation
+# Open androidp1/ in Android Studio
 ```
 
 ## Important
 
-Ce repo est destiné UNIQUEMENT aux tests de design UI. Le repo principal reste `Group-Hackathon/p1`.
+This repo is intended ONLY for UI design experiments. The main repo remains `Group-Hackathon/p1`.
