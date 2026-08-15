@@ -24,6 +24,7 @@ androidp1/local.properties
 androidp1/.idea/
 androidp1/captures/
 *.apk
+!releases/*.apk
 *.aab
 
 # Go backend local artifacts
