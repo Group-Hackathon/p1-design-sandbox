@@ -30,11 +30,7 @@ import com.preappointment1.app.R
 import com.preappointment1.app.data.local.DocumentSource
 import com.preappointment1.app.data.local.LocalDocumentEntity
 import com.preappointment1.app.data.repository.DocumentsRepository
-import com.preappointment1.app.ui.theme.Black
-import com.preappointment1.app.ui.theme.Gray200
-import com.preappointment1.app.ui.theme.Gray400
-import com.preappointment1.app.ui.theme.Gray600
-import com.preappointment1.app.ui.theme.White
+import com.preappointment1.app.ui.theme.*
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Date
@@ -91,7 +87,7 @@ fun DocumentsScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = White,
+        containerColor = CanvasBackground,
         topBar = {
             TopAppBar(
                 title = {
@@ -99,12 +95,12 @@ fun DocumentsScreen(
                         Text(
                             stringResource(R.string.documents_title),
                             fontWeight = FontWeight.Bold,
-                            color = Black
+                            color = TextPrimary
                         )
                         Text(
                             followUp.title,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Gray600,
+                            color = TextSecondary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -115,14 +111,14 @@ fun DocumentsScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.action_cancel),
-                            tint = Black
+                            tint = SagePrimary
                         )
                     }
                 },
                 actions = {
                     Box {
                         IconButton(onClick = { showAddMenu = true }) {
-                            Icon(Icons.Filled.Add, contentDescription = null, tint = Black)
+                            Icon(Icons.Filled.Add, contentDescription = null, tint = SagePrimary)
                         }
                         DropdownMenu(
                             expanded = showAddMenu,
@@ -152,7 +148,7 @@ fun DocumentsScreen(
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = White)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = CanvasBackground)
             )
         }
     ) { padding ->

@@ -16,12 +16,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
 import com.preappointment1.app.R
 import com.preappointment1.app.ui.components.LpmPrimaryButton
-import com.preappointment1.app.ui.theme.Black
-import com.preappointment1.app.ui.theme.Gray200
-import com.preappointment1.app.ui.theme.Gray500
-import com.preappointment1.app.ui.theme.White
+import com.preappointment1.app.ui.theme.*
 
 @Composable
 fun WelcomeScreen(
@@ -47,7 +45,7 @@ fun WelcomeScreen(
     )
 
     Scaffold(
-        containerColor = White,
+        containerColor = CanvasBackground,
         modifier = modifier
     ) { padding ->
         Column(
@@ -76,13 +74,14 @@ fun WelcomeScreen(
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.ExtraBold,
                         textAlign = TextAlign.Center,
-                        lineHeight = 36.sp,
+                        color = TextPrimary,
+                        lineHeight = 38.sp,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     Text(
                         text = slides[targetSlide].second,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Gray500,
+                        color = TextSecondary,
                         textAlign = TextAlign.Center,
                         lineHeight = 24.sp,
                         modifier = Modifier.padding(horizontal = 16.dp)
@@ -100,9 +99,9 @@ fun WelcomeScreen(
                 repeat(slides.size) { index ->
                     Box(
                         modifier = Modifier
-                            .size(if (currentSlide == index) 10.dp else 8.dp)
+                            .size(if (currentSlide == index) 12.dp else 8.dp)
                             .clip(CircleShape)
-                            .background(if (currentSlide == index) Black else Gray200)
+                            .background(if (currentSlide == index) SagePrimary else MintBadge)
                     )
                 }
             }
@@ -116,7 +115,7 @@ fun WelcomeScreen(
                 Text(
                     text = "By continuing, you accept our Terms of Use & Privacy Policy",
                     fontSize = 12.sp,
-                    color = Gray500,
+                    color = TextMuted,
                     textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
@@ -135,8 +134,8 @@ fun WelcomeScreen(
                     ) {
                         Text(
                             stringResource(R.string.welcome_skip),
-                            color = Gray500,
-                            fontWeight = FontWeight.Medium
+                            color = TextSecondary,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 } else {
@@ -150,8 +149,8 @@ fun WelcomeScreen(
                     ) {
                         Text(
                             stringResource(R.string.welcome_go_home),
-                            color = Gray500,
-                            fontWeight = FontWeight.Medium
+                            color = TextSecondary,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }

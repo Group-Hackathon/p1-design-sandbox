@@ -110,7 +110,7 @@ fun NotificationsScreen(
 
     Scaffold(
         topBar = { LpmTopBar(title = "Notifications", onBack = onBack) },
-        containerColor = White,
+        containerColor = CanvasBackground,
         modifier = modifier
     ) { padding ->
         LazyColumn(

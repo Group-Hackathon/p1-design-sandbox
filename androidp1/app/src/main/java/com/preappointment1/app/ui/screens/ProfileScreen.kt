@@ -38,7 +38,7 @@ fun ProfileScreen(
     val scope = rememberCoroutineScope()
 
     Scaffold(
-        containerColor = White,
+        containerColor = CanvasBackground,
         modifier = modifier
     ) { padding ->
         LazyColumn(
@@ -52,20 +52,20 @@ fun ProfileScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Gray50)
-                        .padding(top = 48.dp, bottom = 32.dp),
+                        .background(MintBadge.copy(alpha = 0.5f))
+                        .padding(top = 40.dp, bottom = 28.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Box(
                         modifier = Modifier
                             .size(80.dp)
                             .clip(CircleShape)
-                            .background(Black),
+                            .background(SagePrimary),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = if (userName.isNotBlank()) userName.take(1).uppercase() else "?",
-                            color = White,
+                            text = if (userName.isNotBlank()) userName.take(1).uppercase() else "S",
+                            color = Color.White,
                             fontSize = 32.sp,
                             fontWeight = FontWeight.ExtraBold
                         )
@@ -74,7 +74,7 @@ fun ProfileScreen(
                     OutlinedTextField(
                         value = userName,
                         onValueChange = { userName = it },
-                        placeholder = { Text("Enter your full name", color = Gray400) },
+                        placeholder = { Text("Enter your full name", color = TextMuted) },
                         modifier = Modifier.fillMaxWidth(0.8f),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -83,9 +83,11 @@ fun ProfileScreen(
                             focusManager.clearFocus()
                         }),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Black,
-                            unfocusedBorderColor = Gray200,
-                            cursorColor = Black
+                            focusedBorderColor = SagePrimary,
+                            unfocusedBorderColor = CardBorderSoft,
+                            cursorColor = SagePrimary,
+                            focusedContainerColor = CardBackground,
+                            unfocusedContainerColor = CardBackground
                         )
                     )
                 }
@@ -157,7 +159,7 @@ private fun SectionTitle(title: String) {
         fontSize = 11.sp,
         fontWeight = FontWeight.Bold,
         letterSpacing = 1.2.sp,
-        color = Gray400,
+        color = SagePrimary,
         modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 8.dp)
     )
 }
@@ -177,16 +179,16 @@ private fun DeviceRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = name, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
-            Text(text = desc, color = Gray500, fontSize = 13.sp)
+            Text(text = name, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = TextPrimary)
+            Text(text = desc, color = TextSecondary, fontSize = 13.sp)
         }
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = White,
-                checkedTrackColor = Black,
-                uncheckedThumbColor = White,
+                checkedThumbColor = Color.White,
+                checkedTrackColor = SagePrimary,
+                uncheckedThumbColor = Color.White,
                 uncheckedTrackColor = Gray200,
                 uncheckedBorderColor = Gray200
             )
@@ -212,25 +214,25 @@ private fun MenuRow(
             text = label,
             fontWeight = FontWeight.Medium,
             fontSize = 15.sp,
-            color = if (isDestructive) Color(0xFFEF4444) else Black,
+            color = if (isDestructive) PainHigh else TextPrimary,
             modifier = Modifier.weight(1f)
         )
         if (value != null) {
             Box(
                 modifier = Modifier
                     .clip(CircleShape)
-                    .background(Gray200)
-                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                    .background(MintBadge)
+                    .padding(horizontal = 10.dp, vertical = 3.dp)
             ) {
                 Text(
                     text = value,
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Gray600
+                    fontWeight = FontWeight.Bold,
+                    color = MintBadgeText
                 )
             }
         }
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = "›", fontSize = 20.sp, color = Gray400)
+        Text(text = "›", fontSize = 20.sp, color = TextMuted)
     }
 }

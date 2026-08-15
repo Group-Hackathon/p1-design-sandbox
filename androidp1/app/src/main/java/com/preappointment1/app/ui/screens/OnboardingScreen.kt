@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,12 +38,7 @@ import com.preappointment1.app.data.model.RecommendRequest
 import com.preappointment1.app.data.model.SubscriptionRequest
 import com.preappointment1.app.data.model.TrackingRulesDto
 import com.preappointment1.app.ui.components.*
-import com.preappointment1.app.ui.theme.Black
-import com.preappointment1.app.ui.theme.Gray200
-import com.preappointment1.app.ui.theme.Gray400
-import com.preappointment1.app.ui.theme.Gray50
-import com.preappointment1.app.ui.theme.Gray600
-import com.preappointment1.app.ui.theme.White
+import com.preappointment1.app.ui.theme.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -313,12 +309,14 @@ private fun DescribeStep(
             value = symptomText,
             onValueChange = onSymptomChange,
             modifier = Modifier.fillMaxWidth().heightIn(min = 160.dp),
-            placeholder = { Text("e.g. knee wound for 3 days, fever at 39°C...", color = Gray600) },
-            shape = RoundedCornerShape(4.dp),
+            placeholder = { Text("e.g. knee wound for 3 days, fever at 39°C...", color = TextMuted) },
+            shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Black,
-                unfocusedBorderColor = Gray200,
-                cursorColor = Black
+                focusedBorderColor = SagePrimary,
+                unfocusedBorderColor = CardBorderSoft,
+                cursorColor = SagePrimary,
+                focusedContainerColor = CardBackground,
+                unfocusedContainerColor = CardBackground
             )
         )
 
@@ -379,7 +377,7 @@ private fun DateStep(
             text = selectedDateLabel,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
-            color = Black
+            color = SagePrimary
         )
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -387,8 +385,8 @@ private fun DateStep(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Gray50, androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
-                .border(1.dp, Gray200, androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                .background(CardBackground, androidx.compose.foundation.shape.RoundedCornerShape(20.dp))
+                .border(1.dp, CardBorderSoft, androidx.compose.foundation.shape.RoundedCornerShape(20.dp))
                 .padding(vertical = 4.dp)
         ) {
             DatePicker(
@@ -400,15 +398,15 @@ private fun DateStep(
                 title = null,
                 headline = null,
                 colors = DatePickerDefaults.colors(
-                    selectedDayContainerColor = Black,
-                    selectedDayContentColor = White,
-                    todayDateBorderColor = Black,
-                    todayContentColor = Black,
-                    containerColor = Gray50,
-                    headlineContentColor = Black,
-                    weekdayContentColor = Gray600,
-                    dayContentColor = Black,
-                    disabledDayContentColor = Gray200
+                    selectedDayContainerColor = SagePrimary,
+                    selectedDayContentColor = Color.White,
+                    todayDateBorderColor = SagePrimary,
+                    todayContentColor = SagePrimary,
+                    containerColor = CardBackground,
+                    headlineContentColor = TextPrimary,
+                    weekdayContentColor = TextSecondary,
+                    dayContentColor = TextPrimary,
+                    disabledDayContentColor = Gray300
                 )
             )
         }
@@ -489,16 +487,16 @@ private fun RuleToggle(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, fontWeight = FontWeight.Bold, color = Black)
-                Text(text = subtitle, style = MaterialTheme.typography.bodySmall, color = Gray600)
+                Text(text = title, fontWeight = FontWeight.Bold, color = TextPrimary)
+                Text(text = subtitle, style = MaterialTheme.typography.bodySmall, color = TextSecondary)
             }
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = White,
-                    checkedTrackColor = Black,
-                    uncheckedThumbColor = White,
+                    checkedThumbColor = Color.White,
+                    checkedTrackColor = SagePrimary,
+                    uncheckedThumbColor = Color.White,
                     uncheckedTrackColor = Gray200,
                     uncheckedBorderColor = Gray200
                 )
@@ -539,9 +537,9 @@ private fun PremiumPreviewStep(
         }
         Spacer(modifier = Modifier.height(12.dp))
         
-        Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black, color = Black)
+        Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black, color = TextPrimary)
         Spacer(modifier = Modifier.height(8.dp))
-        Text("Here is the optimal $durationDays-day tracking program until your appointment.", style = MaterialTheme.typography.bodyMedium, color = Gray600)
+        Text("Here is the optimal $durationDays-day tracking program until your appointment.", style = MaterialTheme.typography.bodyMedium, color = TextSecondary)
         
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -549,18 +547,19 @@ private fun PremiumPreviewStep(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Gray50, RoundedCornerShape(12.dp))
-                .padding(2.dp) // border space
-                .background(White, RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(20.dp))
+                .background(CardBackground)
+                .border(1.dp, CardBorderSoft, RoundedCornerShape(20.dp))
+                .padding(20.dp)
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
+            Column {
                 val lines = planText.split("\n").filter { it.isNotBlank() }
                 lines.forEach { line ->
                     val cleanLine = line.removePrefix("- ").removePrefix("* ")
                     Row(modifier = Modifier.padding(vertical = 4.dp)) {
-                        Text("•", color = Black, fontWeight = FontWeight.Bold)
+                        Text("•", color = SagePrimary, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(cleanLine, color = Gray600, style = MaterialTheme.typography.bodyMedium)
+                        Text(cleanLine, color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }
@@ -574,17 +573,17 @@ private fun PremiumPreviewStep(
                 if (activity != null) BillingManager.launchPurchaseFlow(activity, productId)
             },
             modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Black)
+            shape = RoundedCornerShape(20.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = SagePrimary)
         ) {
             if (isLoading) {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = White, strokeWidth = 2.dp)
+                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
             } else {
                 Text(
                     "Pay $displayPrice via Google Play",
-                    color = White,
+                    color = Color.White,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.Bold
                 )
             }
         }

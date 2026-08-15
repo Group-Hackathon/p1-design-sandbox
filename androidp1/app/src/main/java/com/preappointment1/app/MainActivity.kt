@@ -49,13 +49,9 @@ import com.preappointment1.app.notifications.NotificationDeepLink
 import com.preappointment1.app.notifications.NotificationIntents
 import com.preappointment1.app.notifications.NotificationHelper
 import com.preappointment1.app.notifications.ScheduleReminderManager
+import androidx.compose.material.icons.filled.LocalHospital
 import com.preappointment1.app.ui.screens.*
-import com.preappointment1.app.ui.theme.Black
-import com.preappointment1.app.ui.theme.Gray200
-import com.preappointment1.app.ui.theme.Gray400
-import com.preappointment1.app.ui.theme.Gray500
-import com.preappointment1.app.ui.theme.White
-import com.preappointment1.app.ui.theme.LivingPatientMemoryTheme
+import com.preappointment1.app.ui.theme.*
 import com.preappointment1.app.data.repository.FollowUpRepository
 import com.preappointment1.app.data.repository.TimelineRepository
 import com.preappointment1.app.data.sync.SyncManager
@@ -595,7 +591,11 @@ private fun SplashScreen() {
     }
     LaunchedEffect(Unit) { visible = true }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(CanvasBackground)
+    ) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -606,20 +606,35 @@ private fun SplashScreen() {
                 exit = fadeOut()
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(MintBadge),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocalHospital,
+                            contentDescription = null,
+                            tint = SagePrimary,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = stringResource(R.string.app_name),
-                        fontSize = 72.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = (-2).sp,
-                        color = Black
+                        text = "P1 Health",
+                        fontSize = 36.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = (-1).sp,
+                        color = TextPrimary
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = stringResource(R.string.pre_appointment),
+                        text = "YOUR HEALTH COMPANION",
                         fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
-                        letterSpacing = 3.sp,
-                        color = Gray400
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp,
+                        color = SagePrimary
                     )
                 }
             }

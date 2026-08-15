@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
 import com.preappointment1.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,7 +28,7 @@ fun LpmTopBar(
             Text(
                 text = title,
                 fontWeight = FontWeight.Bold,
-                color = Black
+                color = TextPrimary
             )
         },
         navigationIcon = {
@@ -36,14 +37,14 @@ fun LpmTopBar(
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = Black
+                        tint = SagePrimary
                     )
                 }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = White,
-            titleContentColor = Black
+            containerColor = CanvasBackground,
+            titleContentColor = TextPrimary
         )
     )
 }
@@ -59,12 +60,12 @@ fun LpmStepIndicator(currentStep: Int, totalSteps: Int, modifier: Modifier = Mod
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(4.dp)
+                        .height(6.dp)
                 ) {
                     HorizontalDivider(
                         modifier = Modifier.fillMaxWidth(),
-                        thickness = 4.dp,
-                        color = if (index < currentStep) MedicalBlue else Gray200
+                        thickness = 6.dp,
+                        color = if (index < currentStep) SagePrimary else MintBadge
                     )
                 }
             }
@@ -72,7 +73,7 @@ fun LpmStepIndicator(currentStep: Int, totalSteps: Int, modifier: Modifier = Mod
         Text(
             text = "Step $currentStep of $totalSteps",
             style = MaterialTheme.typography.labelMedium,
-            color = Gray500,
+            color = TextSecondary,
             modifier = Modifier.padding(top = 8.dp)
         )
     }
@@ -90,12 +91,12 @@ fun LpmPrimaryButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(52.dp),
+            .height(54.dp),
         enabled = enabled && !loading,
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Black,
-            contentColor = White,
+            containerColor = SagePrimary,
+            contentColor = Color.White,
             disabledContainerColor = Gray200,
             disabledContentColor = Gray400
         )
@@ -103,11 +104,11 @@ fun LpmPrimaryButton(
         if (loading) {
             CircularProgressIndicator(
                 modifier = Modifier.size(22.dp),
-                color = White,
+                color = Color.White,
                 strokeWidth = 2.dp
             )
         } else {
-            Text(text, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+            Text(text, fontSize = 15.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -123,16 +124,16 @@ fun LpmSecondaryButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(52.dp),
+            .height(54.dp),
         enabled = enabled,
-        shape = RoundedCornerShape(14.dp),
-        border = BorderStroke(1.dp, CardBorder),
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, CardBorderSoft),
         colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = Black,
-            containerColor = White
+            contentColor = TextPrimary,
+            containerColor = CardBackground
         )
     ) {
-        Text(text, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+        Text(text, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -147,17 +148,17 @@ fun LpmCard(
         OutlinedCard(
             onClick = onClick,
             modifier = cardModifier,
-            shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, CardBorder),
-            colors = CardDefaults.outlinedCardColors(containerColor = White),
+            shape = RoundedCornerShape(20.dp),
+            border = BorderStroke(1.dp, CardBorderSoft),
+            colors = CardDefaults.outlinedCardColors(containerColor = CardBackground),
             content = content
         )
     } else {
         OutlinedCard(
             modifier = cardModifier,
-            shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, CardBorder),
-            colors = CardDefaults.outlinedCardColors(containerColor = White),
+            shape = RoundedCornerShape(20.dp),
+            border = BorderStroke(1.dp, CardBorderSoft),
+            colors = CardDefaults.outlinedCardColors(containerColor = CardBackground),
             content = content
         )
     }
@@ -169,7 +170,7 @@ fun LpmSectionTitle(text: String, modifier: Modifier = Modifier) {
         text = text,
         style = MaterialTheme.typography.headlineLarge,
         fontWeight = FontWeight.Bold,
-        color = Black,
+        color = TextPrimary,
         modifier = modifier
     )
 }
@@ -179,7 +180,7 @@ fun LpmBodyText(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodyLarge,
-        color = Gray600,
+        color = TextSecondary,
         modifier = modifier
     )
 }
@@ -190,9 +191,9 @@ fun LpmProgressBar(progress: Float, modifier: Modifier = Modifier) {
         progress = progress.coerceIn(0f, 1f),
         modifier = modifier
             .fillMaxWidth()
-            .height(6.dp),
-        color = MedicalBlue,
-        trackColor = Gray200
+            .height(8.dp),
+        color = SagePrimary,
+        trackColor = MintBadge
     )
 }
 
@@ -214,13 +215,13 @@ fun LpmEmptyState(
             text = title,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = Black
+            color = TextPrimary
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = description,
             style = MaterialTheme.typography.bodyLarge,
-            color = Gray600,
+            color = TextSecondary,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
         Spacer(modifier = Modifier.height(32.dp))
