@@ -140,14 +140,15 @@ The core interactive experience of P1 features a full 3D robot body model that a
 
 ---
 
-## V. Direct APK Download & Installation
+## V. Direct APK Download & GitHub Release
 
-### 📥 Standalone APK Release
+### Official GitHub Release v1.0.0
 You can directly download and install the official build on your Android device:
-- **Download Link**: [Download P1 v1.0 Release APK (Direct Link)](releases/p1-app-release-v1.0.apk)
+- **GitHub Release Page**: [GitHub Release v1.0.0](https://github.com/Group-Hackathon/p1-design-sandbox/releases/tag/v1.0.0)
+- **Direct APK Download**: [Download `p1-app-release-v1.0.apk`](https://github.com/Group-Hackathon/p1-design-sandbox/releases/download/v1.0.0/p1-app-release-v1.0.apk)
 
 ```bash
-# Or install directly via ADB
+# Or install directly via ADB from repo
 adb install -r releases/p1-app-release-v1.0.apk
 ```
 
