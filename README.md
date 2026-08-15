@@ -7,8 +7,9 @@
   <p><em>Prepare crystal-clear, structured clinical briefings for your doctor — in under 2 minutes a day.</em></p>
 
   <p>
-    <img src="https://img.shields.io/badge/Platform-Android_Jetpack_Compose-3DDC84?style=for-the-badge&logo=android&logoColor=white" />
-    <img src="https://img.shields.io/badge/Theme-Stitch_Sage_%26_Mint-2D5A47?style=for-the-badge" />
+    <a href="https://play.google.com/store/apps/details?id=com.preappointment1.app"><img src="https://img.shields.io/badge/Platform-Android_Jetpack_Compose-3DDC84?style=for-the-badge&logo=android&logoColor=white" /></a>
+    <a href="https://p1-website-9fb.pages.dev"><img src="https://img.shields.io/badge/Live_Web_Demo-Cloudflare_Pages-2D524A?style=for-the-badge&logo=cloudflare&logoColor=white" /></a>
+    <a href="https://youtu.be/TLQesJkoKWM"><img src="https://img.shields.io/badge/Video_Demo-YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" /></a>
     <img src="https://img.shields.io/badge/AI-Gemini_Clinical_Synthesis-4285F4?style=for-the-badge&logo=google" />
     <img src="https://img.shields.io/badge/Storage-Offline_First_Room_DB-007ACC?style=for-the-badge" />
   </p>
