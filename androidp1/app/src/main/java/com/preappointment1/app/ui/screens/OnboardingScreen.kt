@@ -237,7 +237,51 @@ fun OnboardingScreen(
                         appointmentDate = appointmentDate,
                         isLoading = isStarting,
                         onConfirm = {
-                            // Handled via Purchase Flow and LaunchedEffect above
+                            isStarting = true
+                            scope.launch {
+                                try {
+                                    if (!AuthHelper.ensureAuthenticated()) throw Exception("Authentication required")
+                                    val profileId = AuthHelper.ensureProfile() ?: throw IllegalStateException("Profile not found")
+                                    val duration = java.time.temporal.ChronoUnit.DAYS.between(LocalDate.now(), appointmentDate).toInt().coerceAtLeast(1)
+                                    val rulesMap = mapOf(
+                                        "temperature" to ruleTemperature,
+                                        "pain" to rulePain,
+                                        "photos" to rulePhotos,
+                                        "smartwatch" to ruleSmartwatch,
+                                        "blood_pressure" to ruleBp
+                                    )
+                                    val effectiveSchedule = generatedSchedule ?: mapOf(
+                                        "08:00" to listOf("pain", "temperature"),
+                                        "20:00" to listOf("pain", "temperature", "photo")
+                                    )
+                                    val params = mutableMapOf<String, Any>(
+                                        "title" to generatedTitle.ifBlank { "Consultation Follow-up" },
+                                        "symptoms" to symptomText,
+                                        "next_appointment" to appointmentDate.format(DateTimeFormatter.ISO_LOCAL_DATE),
+                                        "plan" to generatedPlan,
+                                        "schedule" to effectiveSchedule,
+                                        "rules" to rulesMap
+                                    )
+                                    val response = ApiClient.apiService.createSubscription(
+                                        SubscriptionRequest(
+                                            profile_id = profileId,
+                                            agent_id = "dynamic-plan",
+                                            duration_days = duration,
+                                            parameters = params
+                                        )
+                                    )
+                                    FollowUpRepository.saveFromRemote(response)
+                                    onFollowUpCreated(response.id)
+                                    ScheduleReminderManager.scheduleForFollowUp(
+                                        context, response.id, generatedTitle.ifBlank { "Consultation Follow-up" }, effectiveSchedule
+                                    )
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                    errorMessage = "Unable to activate tracking: ${e.message}"
+                                } finally {
+                                    isStarting = false
+                                }
+                            }
                         },
                         onManualSetup = { step = 6 }
                     )
@@ -573,12 +617,10 @@ private fun PremiumPreviewStep(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Google Play Payment Button
+        // Activate File Button (100% Free Open Access)
         LpmPrimaryButton(
-            text = stringResource(R.string.onboarding_pay, displayPrice),
-            onClick = {
-                if (activity != null) BillingManager.launchPurchaseFlow(activity, productId)
-            },
+            text = stringResource(R.string.onboarding_generate_plan),
+            onClick = onConfirm,
             loading = isLoading
         )
 
