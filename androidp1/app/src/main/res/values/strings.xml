@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">P1</string>
+    <string name="app_name">P1 Sandbox</string>
     <string name="patient_name_placeholder">Patient</string>
     <string name="view_profile">View profile</string>
     <string name="my_trackings">MY FILES</string>

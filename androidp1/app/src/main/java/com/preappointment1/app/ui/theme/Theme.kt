@@ -10,20 +10,20 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val MonochromeColorScheme = lightColorScheme(
-    primary = Black,
+    primary = SagePrimary,
     onPrimary = White,
-    secondary = Gray800,
+    secondary = SageDark,
     onSecondary = White,
-    tertiary = Gray600,
+    tertiary = SageLight,
     onTertiary = White,
-    background = White,
-    onBackground = Black,
-    surface = White,
-    onSurface = Black,
-    surfaceVariant = Gray50,
-    onSurfaceVariant = Gray600,
-    outline = Gray200,
-    outlineVariant = Gray200
+    background = CanvasBackground,
+    onBackground = TextPrimary,
+    surface = CardBackground,
+    onSurface = TextPrimary,
+    surfaceVariant = CanvasBackground,
+    onSurfaceVariant = TextSecondary,
+    outline = CardBorderSoft,
+    outlineVariant = CardBorderSoft
 )
 
 @Composable

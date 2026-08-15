@@ -352,30 +352,86 @@ private fun AppRoot(
                 }
             )
 
-            AppScreen.Home -> Scaffold(
-                topBar = {
-                    MainTopBar(
-                        title = stringResource(R.string.app_name),
-                        onOpenDrawer = { scope.launch { drawerState.open() } },
-                        hasPendingTasks = hasPendingCheckIn,
-                        pendingSyncCount = pendingSyncCount,
-                        isOfflineMode = isOfflineMode,
-                        onOpenNotifications = { screen = AppScreen.Notifications }
-                    )
-                }
-            ) { padding ->
-                DashboardScreen(
-                    followUps = followUps,
-                    timelineByFollowUpId = timelineEventsBySubId,
-                    patientName = SessionManager.getUserName(),
-                    isLoading = followUpsLoading,
-                    onNewFollowUp = { screen = AppScreen.NewFollowUp },
-                    onOpenJourney = { followUp ->
-                        selectedFollowUp = followUp
-                        screen = AppScreen.Journey
+            AppScreen.Home -> {
+                val activeFollowUp = followUps.firstOrNull { it.daysRemaining > 0 } ?: followUps.firstOrNull()
+                val currentUserName = SessionManager.getUserName() ?: "Sarah"
+
+                StitchHomeScreen(
+                    patientName = currentUserName,
+                    activeTab = com.preappointment1.app.ui.components.StitchTab.HOME,
+                    onTabSelected = { tab ->
+                        when (tab) {
+                            com.preappointment1.app.ui.components.StitchTab.HOME -> { /* already on home */ }
+                            com.preappointment1.app.ui.components.StitchTab.TIMELINE -> {
+                                if (activeFollowUp != null) {
+                                    selectedFollowUp = activeFollowUp
+                                    screen = AppScreen.Journey
+                                } else {
+                                    screen = AppScreen.NewFollowUp
+                                }
+                            }
+                            com.preappointment1.app.ui.components.StitchTab.PROGRESS -> {
+                                if (activeFollowUp != null) {
+                                    selectedFollowUp = activeFollowUp
+                                    screen = AppScreen.Report
+                                } else {
+                                    scope.launch { drawerState.open() }
+                                }
+                            }
+                            com.preappointment1.app.ui.components.StitchTab.PREP -> {
+                                screen = AppScreen.Documents
+                            }
+                        }
                     },
-                    onOpenNotifications = { screen = AppScreen.Notifications },
-                    modifier = Modifier.padding(padding)
+                    onOpenSettings = { screen = AppScreen.Notifications },
+                    onOpenAddPhoto = {
+                        if (activeFollowUp != null) {
+                            selectedFollowUp = activeFollowUp
+                            openMeasurementFormOnLaunch = true
+                            screen = AppScreen.Journey
+                        } else {
+                            screen = AppScreen.Documents
+                        }
+                    },
+                    onOpenQuickLog = {
+                        if (activeFollowUp != null) {
+                            selectedFollowUp = activeFollowUp
+                            openMeasurementFormOnLaunch = true
+                            screen = AppScreen.Journey
+                        } else {
+                            screen = AppScreen.NewFollowUp
+                        }
+                    },
+                    onSaveVoiceLog = { transcript, _ ->
+                        scope.launch {
+                            if (activeFollowUp != null) {
+                                TimelineRepository.addEvent(
+                                    subscriptionId = activeFollowUp.id,
+                                    request = com.preappointment1.app.data.model.TimelineEventRequest(
+                                        content = "🎙️ Voice log: $transcript",
+                                        date_label = "Voice Check-in",
+                                        effective_date = java.time.LocalDate.now().toString()
+                                    )
+                                )
+                                refreshKey++
+                            }
+                        }
+                    },
+                    onSentimentSelected = { sentiment ->
+                        scope.launch {
+                            if (activeFollowUp != null) {
+                                TimelineRepository.addEvent(
+                                    subscriptionId = activeFollowUp.id,
+                                    request = com.preappointment1.app.data.model.TimelineEventRequest(
+                                        content = "Mood sentiment: ${sentiment.label}",
+                                        date_label = "Daily Mood",
+                                        effective_date = java.time.LocalDate.now().toString()
+                                    )
+                                )
+                                refreshKey++
+                            }
+                        }
+                    }
                 )
             }
 

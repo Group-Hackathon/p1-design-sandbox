@@ -2,27 +2,42 @@ package com.preappointment1.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Minimalist clinical palette with modern medical accents
-val Black = Color(0xFF0F172A)
-val White = Color(0xFFFFFFFF)
-val SurfaceLight = Color(0xFFF8FAFC)
-val CardBorder = Color(0xFFE2E8F0)
+// Stitch P1 Health Palette
+val SagePrimary = Color(0xFF2D524A)
+val SageDark = Color(0xFF1D3B34)
+val SageLight = Color(0xFF456F65)
+val MintBadge = Color(0xFFE5EFEA)
+val MintBadgeText = Color(0xFF265B4E)
+val CanvasBackground = Color(0xFFF7F9F8)
+val CardBackground = Color(0xFFFFFFFF)
+val CardBorderSoft = Color(0xFFECEFEF)
 
-val Gray50 = Color(0xFFF8FAFC)
-val Gray100 = Color(0xFFF1F5F9)
-val Gray200 = Color(0xFFE2E8F0)
-val Gray300 = Color(0xFFCBD5E1)
-val Gray400 = Color(0xFF94A3B8)
-val Gray500 = Color(0xFF64748B)
-val Gray600 = Color(0xFF475569)
-val Gray800 = Color(0xFF1E293B)
+// Text tokens
+val TextPrimary = Color(0xFF191E1C)
+val TextSecondary = Color(0xFF6B7470)
+val TextMuted = Color(0xFF9AA3A0)
+
+// Legacy compatibility
+val Black = Color(0xFF191E1C)
+val White = Color(0xFFFFFFFF)
+val SurfaceLight = Color(0xFFF7F9F8)
+val CardBorder = Color(0xFFECEFEF)
+
+val Gray50 = Color(0xFFF7F9F8)
+val Gray100 = Color(0xFFEFF2F1)
+val Gray200 = Color(0xFFE2E7E5)
+val Gray300 = Color(0xFFCBD2D0)
+val Gray400 = Color(0xFF9AA3A0)
+val Gray500 = Color(0xFF6B7470)
+val Gray600 = Color(0xFF48514E)
+val Gray800 = Color(0xFF1E2825)
 
 // Medical Accent Colors
-val MedicalBlue = Color(0xFF2563EB)
-val MedicalBlueLight = Color(0xFFEFF6FF)
-val AccentIndigo = Color(0xFF4F46E5)
-val AccentIndigoLight = Color(0xFFEEF2FF)
-val PainLow = Color(0xFF10B981)
-val PainMedium = Color(0xFFF59E0B)
-val PainHigh = Color(0xFFEF4444)
-val PainExtreme = Color(0xFF881337)
+val MedicalBlue = Color(0xFF2D524A)
+val MedicalBlueLight = Color(0xFFE5EFEA)
+val AccentIndigo = Color(0xFF2D524A)
+val AccentIndigoLight = Color(0xFFE5EFEA)
+val PainLow = Color(0xFF2E7D32)
+val PainMedium = Color(0xFFD97706)
+val PainHigh = Color(0xFFDC2626)
+val PainExtreme = Color(0xFF991B1B)
