@@ -52,8 +52,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val deepLink by deepLinkState
-            val hasSeenWelcome = SessionManager.getToken() != null
-            val initialDestination = if (hasSeenWelcome) AppDestination.Home else AppDestination.Welcome
+            val initialDestination = AppDestination.Home
 
             LivingPatientMemoryTheme {
                 Surface(

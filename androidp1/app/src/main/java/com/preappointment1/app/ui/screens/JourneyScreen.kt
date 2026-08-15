@@ -722,7 +722,7 @@ private fun TopInfoCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Status", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = TextPrimary)
+                Text(stringResource(R.string.journey_status), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = TextPrimary)
                 Box(
                     modifier = Modifier
                         .background(MintBadge, RoundedCornerShape(12.dp))
@@ -769,10 +769,10 @@ private fun CentralTimelineEvent(userEvent: TimelineEventResponse, aiEvent: Time
                 TextButton(onClick = {
                     showDeleteConfirm = false
                     onDelete(userEvent.id)
-                }) { Text("Delete", color = Color.Red) }
+                }) { Text(stringResource(R.string.action_delete), color = Color.Red) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") }
+                TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.action_cancel)) }
             }
         )
     }

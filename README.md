@@ -1,7 +1,7 @@
 # 🌿 P1 — Pre-Appointment 1 & Living Patient Memory
 
 <div align="center">
-  <img src="docs/images/p1_logo_v1_sage_hud.jpg" alt="P1 Logo Sage HUD" width="220" style="border-radius: 36px; box-shadow: 0 16px 32px rgba(45, 90, 71, 0.25);" />
+  <img src="logo%20P1%20remix/p1_logo_sage_hud_v1.jpg" alt="P1 Logo Sage HUD" width="220" style="border-radius: 36px; box-shadow: 0 16px 32px rgba(45, 90, 71, 0.25);" />
   
   <h3><strong>Next-Gen AI Pre-Appointment & Clinical Memory Mobile Companion</strong></h3>
   <p><em>Prepare crystal-clear, structured clinical briefings for your doctor — in under 2 minutes a day.</em></p>
@@ -10,31 +10,31 @@
     <img src="https://img.shields.io/badge/Platform-Android_Jetpack_Compose-3DDC84?style=for-the-badge&logo=android&logoColor=white" />
     <img src="https://img.shields.io/badge/Theme-Stitch_Sage_%26_Mint-2D5A47?style=for-the-badge" />
     <img src="https://img.shields.io/badge/AI-Gemini_Clinical_Synthesis-4285F4?style=for-the-badge&logo=google" />
-    <img src="https://img.shields.io/badge/3D_Engine-Filament_Interactive-FF6F00?style=for-the-badge" />
+    <img src="https://img.shields.io/badge/Storage-Offline_First_Room_DB-007ACC?style=for-the-badge" />
   </p>
 </div>
 
 ---
 
-## 🎨 New P1 Logo Redesigns (Sage & Mint Theme)
+## 🎨 New P1 Logo Redesigns (Sage & Mint HUD Palette)
 
-Inspired by the high-tech medical HUD scanner aesthetic, redesigned to perfectly harmonize with the new **Stitch Sage Green (`#2D5A47`)** and **Fresh Mint (`#C4E8D6`)** color palette.
+The app logo has been refined in the **Stitch Sage Green (`#2D5A47`)** and **Fresh Mint (`#C4E8D6`)** color identity, featuring a high-tech medical telemetry and biometric viewfinder aesthetic.
 
 <div align="center">
   <table>
     <tr>
-      <th align="center">✨ Variation 1: Sage HUD Scanner (Primary)</th>
+      <th align="center">✨ Variation 1: Sage HUD Scanner (Primary App Icon)</th>
       <th align="center">⚡ Variation 2: Emerald Precision Badge</th>
     </tr>
     <tr>
       <td align="center">
-        <img src="docs/images/p1_logo_v1_sage_hud.jpg" width="300" style="border-radius: 28px;" />
-        <br />
-        <em>Dynamic italic P1 monogram, glowing mint HUD scanning viewfinder brackets, and real-time biometric vitals rings.</em>
+        <img src="docs/images/p1_logo_v1_sage_hud.jpg" width="280" style="border-radius: 28px;" />
+        <br /><br />
+        <em>Dynamic italic P1 monogram in brushed metal, glowing mint HUD scanning viewfinder brackets, and real-time biometric vitals rings.</em>
       </td>
       <td align="center">
-        <img src="docs/images/p2_logo_v2_emerald_hud.jpg" width="300" style="border-radius: 28px;" onerror="this.src='docs/images/p1_logo_v2_emerald_hud.jpg'" />
-        <br />
+        <img src="docs/images/p1_logo_v2_emerald_hud.jpg" width="280" style="border-radius: 28px;" />
+        <br /><br />
         <em>Beveled metallic titanium badge with deep emerald illumination and clinical telemetry indicators.</em>
       </td>
     </tr>
@@ -43,47 +43,67 @@ Inspired by the high-tech medical HUD scanner aesthetic, redesigned to perfectly
 
 ---
 
-## 📱 Application Overview & Live Screenshots
+## 📱 Complete User Journey & Verified Live Screenshots
 
 <table>
   <tr>
-    <th align="center">🏠 1. Home Screen (Stitch)</th>
-    <th align="center">📊 2. Timeline & 3D Journey</th>
+    <th align="center">🏠 1. Home Screen (Patient 1)</th>
+    <th align="center">🎙️ 2. Voice Check-in Sheet</th>
   </tr>
   <tr>
     <td align="center">
-      <img src="docs/images/screen_home.png" width="320" style="border-radius: 20px; border: 1px solid #E5ECE7;" />
+      <img src="docs/images/screen_home.png" width="300" style="border-radius: 20px; border: 1px solid #E5ECE7;" />
       <br /><br />
-      <strong>Real-time Patient 1 Greeting</strong>
+      <strong>Real-Time Home Hub</strong>
       <br />
-      <em>Micro-sentiment check-in (Better / Same / Worse), one-tap voice logger, and live 7-day wellbeing wave computed from patient entries.</em>
+      <em>Personalized greeting (Patient 1), micro-sentiment buttons (Better / Same / Worse), one-tap voice logger, and active file readiness.</em>
     </td>
     <td align="center">
-      <img src="docs/images/screen_timeline.png" width="320" style="border-radius: 20px; border: 1px solid #E5ECE7;" />
+      <img src="docs/images/screen_voice.png" width="300" style="border-radius: 20px; border: 1px solid #E5ECE7;" />
       <br /><br />
-      <strong>Interactive 3D Body & Chronology</strong>
+      <strong>Hands-Free Speech Logger</strong>
       <br />
-      <em>Rotate and pinpoint symptoms on the 3D mannequin, view scheduled protocol check-ins, and inspect chronological logs.</em>
+      <em>Real-time speech-to-text listener with live transcript preview and direct one-tap commitment to the patient timeline.</em>
     </td>
   </tr>
   <tr>
-    <th align="center">📁 3. Preparation Folder</th>
-    <th align="center">📂 4. Side Navigation Drawer</th>
+    <th align="center">📊 3. Timeline & Chronology</th>
+    <th align="center">📑 4. Official Doctor Briefing</th>
   </tr>
   <tr>
     <td align="center">
-      <img src="docs/images/screen_prep.png" width="320" style="border-radius: 20px; border: 1px solid #E5ECE7;" />
+      <img src="docs/images/screen_timeline.png" width="300" style="border-radius: 20px; border: 1px solid #E5ECE7;" />
+      <br /><br />
+      <strong>Real Patient Data & Countdown</strong>
+      <br />
+      <em>Chronological nodes showing status updates, countdown to next scheduled check-in, quick notes, and 3D body measurements.</em>
+    </td>
+    <td align="center">
+      <img src="docs/images/screen_report.png" width="300" width="300" style="border-radius: 20px; border: 1px solid #E5ECE7;" />
+      <br /><br />
+      <strong>Clinical Synthesis PDF</strong>
+      <br />
+      <em>Automatically generated medical report featuring temperature curves, pain trends, and structured logs ready for consultation.</em>
+    </td>
+  </tr>
+  <tr>
+    <th align="center">📁 5. Preparation Folder</th>
+    <th align="center">📂 6. Side Navigation Drawer</th>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="docs/images/screen_prep.png" width="300" style="border-radius: 20px; border: 1px solid #E5ECE7;" />
       <br /><br />
       <strong>Secure On-Device Storage</strong>
       <br />
-      <em>Store clinical PDF reports, prescription photos, and lab results safely on-device with smart category badges.</em>
+      <em>Consolidated preparation folder for prescriptions, lab PDF results, and symptom photos stored securely on device.</em>
     </td>
     <td align="center">
-      <img src="docs/images/screen_drawer.png" width="320" style="border-radius: 20px; border: 1px solid #E5ECE7;" />
+      <img src="docs/images/screen_drawer.png" width="300" style="border-radius: 20px; border: 1px solid #E5ECE7;" />
       <br /><br />
-      <strong>Files & Reminder Management</strong>
+      <strong>Drawer & Reminder Management</strong>
       <br />
-      <em>Switch between active appointment files, initiate new consultations, and adjust gentle protocol reminder schedules.</em>
+      <em>Full file switcher, new appointment creation flow, and protocol reminder configuration.</em>
     </td>
   </tr>
 </table>
@@ -92,10 +112,9 @@ Inspired by the high-tech medical HUD scanner aesthetic, redesigned to perfectly
 
 ## ⚡ Key Highlights & Architecture
 
-### 🎙️ 1. Intelligent Voice Check-in
-- **Real-Time Speech Recognition**: Speak naturally about how you feel. Uses native on-device Android recognizer with fallback support.
+### 🎙️ 1. Connected Voice Check-in
 - **Direct Timeline Integration**: Voice transcripts are automatically committed to the local `TimelineRepository` and synchronized to the active file.
-- **AI Clinical Extraction**: Gemini parses symptoms, intensity, and chronology in the background.
+- **Smart AI Summaries**: Symptoms and context are extracted without requiring manual form entry.
 
 ### 📈 2. 100% Real Patient Data & Dynamics
 - **Zero Hardcoded Dummy Graphs**: The 7-day wellbeing trend card computes spline curves dynamically from recorded pain scores, vitals, and daily sentiment logs.
@@ -103,9 +122,9 @@ Inspired by the high-tech medical HUD scanner aesthetic, redesigned to perfectly
 
 ### 🌐 3. Full i18n Localization (English & French)
 - Complete semantic string separation in `res/values/strings.xml` and `res/values-fr/strings.xml`.
-- Auto-detects device language to deliver a seamless native experience.
+- Automatically adapts to system locale with zero missing keys.
 
-### 🧩 4. Decoupled Clean Architecture
+### 🧩 4. Clean Modular Architecture
 - **`AppNavigation.kt`**: Modular navigation router handling bottom navigation persistence, deep links, and screen transitions (`Crossfade`).
 - **`LocalRepositories.kt`**: Offline-first Room database repository with background synchronization (`SyncManager`).
 - **`Theme.kt`**: Curated Stitch design tokens (`SagePrimary`, `MintBadge`, `CanvasBackground`, `CardBackground`).

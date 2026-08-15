@@ -11,7 +11,6 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import com.preappointment1.app.R
 import com.preappointment1.app.data.SessionManager
 import com.preappointment1.app.data.model.TimelineEventRequest

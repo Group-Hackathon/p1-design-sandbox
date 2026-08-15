@@ -36,9 +36,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.preappointment1.app.R
 import com.preappointment1.app.ui.theme.*
 import io.github.sceneview.Scene
 import io.github.sceneview.node.ModelNode
@@ -812,10 +814,10 @@ fun CheckInScreen(
                             takePhoto()
                         },
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Black)
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
                     ) {
-                        Text("Take Photo", fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 4.dp))
+                        Text(stringResource(R.string.checkin_take_photo), fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 4.dp))
                     }
 
                     OutlinedButton(
@@ -824,10 +826,10 @@ fun CheckInScreen(
                             galleryLauncher.launch("image/*")
                         },
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Black)
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
                     ) {
-                        Text("Choose from Gallery", fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 4.dp))
+                        Text(stringResource(R.string.checkin_choose_gallery), fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 4.dp))
                     }
                 }
             }

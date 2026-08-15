@@ -21,9 +21,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.preappointment1.app.R
 import com.preappointment1.app.ui.theme.*
 import java.io.File
 import java.text.SimpleDateFormat
@@ -62,7 +64,7 @@ fun MeasurementPhotoCapture(
                     .height(previewHeight.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Camera access is required.", color = Gray400)
+                Text(stringResource(R.string.camera_access_required), color = Gray400)
             }
             Spacer(modifier = Modifier.height(12.dp))
             LpmPrimaryButton(
@@ -70,7 +72,7 @@ fun MeasurementPhotoCapture(
                 onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }
             )
         } else {
-            LpmBodyText("Place the area to track inside the frame.")
+            LpmBodyText(stringResource(R.string.camera_frame_hint))
             Spacer(modifier = Modifier.height(8.dp))
 
             Box(

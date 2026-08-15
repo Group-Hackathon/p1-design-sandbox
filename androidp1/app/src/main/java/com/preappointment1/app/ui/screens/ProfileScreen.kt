@@ -77,9 +77,9 @@ fun ProfileScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = if (userName.isNotBlank()) userName.take(1).uppercase() else "S",
+                            text = if (userName.isNotBlank()) userName.take(2).uppercase() else "P1",
                             color = Color.White,
-                            fontSize = 32.sp,
+                            fontSize = 30.sp,
                             fontWeight = FontWeight.ExtraBold
                         )
                     }
