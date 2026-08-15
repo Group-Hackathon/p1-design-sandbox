@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -15,17 +16,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.preappointment1.app.R
+import com.preappointment1.app.data.model.TimelineEventResponse
 import com.preappointment1.app.ui.theme.*
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun WellBeingTrendCard(
-    statusText: String = "Stable",
-    dataPoints: List<Float> = listOf(0.35f, 0.45f, 0.40f, 0.65f, 0.50f, 0.70f, 0.68f),
+    timelineEvents: List<TimelineEventResponse> = emptyList(),
     modifier: Modifier = Modifier
 ) {
+    val (status, points) = remember(timelineEvents) {
+        computeTrendFromEvents(timelineEvents)
+    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -42,14 +51,14 @@ fun WellBeingTrendCard(
             ) {
                 Column {
                     Text(
-                        text = "Your last 7 days",
+                        text = stringResource(R.string.home_insights_title),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "Overall well-being",
+                        text = stringResource(R.string.home_insights_wellness),
                         fontSize = 13.sp,
                         color = TextSecondary
                     )
@@ -63,7 +72,7 @@ fun WellBeingTrendCard(
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        text = statusText,
+                        text = status,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = MintBadgeText
@@ -75,13 +84,73 @@ fun WellBeingTrendCard(
 
             // Smooth Spline Chart Canvas
             SplineWaveChart(
-                points = dataPoints,
+                points = points,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
             )
         }
     }
+}
+
+private fun computeTrendFromEvents(events: List<TimelineEventResponse>): Pair<String, List<Float>> {
+    if (events.isEmpty()) {
+        return "Getting Started" to listOf(0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f)
+    }
+
+    val today = LocalDate.now()
+    val dayPoints = mutableListOf<Float>()
+
+    for (i in 6 downTo 0) {
+        val targetDate = today.minusDays(i.toLong())
+        val datePrefix = targetDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
+
+        val dayEvents = events.filter { event ->
+            event.created_at.startsWith(datePrefix) || event.effective_at?.startsWith(datePrefix) == true
+        }
+
+        if (dayEvents.isEmpty()) {
+            // Default baseline if no entries on this day
+            val prev = dayPoints.lastOrNull() ?: 0.5f
+            dayPoints.add(prev)
+        } else {
+            // Calculate wellness score (1.0 = best, 0.1 = severe pain/unwell)
+            var scoreSum = 0f
+            var count = 0
+            for (event in dayEvents) {
+                val content = event.content.lowercase()
+                val painMatch = Regex("""pain[:\s]+(\d+)""").find(content)
+                if (painMatch != null) {
+                    val painVal = painMatch.groupValues[1].toFloatOrNull() ?: 0f
+                    // Lower pain = higher wellness (10 pain -> 0.1 score, 0 pain -> 0.95 score)
+                    scoreSum += (10f - painVal.coerceIn(0f, 10f)) / 10f * 0.85f + 0.15f
+                    count++
+                } else if (content.contains("better")) {
+                    scoreSum += 0.85f
+                    count++
+                } else if (content.contains("worse") || content.contains("unwell")) {
+                    scoreSum += 0.25f
+                    count++
+                } else {
+                    scoreSum += 0.65f
+                    count++
+                }
+            }
+            val avg = if (count > 0) (scoreSum / count).coerceIn(0.1f, 1.0f) else 0.5f
+            dayPoints.add(avg)
+        }
+    }
+
+    // Determine status text
+    val first = dayPoints.take(3).average()
+    val last = dayPoints.takeLast(3).average()
+    val status = when {
+        last > first + 0.1 -> "Improving"
+        last < first - 0.1 -> "Needs Attention"
+        else -> "Stable"
+    }
+
+    return status to dayPoints
 }
 
 @Composable
@@ -98,12 +167,10 @@ private fun SplineWaveChart(
 
         val coords = points.mapIndexed { index, normY ->
             val x = index * stepX
-            // Invert Y since 0 is top
             val y = height - (normY * height * 0.75f) - (height * 0.12f)
             Offset(x, y)
         }
 
-        // Build smooth Cubic Bezier Path
         val strokePath = Path().apply {
             moveTo(coords.first().x, coords.first().y)
             for (i in 0 until coords.size - 1) {
@@ -118,7 +185,6 @@ private fun SplineWaveChart(
             }
         }
 
-        // Build filled gradient path
         val fillPath = Path().apply {
             addPath(strokePath)
             lineTo(coords.last().x, height)
@@ -126,41 +192,25 @@ private fun SplineWaveChart(
             close()
         }
 
-        // Draw Fill Gradient
         drawPath(
             path = fillPath,
             brush = Brush.verticalGradient(
                 colors = listOf(
-                    SagePrimary.copy(alpha = 0.20f),
-                    MintBadge.copy(alpha = 0.05f)
+                    SagePrimary.copy(alpha = 0.22f),
+                    MintBadge.copy(alpha = 0.04f)
                 ),
                 startY = 0f,
                 endY = height
             )
         )
 
-        // Draw Smooth Stroke Line
         drawPath(
             path = strokePath,
             color = SagePrimary,
-            style = Stroke(width = 3.5.dp.toPx(), cap = StrokeCap.Round)
+            style = Stroke(
+                width = 3.dp.toPx(),
+                cap = StrokeCap.Round
+            )
         )
-
-        // Draw Dots on points
-        coords.forEachIndexed { idx, point ->
-            // Highlight specific days or all points cleanly
-            if (idx == 0 || idx == 2 || idx == 4 || idx == coords.size - 1) {
-                drawCircle(
-                    color = SagePrimary,
-                    radius = 4.dp.toPx(),
-                    center = point
-                )
-                drawCircle(
-                    color = Color.White,
-                    radius = 2.dp.toPx(),
-                    center = point
-                )
-            }
-        }
     }
 }

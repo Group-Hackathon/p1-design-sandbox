@@ -144,7 +144,7 @@ fun NotificationsScreen(
                         fontWeight = FontWeight.SemiBold
                     )
                     TextButton(onClick = { showEditor = true }) {
-                        Text(stringResource(R.string.menu_edit_schedule), color = Black)
+                        Text(stringResource(R.string.menu_edit_schedule), color = SagePrimary, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -155,7 +155,7 @@ fun NotificationsScreen(
                         Text(
                             text = "No schedule configured.",
                             modifier = Modifier.padding(20.dp),
-                            color = Gray600
+                            color = TextSecondary
                         )
                     }
                 }
@@ -205,21 +205,21 @@ private fun ReminderRow(reminder: com.preappointment1.app.notifications.Schedule
                         text = "Check-in at ${reminder.timeKey}",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Black
+                        color = TextPrimary
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = reminder.displayTime,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
-                        color = Gray600
+                        color = TextSecondary
                     )
                 }
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = reminder.measures,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Gray400
+                    color = TextMuted
                 )
             }
             Switch(
@@ -227,11 +227,11 @@ private fun ReminderRow(reminder: com.preappointment1.app.notifications.Schedule
                 onCheckedChange = {},
                 enabled = false,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = White,
-                    checkedTrackColor = Black,
-                    uncheckedThumbColor = White,
-                    uncheckedTrackColor = Gray200,
-                    uncheckedBorderColor = Gray200
+                    checkedThumbColor = androidx.compose.ui.graphics.Color.White,
+                    checkedTrackColor = SagePrimary,
+                    uncheckedThumbColor = androidx.compose.ui.graphics.Color.White,
+                    uncheckedTrackColor = MintBadge,
+                    uncheckedBorderColor = CardBorderSoft
                 )
             )
         }

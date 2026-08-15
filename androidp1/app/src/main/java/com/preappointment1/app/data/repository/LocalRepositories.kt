@@ -73,6 +73,24 @@ object FollowUpRepository {
         }
     }
 
+    suspend fun getOrCreateActiveFollowUp(): FollowUpUi {
+        val existing = getLocalFollowUps().firstOrNull { it.daysRemaining > 0 } ?: getLocalFollowUps().firstOrNull()
+        if (existing != null) return existing
+
+        val defaultId = "local_${System.currentTimeMillis()}"
+        val entity = com.preappointment1.app.data.local.FollowUpEntity(
+            id = defaultId,
+            profileId = "local_profile",
+            agentId = "default_agent",
+            status = "active",
+            startsAt = java.time.LocalDate.now().toString(),
+            expiresAt = java.time.LocalDate.now().plusDays(14).toString(),
+            parametersJson = "{\"title\":\"Consultation File\",\"rules\":{\"pain\":true,\"photos\":true,\"temperature\":true},\"schedule\":{\"08:00\":[\"pain\",\"temperature\"],\"20:00\":[\"pain\"]}}"
+        )
+        followUpDao.upsert(entity)
+        return entity.entityToFollowUpUi()
+    }
+
     suspend fun getAgentsOrEmpty(): Map<String, AgentResponse> {
         return try {
             ApiClient.apiService.getAgents().associateBy { it.id }

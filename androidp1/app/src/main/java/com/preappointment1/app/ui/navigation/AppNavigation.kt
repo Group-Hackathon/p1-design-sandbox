@@ -1,5 +1,6 @@
 package com.preappointment1.app.ui.navigation
 
+import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.DrawerValue
@@ -7,13 +8,17 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.preappointment1.app.data.SessionManager
+import com.preappointment1.app.data.model.TimelineEventRequest
+import com.preappointment1.app.data.model.TimelineEventResponse
 import com.preappointment1.app.data.repository.FollowUpRepository
 import com.preappointment1.app.data.repository.TimelineRepository
 import com.preappointment1.app.notifications.ScheduleReminderManager
 import com.preappointment1.app.ui.components.*
 import com.preappointment1.app.ui.screens.*
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 enum class AppDestination {
     Welcome,
@@ -32,7 +37,7 @@ fun AppNavigation(
     highlightCheckIn: Boolean = false,
     notificationScheduleKey: String? = null
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
@@ -40,6 +45,7 @@ fun AppNavigation(
     var refreshKey by remember { mutableIntStateOf(0) }
     var selectedFollowUp by remember { mutableStateOf<FollowUpUi?>(null) }
     var followUps by remember { mutableStateOf<List<FollowUpUi>>(emptyList()) }
+    var activeTimelineEvents by remember { mutableStateOf<List<TimelineEventResponse>>(emptyList()) }
 
     var formLaunchPending by remember { mutableStateOf(openMeasurementFormOnLaunch) }
     var checkInHighlightPending by remember { mutableStateOf(highlightCheckIn) }
@@ -48,8 +54,15 @@ fun AppNavigation(
     LaunchedEffect(refreshKey) {
         val (loadedFollowUps, _) = FollowUpRepository.loadFollowUpsWithSync()
         followUps = loadedFollowUps
-        if (selectedFollowUp != null) {
-            selectedFollowUp = followUps.find { it.id == selectedFollowUp?.id }
+        val active = selectedFollowUp?.let { sel -> followUps.find { it.id == sel.id } }
+            ?: followUps.firstOrNull { it.daysRemaining > 0 }
+            ?: followUps.firstOrNull()
+        selectedFollowUp = active
+
+        if (active != null) {
+            try {
+                activeTimelineEvents = TimelineRepository.getEvents(active.id)
+            } catch (_: Exception) {}
         }
         ScheduleReminderManager.rescheduleActiveFollowUps(context, followUps)
     }
@@ -118,18 +131,84 @@ fun AppNavigation(
                     StitchHomeScreen(
                         patientName = SessionManager.getUserName() ?: "Patient 1",
                         followUps = followUps,
+                        timelineEvents = activeTimelineEvents,
+                        onOpenDrawer = { scope.launch { drawerState.open() } },
                         onOpenFollowUp = { followUp ->
                             selectedFollowUp = followUp
                             currentDestination = AppDestination.Journey
                         },
                         onStartNewTracking = { currentDestination = AppDestination.Onboarding },
                         onOpenNotifications = { currentDestination = AppDestination.Notifications },
-                        onOpenProfile = { /* Profile */ },
-                        onVoiceNoteCreated = { refreshKey++ },
-                        onPhotoAdded = { /* Photo added */ },
+                        onOpenSettings = { currentDestination = AppDestination.Notifications },
+                        onOpenProfile = { scope.launch { drawerState.open() } },
+                        onOpenAddPhoto = {
+                            scope.launch {
+                                selectedFollowUp = selectedFollowUp ?: FollowUpRepository.getOrCreateActiveFollowUp()
+                                currentDestination = AppDestination.Documents
+                            }
+                        },
+                        onOpenQuickLog = {
+                            scope.launch {
+                                selectedFollowUp = selectedFollowUp ?: FollowUpRepository.getOrCreateActiveFollowUp()
+                                formLaunchPending = true
+                                currentDestination = AppDestination.Journey
+                            }
+                        },
                         onOpenTimeline = {
-                            selectedFollowUp = followUps.firstOrNull { it.daysRemaining > 0 } ?: followUps.firstOrNull()
-                            currentDestination = AppDestination.Journey
+                            scope.launch {
+                                selectedFollowUp = selectedFollowUp ?: FollowUpRepository.getOrCreateActiveFollowUp()
+                                currentDestination = AppDestination.Journey
+                            }
+                        },
+                        onSaveVoiceLog = { transcript, insight ->
+                            scope.launch {
+                                try {
+                                    val active = selectedFollowUp ?: FollowUpRepository.getOrCreateActiveFollowUp()
+                                    val formattedContent = if (!insight.isNullOrBlank()) {
+                                        "🎙️ Voice Check-in: ${transcript.trim()}\n\n💡 AI Assessment: $insight"
+                                    } else {
+                                        "🎙️ Voice Check-in: ${transcript.trim()}"
+                                    }
+
+                                    TimelineRepository.addEvent(
+                                        subscriptionId = active.id,
+                                        request = TimelineEventRequest(
+                                            content = formattedContent,
+                                            date_label = "Voice Check-in",
+                                            effective_date = LocalDate.now().toString()
+                                        )
+                                    )
+                                    refreshKey++
+                                    Toast.makeText(
+                                        context,
+                                        "Voice check-in saved to your timeline",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+                        },
+                        onSentimentSelected = { sentiment ->
+                            scope.launch {
+                                try {
+                                    val active = selectedFollowUp ?: FollowUpRepository.getOrCreateActiveFollowUp()
+                                    val label = when (sentiment) {
+                                        FeelingSentiment.BETTER -> "Better"
+                                        FeelingSentiment.SAME -> "Stable"
+                                        FeelingSentiment.WORSE -> "Unwell / Worse"
+                                    }
+                                    TimelineRepository.addEvent(
+                                        subscriptionId = active.id,
+                                        request = TimelineEventRequest(
+                                            content = "Daily status: $label",
+                                            date_label = "Well-being",
+                                            effective_date = LocalDate.now().toString()
+                                        )
+                                    )
+                                    refreshKey++
+                                } catch (_: Exception) {}
+                            }
                         },
                         activeTab = StitchTab.HOME,
                         onTabSelected = onTabSelected
@@ -171,6 +250,7 @@ fun AppNavigation(
                             onFollowUpUpdated = { updated ->
                                 selectedFollowUp = updated
                                 followUps = followUps.map { if (it.id == updated.id) updated else it }
+                                refreshKey++
                             },
                             openMeasurementFormOnLaunch = formLaunchPending,
                             onMeasurementFormLaunchHandled = { formLaunchPending = false },

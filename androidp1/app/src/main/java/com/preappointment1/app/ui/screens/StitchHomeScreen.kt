@@ -53,6 +53,7 @@ fun StitchHomeScreen(
     timelineEvents: List<TimelineEventResponse> = emptyList(),
     activeTab: StitchTab = StitchTab.HOME,
     onTabSelected: (StitchTab) -> Unit = {},
+    onOpenDrawer: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
     onOpenProfile: () -> Unit = {},
     onOpenNotifications: () -> Unit = {},
@@ -100,14 +101,14 @@ fun StitchHomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Avatar (Default Patient 1 / P1)
+                // Avatar (Tapping opens the full side navigation drawer)
                 Box(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(CircleShape)
                         .background(MintBadge)
                         .border(1.5.dp, Color.White, CircleShape)
-                        .clickable { onOpenProfile() },
+                        .clickable { onOpenDrawer() },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -502,10 +503,9 @@ fun StitchHomeScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // ── Insights Card: Your last 7 days ──
+            // ── Insights Card: Your last 7 days (Computed from Real Patient Data) ──
             WellBeingTrendCard(
-                statusText = stringResource(R.string.home_insights_stable),
-                dataPoints = listOf(0.35f, 0.45f, 0.40f, 0.65f, 0.50f, 0.70f, 0.68f)
+                timelineEvents = timelineEvents
             )
 
             Spacer(modifier = Modifier.height(16.dp))
