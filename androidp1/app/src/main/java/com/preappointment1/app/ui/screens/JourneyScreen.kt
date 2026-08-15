@@ -717,28 +717,28 @@ private fun TopInfoCard(
     }
 
     LpmCard(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp)) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(18.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Status", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                Text("Status", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = TextPrimary)
                 Box(
                     modifier = Modifier
-                        .background(Gray200, RoundedCornerShape(12.dp))
+                        .background(MintBadge, RoundedCornerShape(12.dp))
                         .padding(horizontal = 12.dp, vertical = 4.dp)
                 ) {
                     Text(
                         if (followUp.isActive) stringResource(R.string.status_ongoing) else stringResource(R.string.status_completed),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Black
+                        color = MintBadgeText
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(stringResource(R.string.next_appt_in_days, followUp.daysRemaining), style = MaterialTheme.typography.bodySmall, color = Gray600)
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(stringResource(R.string.next_appt_in_days, followUp.daysRemaining), style = MaterialTheme.typography.bodySmall, color = TextSecondary)
 
             val actionText = when {
                 dueSlotKey != null -> stringResource(R.string.next_action_now, dueSlotKey)
@@ -746,11 +746,12 @@ private fun TopInfoCard(
                 else -> stringResource(R.string.next_action_done_today)
             }
 
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = actionText,
                 style = MaterialTheme.typography.bodySmall,
-                color = Black,
-                fontWeight = FontWeight.SemiBold
+                color = SagePrimary,
+                fontWeight = FontWeight.Bold
             )
         }
     }
@@ -797,19 +798,29 @@ private fun CentralTimelineEvent(userEvent: TimelineEventResponse, aiEvent: Time
         ) {
             Spacer(modifier = Modifier.weight(0.45f))
             Box(modifier = Modifier.weight(0.1f), contentAlignment = Alignment.Center) {
-                Box(modifier = Modifier.size(10.dp).background(Black, CircleShape))
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .background(SagePrimary, CircleShape)
+                        .border(2.dp, CanvasBackground, CircleShape)
+                )
             }
             Column(
                 modifier = Modifier.weight(0.45f).padding(start = 12.dp, end = 20.dp),
                 horizontalAlignment = Alignment.Start
             ) {
-                Text(if (userTime.isNotEmpty()) "$userDateLabel • $userTime" else userDateLabel, style = MaterialTheme.typography.labelSmall, color = Gray400)
-                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = if (userTime.isNotEmpty()) "$userDateLabel • $userTime" else userDateLabel,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextSecondary,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(modifier = Modifier.height(6.dp))
                 Box(
                     modifier = Modifier
-                        .background(White, RoundedCornerShape(12.dp))
-                        .border(1.dp, Gray200, RoundedCornerShape(12.dp))
-                        .padding(12.dp)
+                        .background(CardBackground, RoundedCornerShape(20.dp))
+                        .border(1.dp, CardBorderSoft, RoundedCornerShape(20.dp))
+                        .padding(14.dp)
                         .combinedClickable(
                             onClick = {},
                             onLongClick = { if (userEvent.type == "user") showDeleteConfirm = true }
@@ -820,13 +831,12 @@ private fun CentralTimelineEvent(userEvent: TimelineEventResponse, aiEvent: Time
             }
         }
 
-        // --- AI EVENT ---
+        // --- AI ASSISTANT / ROBOT EVENT ---
         if (aiEvent != null) {
-            val aiDateLabel = aiEvent.date_label.ifEmpty { "ASSISTANT" }.uppercase()
+            val aiDateLabel = aiEvent.date_label.ifEmpty { "P1 ASSISTANT" }.uppercase()
             val aiTime = formatTime(aiEvent.created_at)
 
-            // Connection line if we want visual link between the two boxes
-            Row(modifier = Modifier.fillMaxWidth().height(16.dp)) {}
+            Spacer(modifier = Modifier.height(12.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -837,19 +847,34 @@ private fun CentralTimelineEvent(userEvent: TimelineEventResponse, aiEvent: Time
                     modifier = Modifier.weight(0.45f).padding(end = 12.dp, start = 20.dp),
                     horizontalAlignment = Alignment.End
                 ) {
-                    Text(if (aiTime.isNotEmpty()) "$aiDateLabel • $aiTime" else aiDateLabel, style = MaterialTheme.typography.labelSmall, color = Gray400)
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = if (aiTime.isNotEmpty()) "$aiDateLabel • $aiTime" else aiDateLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MintBadgeText,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
                     Box(
                         modifier = Modifier
-                            .background(White, RoundedCornerShape(12.dp))
-                            .border(1.dp, Gray200, RoundedCornerShape(12.dp))
-                            .padding(12.dp)
+                            .background(MintBadge.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
+                            .border(1.dp, MintBadge, RoundedCornerShape(20.dp))
+                            .padding(14.dp)
                     ) {
-                        Text(aiEvent.content, style = MaterialTheme.typography.bodySmall, color = Black)
+                        Text(aiEvent.content, style = MaterialTheme.typography.bodySmall, color = TextPrimary, lineHeight = 18.sp)
                     }
                 }
                 Box(modifier = Modifier.weight(0.1f), contentAlignment = Alignment.Center) {
-                    Box(modifier = Modifier.size(10.dp).background(Color(0xFF4CAF50), CircleShape)) // Green dot
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .background(MintBadgeText, CircleShape)
+                            .border(2.dp, CanvasBackground, CircleShape)
+                    )
                 }
                 Spacer(modifier = Modifier.weight(0.45f))
             }
@@ -1109,25 +1134,19 @@ private fun BottomMeasurementBar(
     }
 
     Surface(
-        color = White,
-        shadowElevation = if (highlightPendingCheckIn) 20.dp else 16.dp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(
-                if (highlightPendingCheckIn) {
-                    Modifier.border(2.dp, Black, RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
-                } else {
-                    Modifier
-                }
-            )
+        color = CardBackground,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        shadowElevation = if (highlightPendingCheckIn) 12.dp else 6.dp,
+        border = androidx.compose.foundation.BorderStroke(1.dp, CardBorderSoft),
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             if (highlightPendingCheckIn) {
                 Text(
                     text = stringResource(R.string.notification_checkin_pending),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Black,
+                    color = SagePrimary,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
@@ -1137,27 +1156,27 @@ private fun BottomMeasurementBar(
                         stringResource(R.string.bottom_starter_title),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Black
+                        color = TextPrimary
                     )
                     if (previewText.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             stringResource(R.string.bottom_checkin_will_ask, previewText),
                             style = MaterialTheme.typography.bodySmall,
-                            color = Gray600
+                            color = TextSecondary
                         )
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Button(
                         onClick = onStartRoutine,
-                        modifier = Modifier.fillMaxWidth().height(48.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Black)
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = SagePrimary)
                     ) {
                         Text(
                             stringResource(R.string.btn_start_baseline),
-                            color = White,
-                            fontWeight = FontWeight.SemiBold
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
@@ -1166,27 +1185,27 @@ private fun BottomMeasurementBar(
                         stringResource(R.string.bottom_checkin_now_title, dueSlot.timeKey),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Black
+                        color = TextPrimary
                     )
                     if (previewText.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             stringResource(R.string.bottom_checkin_will_ask, previewText),
                             style = MaterialTheme.typography.bodySmall,
-                            color = Gray600
+                            color = TextSecondary
                         )
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Button(
                         onClick = onStartRoutine,
-                        modifier = Modifier.fillMaxWidth().height(48.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Black)
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = SagePrimary)
                     ) {
                         Text(
                             stringResource(R.string.btn_fill_measurements, dueSlot.timeKey),
-                            color = White,
-                            fontWeight = FontWeight.SemiBold
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
@@ -1195,14 +1214,14 @@ private fun BottomMeasurementBar(
                         stringResource(R.string.bottom_next_measurement_at, nextSlot.timeKey),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Black
+                        color = TextPrimary
                     )
                     if (previewText.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             stringResource(R.string.bottom_next_measurement_prepare, previewText),
                             style = MaterialTheme.typography.bodySmall,
-                            color = Gray600
+                            color = TextSecondary
                         )
                     }
                     if (countdownText.isNotEmpty()) {
@@ -1210,8 +1229,8 @@ private fun BottomMeasurementBar(
                         Text(
                             stringResource(R.string.bottom_countdown, countdownText),
                             style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Black
+                            fontWeight = FontWeight.Bold,
+                            color = SagePrimary
                         )
                     }
                 }
@@ -1219,13 +1238,13 @@ private fun BottomMeasurementBar(
                     Text(
                         stringResource(R.string.next_action_done_today),
                         style = MaterialTheme.typography.bodySmall,
-                        color = Gray600
+                        color = TextSecondary
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-            HorizontalDivider(color = Gray200)
+            HorizontalDivider(color = CardBorderSoft)
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(
@@ -1233,7 +1252,7 @@ private fun BottomMeasurementBar(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 JourneyQuickAction(
-                    icon = { Icon(Icons.Outlined.Edit, contentDescription = null, tint = Black, modifier = Modifier.size(22.dp)) },
+                    icon = { Icon(Icons.Outlined.Edit, contentDescription = null, tint = SagePrimary, modifier = Modifier.size(22.dp)) },
                     label = stringResource(R.string.quick_action_note),
                     onClick = onAddNote
                 )
@@ -1242,18 +1261,13 @@ private fun BottomMeasurementBar(
                         Icon(
                             painter = painterResource(R.drawable.ic_body_mannequin),
                             contentDescription = null,
-                            tint = Black,
+                            tint = SagePrimary,
                             modifier = Modifier.size(22.dp)
                         )
                     },
                     label = stringResource(R.string.quick_action_extra),
                     onClick = onExtraMeasurement,
                     enabled = !showMeasurementButton
-                )
-                JourneyQuickAction(
-                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null, tint = Black, modifier = Modifier.size(22.dp)) },
-                    label = stringResource(R.string.quick_action_report),
-                    onClick = onOpenReport
                 )
             }
         }

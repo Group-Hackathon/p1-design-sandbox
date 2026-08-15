@@ -33,10 +33,9 @@ private const val RUNG_MAX_WIDTH = 0.330f
 
 private const val BULB_RADIUS = 0.147f * GADGET_SCALE
 
-// Greyscale levels — the whole HUD stays black & white. The scene light runs at
-// 180k lux, so an idle grey has to be very low to still read as "off".
-private val ACTIVE = floatArrayOf(1.0f, 1.0f, 1.0f)
-private val IDLE = floatArrayOf(0.035f, 0.035f, 0.035f)
+// Sage & Mint levels for 3D instruments
+private val ACTIVE = floatArrayOf(0.40f, 0.85f, 0.70f)
+private val IDLE = floatArrayOf(0.08f, 0.12f, 0.11f)
 
 private fun ModelNode.tint(rgb: FloatArray, alpha: Float = 1.0f) {
     modelInstance?.materialInstances?.forEach { material ->

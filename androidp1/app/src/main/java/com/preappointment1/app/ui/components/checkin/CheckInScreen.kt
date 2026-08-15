@@ -321,7 +321,7 @@ fun CheckInScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xE6000000))
+            .background(Color(0xF0121C1A))
             .onGloballyPositioned { coords ->
                 val pos = coords.positionInWindow()
                 rootWindowOffset = Offset(pos.x, pos.y)
@@ -697,7 +697,7 @@ fun CheckInScreen(
                     }
                 }
 
-                // Selected Zone Badges (Pure Monochrome)
+                // Selected Zone Badges (Mint Badge Theme)
                 if (zoneLabels.isNotEmpty() || photoFilename != null) {
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
@@ -710,13 +710,13 @@ fun CheckInScreen(
                                 modifier = Modifier
                                     .padding(2.dp)
                                     .clip(RoundedCornerShape(10.dp))
-                                    .background(White)
+                                    .background(MintBadge)
                                     .padding(horizontal = 10.dp, vertical = 5.dp)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
                                         label,
-                                        color = Black,
+                                        color = MintBadgeText,
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -725,7 +725,7 @@ fun CheckInScreen(
                                         Icon(
                                             imageVector = Icons.Default.Close,
                                             contentDescription = "Remove",
-                                            tint = Black,
+                                            tint = MintBadgeText,
                                             modifier = Modifier
                                                 .size(12.dp)
                                                 .clickable {
@@ -740,13 +740,13 @@ fun CheckInScreen(
                     }
                 }
 
-                // Save Action Button — frosted glass
+                // Save Action Button — Sage Primary capsule
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White)
+                        .height(54.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SagePrimary)
                         .clickable {
                             val finalQualities = PAIN_QUALITIES
                                 .filter { qualities.contains(it) }
@@ -770,7 +770,7 @@ fun CheckInScreen(
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            tint = Color.Black,
+                            tint = Color.White,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(10.dp))
@@ -779,7 +779,7 @@ fun CheckInScreen(
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 2.sp,
-                            color = Color.Black
+                            color = Color.White
                         )
                     }
                 }
