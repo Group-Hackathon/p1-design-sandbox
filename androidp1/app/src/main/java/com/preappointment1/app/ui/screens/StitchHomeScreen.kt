@@ -181,67 +181,8 @@ fun StitchHomeScreen(
                 lineHeight = 38.sp
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = stringResource(R.string.home_feeling_question),
-                fontSize = 15.sp,
-                color = TextSecondary,
-                fontWeight = FontWeight.Normal
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── Sentiment Selector Row (Better / Same / Worse) ──
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                FeelingSentiment.values().forEach { sentiment ->
-                    val isSelected = selectedSentiment == sentiment
-                    val label = when (sentiment) {
-                        FeelingSentiment.BETTER -> stringResource(R.string.sentiment_better)
-                        FeelingSentiment.SAME -> stringResource(R.string.sentiment_same)
-                        FeelingSentiment.WORSE -> stringResource(R.string.sentiment_worse)
-                    }
-                    val interactionSource = remember { MutableInteractionSource() }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(52.dp)
-                            .shadow(
-                                elevation = if (isSelected) 3.dp else 1.dp,
-                                shape = RoundedCornerShape(16.dp),
-                                spotColor = SagePrimary.copy(alpha = 0.12f)
-                            )
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(if (isSelected) CardBackground else CardBackground.copy(alpha = 0.85f))
-                            .border(
-                                width = if (isSelected) 1.5.dp else 1.dp,
-                                color = if (isSelected) SagePrimary.copy(alpha = 0.7f) else CardBorderSoft,
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                            .clickable(
-                                interactionSource = interactionSource,
-                                indication = null
-                            ) {
-                                selectedSentiment = sentiment
-                                onSentimentSelected(sentiment)
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = label,
-                            fontSize = 15.sp,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSelected) TextPrimary else TextSecondary
-                        )
-                    }
-                }
-            }
-
             Spacer(modifier = Modifier.height(24.dp))
+
 
             // ── Primary Hero Button (Voice Action) ──
             Box(
@@ -507,17 +448,11 @@ fun StitchHomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // ── Insights Card: Your last 7 days (Computed from Real Patient Data) ──
-            WellBeingTrendCard(
-                timelineEvents = timelineEvents
-            )
-
             Spacer(modifier = Modifier.height(16.dp))
         }
 
         // ── Voice Sheet Dialog ──
+
         if (showVoiceSheet) {
             VoiceLogSheet(
                 onDismiss = { showVoiceSheet = false },
