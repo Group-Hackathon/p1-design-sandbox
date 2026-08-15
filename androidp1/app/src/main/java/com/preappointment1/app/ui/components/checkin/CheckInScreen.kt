@@ -169,6 +169,7 @@ private fun StepperButton(glyph: String, onClick: () -> Unit) {
 @Composable
 fun CheckInScreen(
     submitLabel: String,
+    initialPhotoMode: Boolean = false,
     onClose: (() -> Unit)? = null,
     onSubmit: (
         level: Int,
@@ -197,7 +198,7 @@ fun CheckInScreen(
     var showCameraSheet by remember { mutableStateOf(false) }
     var photoFilename by remember { mutableStateOf<String?>(null) }
     var photoEntries by remember { mutableStateOf<List<PhotoEntry>>(emptyList()) }
-    var photoMode by remember { mutableStateOf(false) }
+    var photoMode by remember { mutableStateOf(initialPhotoMode) }
     var frameOffsetX by remember { mutableFloatStateOf(0f) }
     var frameOffsetY by remember { mutableFloatStateOf(0f) }
     var cameraUri by remember { mutableStateOf<Uri?>(null) }

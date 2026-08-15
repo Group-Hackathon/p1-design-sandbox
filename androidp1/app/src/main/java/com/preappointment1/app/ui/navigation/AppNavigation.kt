@@ -53,11 +53,13 @@ fun AppNavigation(
     var activeTimelineEvents by remember { mutableStateOf<List<TimelineEventResponse>>(emptyList()) }
 
     var formLaunchPending by remember { mutableStateOf(openMeasurementFormOnLaunch) }
+    var photoModePending by remember { mutableStateOf(false) }
     var checkInHighlightPending by remember { mutableStateOf(highlightCheckIn) }
     var scheduleKeyPending by remember { mutableStateOf(notificationScheduleKey) }
 
     fun clearPendingFlags() {
         formLaunchPending = false
+        photoModePending = false
         checkInHighlightPending = false
         scheduleKeyPending = null
     }
@@ -200,13 +202,16 @@ fun AppNavigation(
                         onOpenAddPhoto = {
                             scope.launch {
                                 selectedFollowUp = selectedFollowUp ?: FollowUpRepository.getOrCreateActiveFollowUp()
-                                navigateTo(AppDestination.Documents)
+                                formLaunchPending = true
+                                photoModePending = true
+                                navigateTo(AppDestination.Journey)
                             }
                         },
                         onOpenQuickLog = {
                             scope.launch {
                                 selectedFollowUp = selectedFollowUp ?: FollowUpRepository.getOrCreateActiveFollowUp()
                                 formLaunchPending = true
+                                photoModePending = false
                                 navigateTo(AppDestination.Journey)
                             }
                         },
@@ -305,6 +310,8 @@ fun AppNavigation(
                             },
                             openMeasurementFormOnLaunch = formLaunchPending,
                             onMeasurementFormLaunchHandled = { formLaunchPending = false },
+                            openPhotoModeOnLaunch = photoModePending,
+                            onPhotoModeLaunchHandled = { photoModePending = false },
                             highlightPendingCheckIn = checkInHighlightPending,
                             onHighlightCheckInHandled = { checkInHighlightPending = false },
                             notificationScheduleKey = scheduleKeyPending,

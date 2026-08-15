@@ -102,6 +102,8 @@ fun JourneyScreen(
     onFollowUpUpdated: ((FollowUpUi) -> Unit)? = null,
     openMeasurementFormOnLaunch: Boolean = false,
     onMeasurementFormLaunchHandled: () -> Unit = {},
+    openPhotoModeOnLaunch: Boolean = false,
+    onPhotoModeLaunchHandled: () -> Unit = {},
     highlightPendingCheckIn: Boolean = false,
     onHighlightCheckInHandled: () -> Unit = {},
     notificationScheduleKey: String? = null,
@@ -121,6 +123,7 @@ fun JourneyScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     var isFormMode by remember { mutableStateOf(false) }
+    var isPhotoModeActiveInForm by remember { mutableStateOf(false) }
     var formEffectiveDate by remember { mutableStateOf<LocalDate?>(null) }
     var formLabelOverride by remember { mutableStateOf<String?>(null) }
     var formStepsOverride by remember { mutableStateOf<List<MeasurementStep>?>(null) }
@@ -186,8 +189,20 @@ fun JourneyScreen(
     val nextWindowName = nextSlot?.timeKey?.let { stringResource(R.string.check_in_at, it) }
         ?: stringResource(R.string.next_check_in)
 
-    LaunchedEffect(openMeasurementFormOnLaunch, isLoading, showMeasurementButton, showStarterCheckIn, notificationScheduleKey) {
+    LaunchedEffect(openMeasurementFormOnLaunch, openPhotoModeOnLaunch, isLoading, showMeasurementButton, showStarterCheckIn, notificationScheduleKey) {
         if (!openMeasurementFormOnLaunch || isLoading) return@LaunchedEffect
+
+        if (openPhotoModeOnLaunch) {
+            formEffectiveDate = null
+            formLabelOverride = "Photo Check-in"
+            formStepsOverride = listOf(MeasurementStep.Pain, MeasurementStep.Temperature, MeasurementStep.Photo)
+            formScheduleKeyOverride = null
+            isPhotoModeActiveInForm = true
+            isFormMode = true
+            onPhotoModeLaunchHandled()
+            onMeasurementFormLaunchHandled()
+            return@LaunchedEffect
+        }
 
         val notifiedKey = notificationScheduleKey?.takeIf { schedule.containsKey(it) }
         val openFromNotification = notifiedKey != null &&
@@ -199,6 +214,7 @@ fun JourneyScreen(
                 formLabelOverride = null
                 formStepsOverride = null
                 formScheduleKeyOverride = notifiedKey
+                isPhotoModeActiveInForm = false
                 isFormMode = true
                 onHighlightCheckInHandled()
             }
@@ -207,6 +223,7 @@ fun JourneyScreen(
                 formLabelOverride = if (showStarterCheckIn) measurementContext.formLabelOverride else null
                 formStepsOverride = if (showStarterCheckIn) measurementContext.formStepsOverride else null
                 formScheduleKeyOverride = null
+                isPhotoModeActiveInForm = false
                 isFormMode = true
                 onHighlightCheckInHandled()
             }
@@ -538,14 +555,17 @@ fun JourneyScreen(
                 effectiveDate = formEffectiveDate,
                 labelOverride = formLabelOverride,
                 stepsOverride = formStepsOverride,
+                initialPhotoMode = isPhotoModeActiveInForm,
                 onClose = {
                     isFormMode = false
+                    isPhotoModeActiveInForm = false
                     formLabelOverride = null
                     formStepsOverride = null
-                        formScheduleKeyOverride = null
-                    },
-                    onSubmitted = {
-                        isFormMode = false
+                    formScheduleKeyOverride = null
+                },
+                onSubmitted = {
+                    isFormMode = false
+                    isPhotoModeActiveInForm = false
                         formLabelOverride = null
                         formStepsOverride = null
                         formScheduleKeyOverride = null
@@ -1399,6 +1419,7 @@ private fun FocusModeForm(
     effectiveDate: LocalDate? = null,
     labelOverride: String? = null,
     stepsOverride: List<MeasurementStep>? = null,
+    initialPhotoMode: Boolean = false,
     onClose: () -> Unit,
     onSubmitted: () -> Unit
 ) {
@@ -1458,6 +1479,7 @@ private fun FocusModeForm(
             } else {
                 com.preappointment1.app.ui.components.checkin.CheckInScreen(
                     submitLabel = stringResource(R.string.action_save),
+                    initialPhotoMode = initialPhotoMode,
                     onClose = onClose,
                     onSubmit = { level, temp, zoneIds, zoneLabels, qualities, mobility, pattern ->
                         isSending = true
