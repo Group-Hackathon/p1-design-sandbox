@@ -109,7 +109,7 @@ fun NotificationsScreen(
     }
 
     Scaffold(
-        topBar = { LpmTopBar(title = "Notifications", onBack = onBack) },
+        topBar = { LpmTopBar(title = stringResource(R.string.reminders_title), onBack = onBack) },
         containerColor = CanvasBackground,
         modifier = modifier
     ) { padding ->
@@ -124,10 +124,9 @@ fun NotificationsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 LpmBodyText(
                     if (activeFollowUp != null) {
-                        "Gentle reminders to keep building your file for ${activeFollowUp.title}. " +
-                            "Edit times here or from the file menu."
+                        stringResource(R.string.reminders_body_file, activeFollowUp.title)
                     } else {
-                        "Default times apply when you prepare a new appointment file."
+                        stringResource(R.string.reminders_body_defaults)
                     }
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -137,7 +136,7 @@ fun NotificationsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "PROTOCOL REMINDERS",
+                        text = stringResource(R.string.reminders_section_header),
                         style = MaterialTheme.typography.labelMedium,
                         color = Gray400,
                         letterSpacing = 1.5.sp,
@@ -153,7 +152,7 @@ fun NotificationsScreen(
                 item {
                     LpmCard {
                         Text(
-                            text = "No schedule configured.",
+                            text = stringResource(R.string.reminders_empty),
                             modifier = Modifier.padding(20.dp),
                             color = TextSecondary
                         )
@@ -169,7 +168,11 @@ fun NotificationsScreen(
             item {
                 Spacer(modifier = Modifier.height(16.dp))
                 LpmSecondaryButton(
-                    text = if (testSent) "Test notification sent" else "Send a test notification",
+                    text = if (testSent) {
+                        stringResource(R.string.reminders_test_sent)
+                    } else {
+                        stringResource(R.string.reminders_test_send)
+                    },
                     onClick = { requestTestNotification() },
                     enabled = !testSent
                 )
@@ -183,8 +186,8 @@ private fun sendTestNotification(context: android.content.Context, onSent: () ->
     NotificationHelper.createNotificationChannel(context)
     NotificationScheduler.scheduleRoutineReminder(
         context = context,
-        title = "P1 — Time for your check-in",
-        message = "About 90 seconds to add today's entries to your file.",
+        title = context.getString(R.string.reminders_test_title),
+        message = context.getString(R.string.reminders_test_message),
         delayMinutes = 0
     )
     onSent()
@@ -202,7 +205,7 @@ private fun ReminderRow(reminder: com.preappointment1.app.notifications.Schedule
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Check-in at ${reminder.timeKey}",
+                        text = stringResource(R.string.reminders_checkin_at, reminder.timeKey),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary

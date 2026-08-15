@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Brand & Common -->
-    <string name="app_name">P1 Sandbox</string>
+    <string name="app_name">P1 Health</string>
     <string name="brand_title">P1 Health</string>
-    <string name="patient_name_placeholder">Patient</string>
-    <string name="view_profile">View profile</string>
-    <string name="profile_title">Profile</string>
     <string name="my_trackings">MY FILES</string>
     <string name="start_new_tracking">Prepare a new appointment</string>
-    <string name="pre_appointment">PRE-APPOINTMENT 1</string>
     <string name="action_confirm">Confirm</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_delete">Delete</string>
@@ -17,12 +13,12 @@
     <string name="action_continue">Continue</string>
     <string name="action_go_back">Go back</string>
     <string name="action_open">Open</string>
+    <string name="action_ok">OK</string>
 
-    <!-- Navigation Tabs -->
-    <string name="nav_home">Home</string>
-    <string name="nav_timeline">Timeline</string>
-    <string name="nav_progress">Progress</string>
-    <string name="nav_prep">Prep</string>
+    <!-- Profile & Settings -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_name_placeholder">Enter your full name</string>
+    <string name="profile_export_coming_soon">Coming soon</string>
 
     <!-- Stitch Home Screen -->
     <string name="home_greeting_morning">Good morning,\n%1$s.</string>
@@ -43,7 +39,6 @@
     <string name="home_open_timeline">Open Timeline</string>
     <string name="home_empty_prep_title">Start an appointment file</string>
     <string name="home_empty_prep_subtitle">Prepare a clear summary for your doctor</string>
-
     <!-- Dashboard Compatibility -->
     <string name="dashboard_empty_title">Nothing to prepare yet</string>
     <string name="dashboard_empty_body">When you have an upcoming appointment, start here. We\'ll help you build a clear file for your doctor — a few minutes a day.</string>
@@ -68,6 +63,9 @@
     <string name="voice_open_system_recognizer">Open system voice recognizer</string>
     <string name="voice_input_placeholder">Your words will appear here in real time as you speak (or type here directly)…</string>
     <string name="voice_save_to_file">Save to File</string>
+    <string name="voice_event_plain">Voice Check-in: %1$s</string>
+    <string name="voice_event_with_ai">Voice Check-in: %1$s\n\nAI Assessment: %2$s</string>
+    <string name="voice_saved_toast">Voice check-in saved to your timeline</string>
 
     <!-- Welcome Slides -->
     <string name="welcome_slide_1_title">Never forget what to tell your doctor</string>
@@ -80,6 +78,33 @@
     <string name="welcome_skip">Skip — go to home</string>
     <string name="welcome_start">Prepare my next appointment</string>
     <string name="welcome_go_home">Go to home</string>
+    <string name="welcome_terms">By continuing, you accept our Terms of Use &amp; Privacy Policy</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title_new_file">New File</string>
+    <string name="onboarding_title_manual_setup">Manual Setup</string>
+    <string name="onboarding_track_question">What is your appointment about?</string>
+    <string name="onboarding_step1_body">Describe your situation in a few sentences.</string>
+    <string name="onboarding_step1_placeholder">e.g. knee wound for 3 days, fever at 39°C...</string>
+    <string name="onboarding_step2_body">Select the exact date of your next medical checkup.</string>
+    <string name="onboarding_step3_body">Choose the health metrics you want to monitor.</string>
+    <string name="onboarding_rules_title">Your daily check-ins</string>
+    <string name="onboarding_generate_plan">Prepare my file</string>
+    <string name="onboarding_premium_badge">Analyzed from thousands of medical records</string>
+    <string name="onboarding_premium_duration">Here is the optimal %1$d-day check-in plan until your appointment.</string>
+    <string name="onboarding_pay">Pay %1$s via Google Play</string>
+    <string name="onboarding_manual_free">Or set up my file manually for free</string>
+    <string name="onboarding_manual_entry_title">Manual Setup</string>
+    <string name="onboarding_manual_entry_body">Set your daily check-in times for the next %1$d days until your appointment.</string>
+    <string name="onboarding_tracking_name">File name</string>
+    <string name="onboarding_slot_morning">Morning — 08:00</string>
+    <string name="onboarding_slot_noon">Noon — 12:00</string>
+    <string name="onboarding_slot_evening">Evening — 20:00</string>
+    <string name="onboarding_create_free">Create my file</string>
+    <string name="onboarding_offline_title">Connection Unavailable</string>
+    <string name="onboarding_offline_body">We cannot analyze your symptoms at the moment to propose your check-in plan.</string>
+    <string name="onboarding_retry">Try again</string>
+    <string name="onboarding_manual_proceed">Proceed with manual setup</string>
 
     <!-- Timeline & Journey -->
     <string name="summary_appt_date">Appt date</string>
@@ -124,20 +149,27 @@
     <string name="note_sheet_desc">Anything you want them to know — symptoms, context, questions. Added to your file.</string>
     <string name="note_sheet_placeholder">I want my doctor to know…</string>
     <string name="note_sheet_send">Add to file</string>
+    <string name="note_added_snackbar">Added to your file. Assistant replies when you\'re back online.</string>
     <string name="extra_picker_title">Add an extra measurement</string>
-    <string name="extra_picker_desc">Choose one measurement from your protocol.</string>
+    <string name="extra_picker_desc">Choose one measurement from your check-in plan.</string>
+    <string name="schedule_editor_title">Check-in schedule</string>
+    <string name="schedule_editor_subtitle">Tap a time to adjust when reminders and check-ins open.</string>
+    <string name="schedule_editor_edit_time">Edit time</string>
+    <string name="schedule_editor_save">Save schedule</string>
+    <string name="schedule_editor_change_time">Change time for %1$s</string>
 
     <!-- Doctor Briefing / Report -->
     <string name="report_title">Doctor Briefing</string>
     <string name="report_generating">Compiling your clinical briefing…</string>
     <string name="report_file_title">Official Briefing File</string>
     <string name="report_file_subtitle">Synthesized data &amp; symptom trends ready for your doctor</string>
-    <string name="report_save_to_prep">Save to Prep</string>
+    <string name="report_save_to_prep">Save to Folder</string>
     <string name="report_saving">Saving…</string>
     <string name="report_share_pdf">Share PDF</string>
     <string name="report_saved_to_folder">Saved to your preparation folder</string>
     <string name="report_save_failed">Could not save to folder</string>
     <string name="report_share_chooser_title">Share Doctor Briefing</string>
+    <string name="report_doc_title">Doctor Briefing — %1$s</string>
 
     <!-- Preparation / Documents Folder -->
     <string name="documents_title">Preparation Folder</string>
@@ -159,19 +191,30 @@
     <string name="documents_source_pdf">PDF</string>
     <string name="documents_source_other">File</string>
 
-    <!-- Daily Routine & Measurements -->
-    <string name="routine_step_pain">Pain Assessment</string>
-    <string name="routine_step_vitals">Vitals Check-in</string>
-    <string name="routine_completed_title">Routine Completed</string>
-    <string name="routine_completed_desc">Today\'s data has been securely saved to your timeline file.</string>
+    <!-- Measurements -->
     <string name="measurement_type_pain">Pain level</string>
     <string name="measurement_type_temperature">Temperature</string>
     <string name="measurement_type_photo">Photo</string>
-    <string name="schedule_editor_title">Check-in schedule</string>
+    <string name="journey_status">Status</string>
+    <string name="checkin_take_photo">Take Photo</string>
+    <string name="checkin_choose_gallery">Choose from Gallery</string>
+    <string name="camera_access_required">Camera access is required.</string>
+    <string name="camera_frame_hint">Place the area to track inside the frame.</string>
 
-    <!-- Notifications & Offline -->
+    <!-- Notifications & Reminders -->
+    <string name="reminders_title">Reminders</string>
+    <string name="reminders_body_file">Gentle reminders to keep building your file for %1$s. Edit times here or from the file menu.</string>
+    <string name="reminders_body_defaults">Default times apply when you prepare a new appointment file.</string>
+    <string name="reminders_section_header">CHECK-IN REMINDERS</string>
+    <string name="reminders_empty">No schedule configured.</string>
+    <string name="reminders_test_send">Send a test notification</string>
+    <string name="reminders_test_sent">Test notification sent</string>
+    <string name="reminders_test_title">P1 — Time for your check-in</string>
+    <string name="reminders_test_message">About 90 seconds to add today\'s entries to your file.</string>
+    <string name="reminders_checkin_at">Check-in at %1$s</string>
+    <string name="drawer_reminder_settings">Reminders</string>
     <string name="notifications_edit_defaults">Edit default times</string>
-    <string name="notifications_edit_protocol">Edit protocol times</string>
+    <string name="notifications_edit_protocol">Edit check-in times</string>
     <string name="notification_checkin_pending">Your check-in is waiting — about 2 minutes</string>
     <string name="notification_checkin_already_done">Already recorded for today. See you at the next check-in.</string>
     <string name="focus_form_header">Today\'s check-in</string>

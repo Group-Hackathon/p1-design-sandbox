@@ -113,7 +113,7 @@ fun WelcomeScreen(
             ) {
                 val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
                 Text(
-                    text = "By continuing, you accept our Terms of Use & Privacy Policy",
+                    text = stringResource(R.string.welcome_terms),
                     fontSize = 12.sp,
                     color = TextMuted,
                     textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,

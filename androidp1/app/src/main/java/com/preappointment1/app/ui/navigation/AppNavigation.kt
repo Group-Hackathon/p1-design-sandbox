@@ -1,7 +1,9 @@
 package com.preappointment1.app.ui.navigation
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
@@ -9,6 +11,8 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.preappointment1.app.R
 import com.preappointment1.app.data.SessionManager
 import com.preappointment1.app.data.model.TimelineEventRequest
 import com.preappointment1.app.data.model.TimelineEventResponse
@@ -27,7 +31,8 @@ enum class AppDestination {
     Journey,
     Notifications,
     Report,
-    Documents
+    Documents,
+    Profile
 }
 
 @Composable
@@ -41,6 +46,7 @@ fun AppNavigation(
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
+    val backStack = remember { mutableStateListOf(initialScreen) }
     var currentDestination by remember { mutableStateOf(initialScreen) }
     var refreshKey by remember { mutableIntStateOf(0) }
     var selectedFollowUp by remember { mutableStateOf<FollowUpUi?>(null) }
@@ -50,6 +56,47 @@ fun AppNavigation(
     var formLaunchPending by remember { mutableStateOf(openMeasurementFormOnLaunch) }
     var checkInHighlightPending by remember { mutableStateOf(highlightCheckIn) }
     var scheduleKeyPending by remember { mutableStateOf(notificationScheduleKey) }
+
+    fun clearPendingFlags() {
+        formLaunchPending = false
+        checkInHighlightPending = false
+        scheduleKeyPending = null
+    }
+
+    // Root-level navigation: replace the whole stack (used for bottom tabs,
+    // drawer selection, welcome/onboarding transitions).
+    fun switchTab(destination: AppDestination) {
+        backStack.clear()
+        if (destination != AppDestination.Home) {
+            backStack.add(AppDestination.Home)
+        }
+        backStack.add(destination)
+        if (destination != AppDestination.Journey) {
+            clearPendingFlags()
+        }
+        currentDestination = destination
+    }
+
+    // Forward navigation: push onto the back stack.
+    fun navigateTo(destination: AppDestination) {
+        backStack.add(destination)
+        currentDestination = destination
+    }
+
+    fun popBack() {
+        if (backStack.size > 1) {
+            val leaving = backStack.removeAt(backStack.lastIndex)
+            if (leaving == AppDestination.Journey) {
+                clearPendingFlags()
+            }
+            currentDestination = backStack.last()
+        }
+    }
+
+    // System back button walks the stack; at the root the system default applies.
+    BackHandler(enabled = backStack.size > 1) {
+        popBack()
+    }
 
     LaunchedEffect(refreshKey) {
         val (loadedFollowUps, _) = FollowUpRepository.loadFollowUpsWithSync()
@@ -67,26 +114,37 @@ fun AppNavigation(
         ScheduleReminderManager.rescheduleActiveFollowUps(context, followUps)
     }
 
+    // Screens that require a selected file redirect to Home when none is available.
+    LaunchedEffect(currentDestination, selectedFollowUp) {
+        if (selectedFollowUp == null &&
+            (currentDestination == AppDestination.Journey ||
+                currentDestination == AppDestination.Report ||
+                currentDestination == AppDestination.Documents)
+        ) {
+            switchTab(AppDestination.Home)
+        }
+    }
+
     val onTabSelected: (StitchTab) -> Unit = { tab ->
         when (tab) {
-            StitchTab.HOME -> currentDestination = AppDestination.Home
+            StitchTab.HOME -> switchTab(AppDestination.Home)
             StitchTab.TIMELINE -> {
                 if (selectedFollowUp == null) {
                     selectedFollowUp = followUps.firstOrNull { it.daysRemaining > 0 } ?: followUps.firstOrNull()
                 }
-                currentDestination = AppDestination.Journey
+                switchTab(AppDestination.Journey)
             }
             StitchTab.PROGRESS -> {
                 if (selectedFollowUp == null) {
                     selectedFollowUp = followUps.firstOrNull { it.daysRemaining > 0 } ?: followUps.firstOrNull()
                 }
-                currentDestination = AppDestination.Report
+                switchTab(AppDestination.Report)
             }
             StitchTab.PREP -> {
                 if (selectedFollowUp == null) {
                     selectedFollowUp = followUps.firstOrNull { it.daysRemaining > 0 } ?: followUps.firstOrNull()
                 }
-                currentDestination = AppDestination.Documents
+                switchTab(AppDestination.Documents)
             }
         }
     }
@@ -99,15 +157,15 @@ fun AppNavigation(
                 selectedFollowUpId = selectedFollowUp?.id,
                 onSelectFollowUp = { followUp ->
                     selectedFollowUp = followUp
-                    currentDestination = AppDestination.Journey
+                    switchTab(AppDestination.Journey)
                     scope.launch { drawerState.close() }
                 },
                 onStartNewTracking = {
-                    currentDestination = AppDestination.Onboarding
+                    navigateTo(AppDestination.Onboarding)
                     scope.launch { drawerState.close() }
                 },
                 onOpenNotifications = {
-                    currentDestination = AppDestination.Notifications
+                    navigateTo(AppDestination.Notifications)
                     scope.launch { drawerState.close() }
                 },
                 onClose = { scope.launch { drawerState.close() } }
@@ -122,8 +180,8 @@ fun AppNavigation(
             when (destination) {
                 AppDestination.Welcome -> {
                     WelcomeScreen(
-                        onStartTracking = { currentDestination = AppDestination.Onboarding },
-                        onGoToHome = { currentDestination = AppDestination.Home }
+                        onStartTracking = { navigateTo(AppDestination.Onboarding) },
+                        onGoToHome = { switchTab(AppDestination.Home) }
                     )
                 }
 
@@ -135,29 +193,28 @@ fun AppNavigation(
                         onOpenDrawer = { scope.launch { drawerState.open() } },
                         onOpenFollowUp = { followUp ->
                             selectedFollowUp = followUp
-                            currentDestination = AppDestination.Journey
                         },
-                        onStartNewTracking = { currentDestination = AppDestination.Onboarding },
-                        onOpenNotifications = { currentDestination = AppDestination.Notifications },
-                        onOpenSettings = { currentDestination = AppDestination.Notifications },
+                        onStartNewTracking = { navigateTo(AppDestination.Onboarding) },
+                        onOpenNotifications = { navigateTo(AppDestination.Notifications) },
+                        onOpenSettings = { navigateTo(AppDestination.Profile) },
                         onOpenProfile = { scope.launch { drawerState.open() } },
                         onOpenAddPhoto = {
                             scope.launch {
                                 selectedFollowUp = selectedFollowUp ?: FollowUpRepository.getOrCreateActiveFollowUp()
-                                currentDestination = AppDestination.Documents
+                                navigateTo(AppDestination.Documents)
                             }
                         },
                         onOpenQuickLog = {
                             scope.launch {
                                 selectedFollowUp = selectedFollowUp ?: FollowUpRepository.getOrCreateActiveFollowUp()
                                 formLaunchPending = true
-                                currentDestination = AppDestination.Journey
+                                navigateTo(AppDestination.Journey)
                             }
                         },
                         onOpenTimeline = {
                             scope.launch {
                                 selectedFollowUp = selectedFollowUp ?: FollowUpRepository.getOrCreateActiveFollowUp()
-                                currentDestination = AppDestination.Journey
+                                navigateTo(AppDestination.Journey)
                             }
                         },
                         onSaveVoiceLog = { transcript, insight ->
@@ -165,9 +222,9 @@ fun AppNavigation(
                                 try {
                                     val active = selectedFollowUp ?: FollowUpRepository.getOrCreateActiveFollowUp()
                                     val formattedContent = if (!insight.isNullOrBlank()) {
-                                        "🎙️ Voice Check-in: ${transcript.trim()}\n\n💡 AI Assessment: $insight"
+                                        context.getString(R.string.voice_event_with_ai, transcript.trim(), insight)
                                     } else {
-                                        "🎙️ Voice Check-in: ${transcript.trim()}"
+                                        context.getString(R.string.voice_event_plain, transcript.trim())
                                     }
 
                                     TimelineRepository.addEvent(
@@ -181,7 +238,7 @@ fun AppNavigation(
                                     refreshKey++
                                     Toast.makeText(
                                         context,
-                                        "Voice check-in saved to your timeline",
+                                        context.getString(R.string.voice_saved_toast),
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 } catch (e: Exception) {
@@ -217,14 +274,14 @@ fun AppNavigation(
 
                 AppDestination.Onboarding -> {
                     OnboardingScreen(
-                        onBack = { currentDestination = AppDestination.Home },
+                        onBack = { switchTab(AppDestination.Home) },
                         onFollowUpCreated = { newFollowUpId ->
                             refreshKey++
                             scope.launch {
                                 val (loaded, _) = FollowUpRepository.loadFollowUpsWithSync()
                                 followUps = loaded
                                 selectedFollowUp = followUps.find { it.id == newFollowUpId }
-                                currentDestination = AppDestination.Journey
+                                switchTab(AppDestination.Journey)
                             }
                         }
                     )
@@ -233,20 +290,15 @@ fun AppNavigation(
                 AppDestination.Journey -> {
                     val followUp = selectedFollowUp
                     if (followUp == null) {
-                        currentDestination = AppDestination.Home
+                        // Redirect handled by the LaunchedEffect guard above.
+                        Spacer(modifier = Modifier.fillMaxSize())
                     } else {
                         JourneyScreen(
                             followUp = followUp,
-                            onBack = {
-                                refreshKey++
-                                formLaunchPending = false
-                                checkInHighlightPending = false
-                                scheduleKeyPending = null
-                                currentDestination = AppDestination.Home
-                            },
+                            onBack = { popBack() },
                             onOpenDrawer = { scope.launch { drawerState.open() } },
-                            onOpenReport = { currentDestination = AppDestination.Report },
-                            onOpenDocuments = { currentDestination = AppDestination.Documents },
+                            onOpenReport = { navigateTo(AppDestination.Report) },
+                            onOpenDocuments = { navigateTo(AppDestination.Documents) },
                             onFollowUpUpdated = { updated ->
                                 selectedFollowUp = updated
                                 followUps = followUps.map { if (it.id == updated.id) updated else it }
@@ -269,7 +321,7 @@ fun AppNavigation(
                         .maxByOrNull { it.startsAt }
                     NotificationsScreen(
                         activeFollowUp = activeFollowUp,
-                        onBack = { currentDestination = AppDestination.Home },
+                        onBack = { popBack() },
                         onScheduleUpdated = { refreshKey++ }
                     )
                 }
@@ -277,11 +329,12 @@ fun AppNavigation(
                 AppDestination.Report -> {
                     val followUp = selectedFollowUp
                     if (followUp == null) {
-                        currentDestination = AppDestination.Home
+                        // Redirect handled by the LaunchedEffect guard above.
+                        Spacer(modifier = Modifier.fillMaxSize())
                     } else {
                         ReportScreen(
                             followUp = followUp,
-                            onBack = { currentDestination = AppDestination.Home },
+                            onBack = { popBack() },
                             activeTab = StitchTab.PROGRESS,
                             onTabSelected = onTabSelected
                         )
@@ -291,15 +344,26 @@ fun AppNavigation(
                 AppDestination.Documents -> {
                     val followUp = selectedFollowUp
                     if (followUp == null) {
-                        currentDestination = AppDestination.Home
+                        // Redirect handled by the LaunchedEffect guard above.
+                        Spacer(modifier = Modifier.fillMaxSize())
                     } else {
                         DocumentsScreen(
                             followUp = followUp,
-                            onBack = { currentDestination = AppDestination.Home },
+                            onBack = { popBack() },
                             activeTab = StitchTab.PREP,
                             onTabSelected = onTabSelected
                         )
                     }
+                }
+
+                AppDestination.Profile -> {
+                    ProfileScreen(
+                        onBack = { popBack() },
+                        onLogout = {
+                            refreshKey++
+                            switchTab(AppDestination.Welcome)
+                        }
+                    )
                 }
             }
         }

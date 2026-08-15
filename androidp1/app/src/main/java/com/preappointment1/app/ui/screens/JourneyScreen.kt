@@ -518,7 +518,7 @@ fun JourneyScreen(
                     showNoteSheet = false
                     coroutineScope.launch {
                         snackbarHostState.showSnackbar(
-                            "Added to your file. Assistant replies when you're back online."
+                            appContext.getString(R.string.note_added_snackbar)
                         )
                         SyncManager.scheduleSync(appContext)
                     }
@@ -1166,18 +1166,10 @@ private fun BottomMeasurementBar(
                         )
                     }
                     Spacer(modifier = Modifier.height(12.dp))
-                    Button(
-                        onClick = onStartRoutine,
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = SagePrimary)
-                    ) {
-                        Text(
-                            stringResource(R.string.btn_start_baseline),
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    LpmPrimaryButton(
+                        text = stringResource(R.string.btn_start_baseline),
+                        onClick = onStartRoutine
+                    )
                 }
                 showMeasurementButton && dueSlot != null -> {
                     Text(
@@ -1195,18 +1187,10 @@ private fun BottomMeasurementBar(
                         )
                     }
                     Spacer(modifier = Modifier.height(12.dp))
-                    Button(
-                        onClick = onStartRoutine,
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = SagePrimary)
-                    ) {
-                        Text(
-                            stringResource(R.string.btn_fill_measurements, dueSlot.timeKey),
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    LpmPrimaryButton(
+                        text = stringResource(R.string.btn_fill_measurements, dueSlot.timeKey),
+                        onClick = onStartRoutine
+                    )
                 }
                 nextSlot != null -> {
                     Text(
@@ -1316,32 +1300,32 @@ private fun NoteBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = White
+        containerColor = CardBackground
     ) {
         Column(modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp)) {
             Text(
                 stringResource(R.string.note_sheet_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = Black
+                color = TextPrimary
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 stringResource(R.string.note_sheet_desc),
                 style = MaterialTheme.typography.bodySmall,
-                color = Gray600
+                color = TextSecondary
             )
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = text,
                 onValueChange = { text = it },
-                placeholder = { Text(stringResource(R.string.note_sheet_placeholder), color = Gray400) },
+                placeholder = { Text(stringResource(R.string.note_sheet_placeholder), color = TextMuted) },
                 modifier = Modifier.fillMaxWidth().heightIn(min = 120.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Gray200,
-                    unfocusedBorderColor = Gray200,
-                    cursorColor = Black
+                    focusedBorderColor = SagePrimary,
+                    unfocusedBorderColor = CardBorderSoft,
+                    cursorColor = SagePrimary
                 )
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -1380,35 +1364,28 @@ private fun ExtraMeasurementPickerSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = White
+        containerColor = CardBackground
     ) {
         Column(modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp)) {
             Text(
                 stringResource(R.string.extra_picker_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = Black
+                color = TextPrimary
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 stringResource(R.string.extra_picker_desc),
                 style = MaterialTheme.typography.bodySmall,
-                color = Gray600
+                color = TextSecondary
             )
             Spacer(modifier = Modifier.height(16.dp))
             availableSteps.forEach { step ->
-                OutlinedButton(
+                LpmSecondaryButton(
+                    text = stringResource(measurementStepLabel(step)),
                     onClick = { onSelect(step) },
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Black)
-                ) {
-                    Text(
-                        stringResource(measurementStepLabel(step)),
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
-                }
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
             }
         }
     }

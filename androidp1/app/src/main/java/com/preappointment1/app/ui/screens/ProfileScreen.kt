@@ -1,5 +1,6 @@
 package com.preappointment1.app.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -20,12 +23,15 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.KeyboardActions
 import kotlinx.coroutines.launch
+import com.preappointment1.app.R
 import com.preappointment1.app.ui.components.LpmCard
+import com.preappointment1.app.ui.components.LpmTopBar
 import com.preappointment1.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
+    onBack: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -36,9 +42,16 @@ fun ProfileScreen(
     var userName by remember { mutableStateOf(com.preappointment1.app.data.SessionManager.getUserName() ?: "") }
     val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     Scaffold(
         containerColor = CanvasBackground,
+        topBar = {
+            LpmTopBar(
+                title = stringResource(R.string.profile_title),
+                onBack = onBack
+            )
+        },
         modifier = modifier
     ) { padding ->
         LazyColumn(
@@ -74,7 +87,7 @@ fun ProfileScreen(
                     OutlinedTextField(
                         value = userName,
                         onValueChange = { userName = it },
-                        placeholder = { Text("Enter your full name", color = TextMuted) },
+                        placeholder = { Text(stringResource(R.string.profile_name_placeholder), color = TextMuted) },
                         modifier = Modifier.fillMaxWidth(0.8f),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -123,8 +136,12 @@ fun ProfileScreen(
 
             item {
                 SectionTitle("PREFERENCES")
-                MenuRow(label = "Temperature unit", value = "°C")
-                MenuRow(label = "Reminder times", value = "9am, 7pm")
+                MenuRow(label = "Temperature unit", value = "°C", onClick = {
+                    Toast.makeText(context, context.getString(R.string.profile_export_coming_soon), Toast.LENGTH_SHORT).show()
+                })
+                MenuRow(label = "Reminder times", onClick = {
+                    Toast.makeText(context, context.getString(R.string.profile_export_coming_soon), Toast.LENGTH_SHORT).show()
+                })
             }
 
             item {
@@ -133,7 +150,9 @@ fun ProfileScreen(
                 MenuRow(label = "Terms of Use & Privacy Policy", onClick = {
                     uriHandler.openUri("https://p1-privacy-policy.pages.dev/")
                 })
-                MenuRow(label = "Export my data")
+                MenuRow(label = "Export my data", onClick = {
+                    Toast.makeText(context, context.getString(R.string.profile_export_coming_soon), Toast.LENGTH_SHORT).show()
+                })
                 MenuRow(label = "Sign out", isDestructive = false, onClick = {
                     com.preappointment1.app.data.SessionManager.clearSession()
                     onLogout()

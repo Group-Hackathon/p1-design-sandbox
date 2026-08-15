@@ -185,7 +185,7 @@ fun LpmAppDrawer(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Reminder Settings", fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.drawer_reminder_settings), fontWeight = FontWeight.SemiBold)
             }
         }
     }

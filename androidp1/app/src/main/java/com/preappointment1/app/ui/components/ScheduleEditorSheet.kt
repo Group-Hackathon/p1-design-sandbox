@@ -7,8 +7,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.preappointment1.app.R
 import com.preappointment1.app.schedule.ScheduleLogic
 import com.preappointment1.app.schedule.ScheduleSlot
 import com.preappointment1.app.ui.theme.*
@@ -38,7 +40,7 @@ fun ScheduleEditorSheet(
         )
         AlertDialog(
             onDismissRequest = { editingSlot = null },
-            title = { Text("Change time for ${slot.timeKey}", fontWeight = FontWeight.Bold, color = TextPrimary) },
+            title = { Text(stringResource(R.string.schedule_editor_change_time, slot.timeKey), fontWeight = FontWeight.Bold, color = TextPrimary) },
             text = { TimePicker(state = pickerState) },
             confirmButton = {
                 TextButton(
@@ -47,10 +49,10 @@ fun ScheduleEditorSheet(
                         editedSchedule = ScheduleLogic.replaceSlotTime(editedSchedule, slot.timeKey, newTime)
                         editingSlot = null
                     }
-                ) { Text("OK", color = SagePrimary, fontWeight = FontWeight.Bold) }
+                ) { Text(stringResource(R.string.action_ok), color = SagePrimary, fontWeight = FontWeight.Bold) }
             },
             dismissButton = {
-                TextButton(onClick = { editingSlot = null }) { Text("Cancel", color = TextSecondary) }
+                TextButton(onClick = { editingSlot = null }) { Text(stringResource(R.string.action_cancel), color = TextSecondary) }
             }
         )
     }
@@ -68,7 +70,7 @@ fun ScheduleEditorSheet(
         ) {
             Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = TextPrimary)
             Spacer(modifier = Modifier.height(6.dp))
-            LpmBodyText("Tap a time to adjust when reminders and check-ins open.")
+            LpmBodyText(stringResource(R.string.schedule_editor_subtitle))
             Spacer(modifier = Modifier.height(18.dp))
 
             LazyColumn(
@@ -97,7 +99,7 @@ fun ScheduleEditorSheet(
                                 )
                             }
                             TextButton(onClick = { editingSlot = slot }) {
-                                Text("Edit time", color = SagePrimary, fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.schedule_editor_edit_time), color = SagePrimary, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -106,7 +108,7 @@ fun ScheduleEditorSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
             LpmPrimaryButton(
-                text = "Save schedule",
+                text = stringResource(R.string.schedule_editor_save),
                 loading = isSaving,
                 onClick = { onSave(editedSchedule) }
             )

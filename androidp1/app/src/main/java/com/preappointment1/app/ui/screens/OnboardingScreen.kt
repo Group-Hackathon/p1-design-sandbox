@@ -20,8 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import com.preappointment1.app.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.alpha
@@ -134,7 +136,11 @@ fun OnboardingScreen(
     Scaffold(
         topBar = { 
             LpmTopBar(
-                title = if (step == 6) "Manual Setup" else "New Tracking", 
+                title = if (step == 6) {
+                    stringResource(R.string.onboarding_title_manual_setup)
+                } else {
+                    stringResource(R.string.onboarding_title_new_file)
+                }, 
                 onBack = { 
                     if (step > 1 && step != 4 && step != 5 && step != 6) step-- 
                     else if (step == 5 || step == 6) step = 3
@@ -300,16 +306,16 @@ private fun DescribeStep(
     onNext: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        LpmSectionTitle("What would you like to track?")
+        LpmSectionTitle(stringResource(R.string.onboarding_track_question))
         Spacer(modifier = Modifier.height(8.dp))
-        LpmBodyText("Describe your situation in a few sentences.")
+        LpmBodyText(stringResource(R.string.onboarding_step1_body))
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = symptomText,
             onValueChange = onSymptomChange,
             modifier = Modifier.fillMaxWidth().heightIn(min = 160.dp),
-            placeholder = { Text("e.g. knee wound for 3 days, fever at 39°C...", color = TextMuted) },
+            placeholder = { Text(stringResource(R.string.onboarding_step1_placeholder), color = TextMuted) },
             shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = SagePrimary,
@@ -322,7 +328,7 @@ private fun DescribeStep(
 
         Spacer(modifier = Modifier.weight(1f))
         LpmPrimaryButton(
-            text = "Continue",
+            text = stringResource(R.string.action_continue),
             onClick = onNext,
             enabled = symptomText.isNotBlank()
         )
@@ -370,7 +376,7 @@ private fun DateStep(
     ) {
         LpmSectionTitle("When is your appointment?")
         Spacer(modifier = Modifier.height(8.dp))
-        LpmBodyText("Select the exact date of your next medical checkup.")
+        LpmBodyText(stringResource(R.string.onboarding_step2_body))
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
@@ -412,7 +418,7 @@ private fun DateStep(
         }
 
         Spacer(modifier = Modifier.height(20.dp))
-        LpmPrimaryButton(text = "Continue", onClick = onNext)
+        LpmPrimaryButton(text = stringResource(R.string.action_continue), onClick = onNext)
         Spacer(modifier = Modifier.height(24.dp))
     }
 }
@@ -428,9 +434,9 @@ private fun RulesStep(
     onGeneratePlan: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        LpmSectionTitle("Your tracking rules")
+        LpmSectionTitle(stringResource(R.string.onboarding_rules_title))
         Spacer(modifier = Modifier.height(8.dp))
-        LpmBodyText("Choose the health metrics you want to monitor.")
+        LpmBodyText(stringResource(R.string.onboarding_step3_body))
         Spacer(modifier = Modifier.height(24.dp))
 
         RuleToggle("Temperature", "Manual entries", ruleTemperature, onRuleTemperatureChange)
@@ -441,7 +447,7 @@ private fun RulesStep(
 
         Spacer(modifier = Modifier.height(32.dp))
         LpmPrimaryButton(
-            text = "Prepare my protocol",
+            text = stringResource(R.string.onboarding_generate_plan),
             onClick = onGeneratePlan,
             loading = isLoading
         )
@@ -533,13 +539,13 @@ private fun PremiumPreviewStep(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.Check, contentDescription = "Analyzed", tint = Color(0xFF4CAF50), modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Analyzed from thousands of medical records", style = MaterialTheme.typography.labelMedium, color = Gray600, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.onboarding_premium_badge), style = MaterialTheme.typography.labelMedium, color = Gray600, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(12.dp))
         
         Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black, color = TextPrimary)
         Spacer(modifier = Modifier.height(8.dp))
-        Text("Here is the optimal $durationDays-day tracking program until your appointment.", style = MaterialTheme.typography.bodyMedium, color = TextSecondary)
+        Text(stringResource(R.string.onboarding_premium_duration, durationDays), style = MaterialTheme.typography.bodyMedium, color = TextSecondary)
         
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -568,31 +574,19 @@ private fun PremiumPreviewStep(
         Spacer(modifier = Modifier.height(32.dp))
 
         // Google Play Payment Button
-        Button(
+        LpmPrimaryButton(
+            text = stringResource(R.string.onboarding_pay, displayPrice),
             onClick = {
                 if (activity != null) BillingManager.launchPurchaseFlow(activity, productId)
             },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(20.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = SagePrimary)
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
-            } else {
-                Text(
-                    "Pay $displayPrice via Google Play",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
+            loading = isLoading
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Manual Opt-out
         Text(
-            text = "Or create my planning manually for free",
+            text = stringResource(R.string.onboarding_manual_free),
             style = MaterialTheme.typography.labelLarge,
             color = Gray400,
             textAlign = TextAlign.Center,
@@ -615,39 +609,34 @@ private fun OfflineFallbackStep(
         Icon(Icons.Filled.Warning, contentDescription = "Offline", tint = Color(0xFFFFA726), modifier = Modifier.size(64.dp))
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            "Connection Unavailable",
+            stringResource(R.string.onboarding_offline_title),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
-            color = Black,
+            color = TextPrimary,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            "We cannot analyze your symptoms at the moment to propose the optimal tracking protocol.",
+            stringResource(R.string.onboarding_offline_body),
             style = MaterialTheme.typography.bodyMedium,
-            color = Gray600,
+            color = TextSecondary,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 24.dp)
         )
         
         Spacer(modifier = Modifier.height(40.dp))
         
-        OutlinedButton(
+        LpmSecondaryButton(
+            text = stringResource(R.string.onboarding_retry),
             onClick = onRetry,
-            modifier = Modifier.fillMaxWidth().height(50.dp),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Text("Try again", color = Black, fontWeight = FontWeight.Bold)
-        }
+            modifier = Modifier.padding(horizontal = 24.dp)
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(
+        LpmPrimaryButton(
+            text = stringResource(R.string.onboarding_manual_proceed),
             onClick = onManualSetup,
-            modifier = Modifier.fillMaxWidth().height(50.dp),
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Black)
-        ) {
-            Text("Proceed with manual setup", color = White, fontWeight = FontWeight.Bold)
-        }
+            modifier = Modifier.padding(horizontal = 24.dp)
+        )
     }
 }
 
@@ -676,12 +665,12 @@ private fun ManualEntryStep(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        Text("Manual Tracking Setup", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black, color = Black)
+        Text(stringResource(R.string.onboarding_manual_entry_title), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black, color = TextPrimary)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            "Set your daily check-in times for the next $durationDays days until your appointment.",
+            stringResource(R.string.onboarding_manual_entry_body, durationDays),
             style = MaterialTheme.typography.bodyMedium,
-            color = Gray600
+            color = TextSecondary
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -689,7 +678,7 @@ private fun ManualEntryStep(
         OutlinedTextField(
             value = trackingTitle,
             onValueChange = { trackingTitle = it },
-            label = { Text("Tracking name") },
+            label = { Text(stringResource(R.string.onboarding_tracking_name)) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -698,7 +687,7 @@ private fun ManualEntryStep(
 
         LpmCard(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Morning — 08:00", fontWeight = FontWeight.SemiBold, color = Black)
+                Text(stringResource(R.string.onboarding_slot_morning), fontWeight = FontWeight.SemiBold, color = TextPrimary)
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     ManualCheckbox("Pain", mornPain) { mornPain = it }
                     ManualCheckbox("Temp", mornTemp) { mornTemp = it }
@@ -711,7 +700,7 @@ private fun ManualEntryStep(
 
         LpmCard(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Noon — 12:00", fontWeight = FontWeight.SemiBold, color = Black)
+                Text(stringResource(R.string.onboarding_slot_noon), fontWeight = FontWeight.SemiBold, color = TextPrimary)
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     ManualCheckbox("Pain", noonPain) { noonPain = it }
                     ManualCheckbox("Temp", noonTemp) { noonTemp = it }
@@ -724,7 +713,7 @@ private fun ManualEntryStep(
 
         LpmCard(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Evening — 20:00", fontWeight = FontWeight.SemiBold, color = Black)
+                Text(stringResource(R.string.onboarding_slot_evening), fontWeight = FontWeight.SemiBold, color = TextPrimary)
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     ManualCheckbox("Pain", evePain) { evePain = it }
                     ManualCheckbox("Temp", eveTemp) { eveTemp = it }
@@ -736,7 +725,7 @@ private fun ManualEntryStep(
         Spacer(modifier = Modifier.height(24.dp))
 
         LpmPrimaryButton(
-            text = "Create free tracking",
+            text = stringResource(R.string.onboarding_create_free),
             loading = isLoading,
             enabled = trackingTitle.isNotBlank(),
             onClick = {
@@ -772,8 +761,8 @@ private fun ManualCheckbox(label: String, checked: Boolean, onCheckedChange: (Bo
         Checkbox(
             checked = checked, 
             onCheckedChange = onCheckedChange,
-            colors = CheckboxDefaults.colors(checkedColor = Black)
+            colors = CheckboxDefaults.colors(checkedColor = SagePrimary)
         )
-        Text(label, style = MaterialTheme.typography.bodySmall, color = Gray600)
+        Text(label, style = MaterialTheme.typography.bodySmall, color = TextSecondary)
     }
 }

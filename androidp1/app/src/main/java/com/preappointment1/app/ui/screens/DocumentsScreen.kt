@@ -107,7 +107,7 @@ fun DocumentsScreen(
                 title = {
                     Column {
                         Text(
-                            text = "Preparation Folder",
+                            text = stringResource(R.string.documents_title),
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp,
                             color = TextPrimary
@@ -218,12 +218,13 @@ fun DocumentsScreen(
                 Spacer(modifier = Modifier.height(24.dp))
                 Button(
                     onClick = { showAddMenu = true },
+                    modifier = Modifier.height(54.dp),
                     shape = RoundedCornerShape(20.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = SagePrimary)
                 ) {
                     Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Add Document or Scan", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.documents_add_btn), fontWeight = FontWeight.Bold)
                 }
             }
         } else {
@@ -281,12 +282,14 @@ private fun DocumentRow(
         DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
             .format(Date(document.createdAt))
     }
-    val sourceLabel = when (document.source) {
-        DocumentSource.REPORT -> "Report PDF"
-        DocumentSource.PHOTO -> "Photo Scan"
-        DocumentSource.PDF -> "PDF Document"
-        else -> "File"
-    }
+    val sourceLabel = stringResource(
+        when (document.source) {
+            DocumentSource.REPORT -> R.string.documents_source_report
+            DocumentSource.PHOTO -> R.string.documents_source_photo
+            DocumentSource.PDF -> R.string.documents_source_pdf
+            else -> R.string.documents_source_other
+        }
+    )
 
     Box(
         modifier = Modifier

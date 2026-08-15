@@ -39,6 +39,7 @@ import com.preappointment1.app.data.repository.DocumentsRepository
 import com.preappointment1.app.data.repository.ReportRepository
 import com.preappointment1.app.data.repository.TimelineRepository
 import com.preappointment1.app.report.PdfReportGenerator
+import com.preappointment1.app.ui.components.LpmPrimaryButton
 import com.preappointment1.app.ui.components.StitchBottomNavBar
 import com.preappointment1.app.ui.components.StitchTab
 import com.preappointment1.app.ui.theme.*
@@ -177,13 +178,11 @@ fun ReportScreen(
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(24.dp))
-                    Button(
+                    LpmPrimaryButton(
+                        text = stringResource(R.string.action_go_back),
                         onClick = onBack,
-                        shape = RoundedCornerShape(20.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = SagePrimary)
-                    ) {
-                        Text(stringResource(R.string.action_go_back), fontWeight = FontWeight.Bold)
-                    }
+                        modifier = Modifier.padding(horizontal = 48.dp)
+                    )
                 }
             }
         } else {
@@ -303,7 +302,7 @@ fun ReportScreen(
                                             DocumentsRepository.saveReportPdf(
                                                 followUpId = followUp.id,
                                                 sourcePdf = file,
-                                                title = "Medical report — ${followUp.title}"
+                                                title = context.getString(R.string.report_doc_title, followUp.title)
                                             )
                                         }
                                         Toast.makeText(

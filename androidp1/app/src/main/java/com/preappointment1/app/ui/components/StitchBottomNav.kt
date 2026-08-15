@@ -9,14 +9,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.ListAlt
-import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.ShowChart
-import androidx.compose.material.icons.outlined.Assignment
+import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material.icons.outlined.ShowChart
+import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,9 +34,9 @@ import com.preappointment1.app.ui.theme.*
 
 enum class StitchTab(val label: String, val activeIcon: ImageVector, val inactiveIcon: ImageVector) {
     HOME("Home", Icons.Filled.Home, Icons.Outlined.Home),
-    TIMELINE("Timeline", Icons.Filled.PhotoLibrary, Icons.Outlined.PhotoLibrary),
-    PROGRESS("Progress", Icons.Filled.ShowChart, Icons.Outlined.ShowChart),
-    PREP("Prep", Icons.Filled.ListAlt, Icons.Outlined.Assignment)
+    TIMELINE("Timeline", Icons.Filled.Timeline, Icons.Outlined.Timeline),
+    PROGRESS("Briefing", Icons.Filled.ShowChart, Icons.Outlined.ShowChart),
+    PREP("Folder", Icons.Filled.Folder, Icons.Outlined.Folder)
 }
 
 @Composable

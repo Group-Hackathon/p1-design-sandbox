@@ -167,8 +167,14 @@ fun StitchHomeScreen(
             Spacer(modifier = Modifier.height(26.dp))
 
             // ── Greeting Section ──
+            val hour = java.time.LocalTime.now().hour
+            val greetingRes = when {
+                hour < 12 -> R.string.home_greeting_morning
+                hour < 18 -> R.string.home_greeting_afternoon
+                else -> R.string.home_greeting_evening
+            }
             Text(
-                text = stringResource(R.string.home_greeting_morning, patientName),
+                text = stringResource(greetingRes, patientName),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = TextPrimary,

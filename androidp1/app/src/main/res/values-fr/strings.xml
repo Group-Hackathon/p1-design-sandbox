@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Brand & Common -->
-    <string name="app_name">P1 Sandbox</string>
+    <string name="app_name">P1 Santé</string>
     <string name="brand_title">P1 Santé</string>
-    <string name="patient_name_placeholder">Patient 1</string>
-    <string name="view_profile">Voir le profil</string>
-    <string name="profile_title">Profil</string>
     <string name="my_trackings">MES DOSSIERS</string>
     <string name="start_new_tracking">Préparer une nouvelle consultation</string>
-    <string name="pre_appointment">PRÉ-CONSULTATION 1</string>
     <string name="action_confirm">Confirmer</string>
     <string name="action_cancel">Annuler</string>
     <string name="action_delete">Supprimer</string>
@@ -17,12 +13,12 @@
     <string name="action_continue">Continuer</string>
     <string name="action_go_back">Retour</string>
     <string name="action_open">Ouvrir</string>
+    <string name="action_ok">OK</string>
 
-    <!-- Navigation Tabs -->
-    <string name="nav_home">Accueil</string>
-    <string name="nav_timeline">Suivi</string>
-    <string name="nav_progress">Rapport</string>
-    <string name="nav_prep">Dossier</string>
+    <!-- Profile & Settings -->
+    <string name="profile_title">Profil</string>
+    <string name="profile_name_placeholder">Entrez votre nom complet</string>
+    <string name="profile_export_coming_soon">Bientôt disponible</string>
 
     <!-- Stitch Home Screen -->
     <string name="home_greeting_morning">Bonjour,\n%1$s.</string>
@@ -44,21 +40,6 @@
     <string name="home_empty_prep_title">Préparer une consultation</string>
     <string name="home_empty_prep_subtitle">Préparez un résumé clair pour votre médecin</string>
 
-    <!-- Dashboard Compatibility -->
-    <string name="dashboard_empty_title">Aucune préparation pour l\'instant</string>
-    <string name="dashboard_empty_body">Quand vous avez un rendez-vous à venir, commencez ici. Nous vous aidons à construire un dossier clair pour votre médecin.</string>
-    <string name="dashboard_empty_action">Préparer ma prochaine consultation</string>
-    <string name="dashboard_greeting">%1$s</string>
-    <string name="dashboard_greeting_named">%1$s, %2$s</string>
-    <string name="dashboard_subtitle">Vos dossiers de consultation</string>
-    <string name="file_ready_percent">Dossier %1$d%% prêt</string>
-    <string name="file_contents">%1$d entrées · %2$d photos · %3$d notes</string>
-    <string name="file_streak">%1$d jours consécutifs</string>
-    <string name="file_appt_countdown">Rendez-vous dans %1$d jours</string>
-    <string name="file_appt_today">Rendez-vous aujourd\'hui</string>
-    <string name="file_continue">Ouvrir le dossier</string>
-    <string name="file_checkin_now">Bilan du jour (~2 min)</string>
-
     <!-- Voice Check-in -->
     <string name="voice_sheet_title">Check-in Vocal</string>
     <string name="voice_listening_hint">À votre écoute… parlez naturellement</string>
@@ -68,6 +49,9 @@
     <string name="voice_open_system_recognizer">Ouvrir la reconnaissance vocale système</string>
     <string name="voice_input_placeholder">Vos mots apparaîtront ici en temps réel (ou écrivez directement ici)…</string>
     <string name="voice_save_to_file">Enregistrer au dossier</string>
+    <string name="voice_event_plain">Check-in vocal : %1$s</string>
+    <string name="voice_event_with_ai">Check-in vocal : %1$s\n\nAnalyse IA : %2$s</string>
+    <string name="voice_saved_toast">Check-in vocal enregistré dans votre suivi</string>
 
     <!-- Welcome Slides -->
     <string name="welcome_slide_1_title">N\'oubliez rien lors de votre rendez-vous médical</string>
@@ -80,12 +64,40 @@
     <string name="welcome_skip">Passer — aller à l\'accueil</string>
     <string name="welcome_start">Préparer ma consultation</string>
     <string name="welcome_go_home">Aller à l\'accueil</string>
+    <string name="welcome_terms">En continuant, vous acceptez nos Conditions d\'utilisation et notre Politique de confidentialité</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title_new_file">Nouveau dossier</string>
+    <string name="onboarding_title_manual_setup">Configuration manuelle</string>
+    <string name="onboarding_track_question">Quel est le motif de votre consultation ?</string>
+    <string name="onboarding_step1_body">Décrivez votre situation en quelques phrases.</string>
+    <string name="onboarding_step1_placeholder">ex. plaie au genou depuis 3 jours, fièvre à 39 °C…</string>
+    <string name="onboarding_step2_body">Sélectionnez la date exacte de votre prochain rendez-vous médical.</string>
+    <string name="onboarding_step3_body">Choisissez les données de santé à surveiller.</string>
+    <string name="onboarding_rules_title">Vos check-ins quotidiens</string>
+    <string name="onboarding_generate_plan">Préparer mon dossier</string>
+    <string name="onboarding_premium_badge">Analysé à partir de milliers de dossiers médicaux</string>
+    <string name="onboarding_premium_duration">Voici le plan de check-in optimal sur %1$d jours jusqu\'à votre consultation.</string>
+    <string name="onboarding_pay">Payer %1$s via Google Play</string>
+    <string name="onboarding_manual_free">Ou configurer mon dossier manuellement, gratuitement</string>
+    <string name="onboarding_manual_entry_title">Configuration manuelle</string>
+    <string name="onboarding_manual_entry_body">Définissez vos horaires de check-in quotidiens pour les %1$d prochains jours.</string>
+    <string name="onboarding_tracking_name">Nom du dossier</string>
+    <string name="onboarding_slot_morning">Matin — 08:00</string>
+    <string name="onboarding_slot_noon">Midi — 12:00</string>
+    <string name="onboarding_slot_evening">Soir — 20:00</string>
+    <string name="onboarding_create_free">Créer mon dossier</string>
+    <string name="onboarding_offline_title">Connexion indisponible</string>
+    <string name="onboarding_offline_body">Nous ne pouvons pas analyser vos symptômes pour le moment pour proposer votre plan de check-in.</string>
+    <string name="onboarding_retry">Réessayer</string>
+    <string name="onboarding_manual_proceed">Continuer en configuration manuelle</string>
 
     <!-- Timeline & Journey -->
     <string name="summary_appt_date">Date RDV</string>
     <string name="summary_days_left">Jours restants</string>
     <string name="summary_complete">Dossier prêt</string>
     <string name="summary_file_contents">%1$d entrées · %2$d photos · %3$d notes</string>
+    <string name="file_streak">%1$d jours consécutifs</string>
     <string name="status_ongoing">En cours</string>
     <string name="status_completed">Terminé</string>
     <string name="next_appt_in_days">Rendez-vous dans %1$d jours</string>
@@ -124,11 +136,17 @@
     <string name="note_sheet_desc">Tout ce que vous voulez lui transmettre — symptômes, contexte, questions.</string>
     <string name="note_sheet_placeholder">Je souhaite que mon médecin sache…</string>
     <string name="note_sheet_send">Ajouter au dossier</string>
+    <string name="note_added_snackbar">Ajouté à votre dossier. L\'assistant répondra quand vous serez de nouveau en ligne.</string>
     <string name="extra_picker_title">Ajouter une mesure supplémentaire</string>
-    <string name="extra_picker_desc">Choisissez une mesure de votre protocole.</string>
+    <string name="extra_picker_desc">Choisissez une mesure de votre plan de check-in.</string>
+    <string name="schedule_editor_title">Horaires des bilans</string>
+    <string name="schedule_editor_subtitle">Appuyez sur un horaire pour ajuster les rappels et les check-ins.</string>
+    <string name="schedule_editor_edit_time">Modifier l\'heure</string>
+    <string name="schedule_editor_save">Enregistrer les horaires</string>
+    <string name="schedule_editor_change_time">Changer l\'heure de %1$s</string>
 
     <!-- Doctor Briefing / Report -->
-    <string name="report_title">Rapport Médical</string>
+    <string name="report_title">Briefing Médecin</string>
     <string name="report_generating">Synthèse clinique en cours…</string>
     <string name="report_file_title">Dossier de Synthèse Officiel</string>
     <string name="report_file_subtitle">Données et évolution des symptômes prêtes pour votre médecin</string>
@@ -137,7 +155,8 @@
     <string name="report_share_pdf">Partager le PDF</string>
     <string name="report_saved_to_folder">Enregistré dans votre dossier de préparation</string>
     <string name="report_save_failed">Impossible d\'enregistrer le fichier</string>
-    <string name="report_share_chooser_title">Partager le rapport médical</string>
+    <string name="report_share_chooser_title">Partager le briefing médical</string>
+    <string name="report_doc_title">Briefing médecin — %1$s</string>
 
     <!-- Preparation / Documents Folder -->
     <string name="documents_title">Dossier de Préparation</string>
@@ -159,19 +178,30 @@
     <string name="documents_source_pdf">PDF</string>
     <string name="documents_source_other">Fichier</string>
 
-    <!-- Daily Routine & Measurements -->
-    <string name="routine_step_pain">Évaluation de la douleur</string>
-    <string name="routine_step_vitals">Constantes</string>
-    <string name="routine_completed_title">Bilan terminé</string>
-    <string name="routine_completed_desc">Vos données du jour sont enregistrées de façon sécurisée.</string>
+    <!-- Measurements -->
     <string name="measurement_type_pain">Niveau de douleur</string>
     <string name="measurement_type_temperature">Température</string>
     <string name="measurement_type_photo">Photo</string>
-    <string name="schedule_editor_title">Horaires des bilans</string>
+    <string name="journey_status">Statut</string>
+    <string name="checkin_take_photo">Prendre une photo</string>
+    <string name="checkin_choose_gallery">Choisir depuis la galerie</string>
+    <string name="camera_access_required">L\'accès à la caméra est requis.</string>
+    <string name="camera_frame_hint">Placez la zone à suivre dans le cadre.</string>
 
-    <!-- Notifications & Offline -->
+    <!-- Notifications & Reminders -->
+    <string name="reminders_title">Rappels</string>
+    <string name="reminders_body_file">Rappels doux pour continuer à enrichir votre dossier pour %1$s. Modifiez les horaires ici ou depuis le menu du dossier.</string>
+    <string name="reminders_body_defaults">Les horaires par défaut s\'appliquent quand vous préparez un nouveau dossier de consultation.</string>
+    <string name="reminders_section_header">RAPPELS DE CHECK-IN</string>
+    <string name="reminders_empty">Aucun horaire configuré.</string>
+    <string name="reminders_test_send">Envoyer une notification de test</string>
+    <string name="reminders_test_sent">Notification de test envoyée</string>
+    <string name="reminders_test_title">P1 — C\'est l\'heure de votre check-in</string>
+    <string name="reminders_test_message">Environ 90 secondes pour ajouter les données du jour à votre dossier.</string>
+    <string name="reminders_checkin_at">Check-in à %1$s</string>
+    <string name="drawer_reminder_settings">Rappels</string>
     <string name="notifications_edit_defaults">Modifier les horaires par défaut</string>
-    <string name="notifications_edit_protocol">Modifier les horaires du protocole</string>
+    <string name="notifications_edit_protocol">Modifier les horaires de check-in</string>
     <string name="notification_checkin_pending">Votre bilan vous attend — environ 2 minutes</string>
     <string name="notification_checkin_already_done">Déjà enregistré pour aujourd\'hui. À bientôt pour le prochain point.</string>
     <string name="focus_form_header">Bilan du jour</string>
