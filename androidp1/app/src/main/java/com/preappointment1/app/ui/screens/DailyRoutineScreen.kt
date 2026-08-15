@@ -16,14 +16,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.preappointment1.app.data.model.FollowUpRules
 import com.preappointment1.app.ui.components.*
-import com.preappointment1.app.ui.theme.Black
-import com.preappointment1.app.ui.theme.Gray200
-import com.preappointment1.app.ui.theme.Gray600
-import com.preappointment1.app.ui.theme.White
+import com.preappointment1.app.ui.theme.*
 
 private enum class RoutineStepType {
     Photo, Pain, Vitals, Done
@@ -40,7 +39,7 @@ fun DailyRoutineScreen(
     val steps = remember(rules) {
         val list = mutableListOf<RoutineStepType>()
         if (rules?.photos == true) list.add(RoutineStepType.Photo)
-        if (rules?.pain != false) list.add(RoutineStepType.Pain) // Default to true if null
+        if (rules?.pain != false) list.add(RoutineStepType.Pain)
         if (rules?.temperature == true || rules?.bloodPressure == true || rules?.smartwatch == true) {
             list.add(RoutineStepType.Vitals)
         }
@@ -53,18 +52,18 @@ fun DailyRoutineScreen(
 
     Scaffold(
         topBar = { LpmTopBar(title = followUpTitle, onBack = onBack) },
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = CanvasBackground,
         modifier = modifier
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 22.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
             LpmStepIndicator(currentStep = stepIndex + 1, totalSteps = steps.size)
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             when (steps[stepIndex]) {
                 RoutineStepType.Photo -> PhotoStep(onPhotoTaken = { filename ->
@@ -96,12 +95,13 @@ private fun PhotoStep(onPhotoTaken: (String?) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
-                    .background(Color(0xFFE8F5E9), RoundedCornerShape(8.dp)),
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(MintBadge),
                 contentAlignment = Alignment.Center
             ) {
-                Text("✓ Photo saved", color = Color(0xFF2E7D32), fontWeight = FontWeight.SemiBold)
+                Text("✓ Photo saved", color = MintBadgeText, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             LpmPrimaryButton(text = "Continue", onClick = { onPhotoTaken(photoSaved) })
         }
     }
@@ -118,16 +118,16 @@ private fun PainStep(onContinue: () -> Unit) {
         Text(
             text = "Pain level today",
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = Black
+            fontWeight = FontWeight.Bold,
+            color = TextPrimary
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("0", color = Gray600, style = MaterialTheme.typography.bodySmall)
-            Text("10", color = Gray600, style = MaterialTheme.typography.bodySmall)
+            Text("0 (None)", color = TextSecondary, style = MaterialTheme.typography.bodySmall)
+            Text("10 (Severe)", color = TextSecondary, style = MaterialTheme.typography.bodySmall)
         }
         Slider(
             value = painLevel,
@@ -135,9 +135,9 @@ private fun PainStep(onContinue: () -> Unit) {
             valueRange = 0f..10f,
             steps = 9,
             colors = SliderDefaults.colors(
-                thumbColor = Black,
-                activeTrackColor = Black,
-                inactiveTrackColor = Gray200
+                thumbColor = SagePrimary,
+                activeTrackColor = SagePrimary,
+                inactiveTrackColor = MintBadge
             )
         )
         Text(
@@ -145,12 +145,12 @@ private fun PainStep(onContinue: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = Black
+            fontWeight = FontWeight.ExtraBold,
+            color = SagePrimary
         )
 
         Spacer(modifier = Modifier.weight(1f))
-        LpmPrimaryButton(text = "Save", onClick = onContinue)
+        LpmPrimaryButton(text = "Save & Continue", onClick = onContinue)
         Spacer(modifier = Modifier.height(24.dp))
     }
 }
@@ -171,7 +171,7 @@ private fun VitalsStep(rules: FollowUpRules?, onContinue: () -> Unit) {
             Spacer(modifier = Modifier.height(24.dp))
 
             if (rules?.temperature == true) {
-                Text("Quick Select Temperature", style = MaterialTheme.typography.bodySmall, color = Gray600)
+                Text("Quick Select Temperature", style = MaterialTheme.typography.bodySmall, color = TextSecondary)
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -183,8 +183,8 @@ private fun VitalsStep(rules: FollowUpRules?, onContinue: () -> Unit) {
                             onClick = { tempValue = temp },
                             label = { Text("$temp°") },
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = Black,
-                                selectedLabelColor = White
+                                selectedContainerColor = SagePrimary,
+                                selectedLabelColor = Color.White
                             )
                         )
                     }
@@ -195,6 +195,7 @@ private fun VitalsStep(rules: FollowUpRules?, onContinue: () -> Unit) {
                     onValueChange = { tempValue = it },
                     label = { Text("Or enter specific (°C)") },
                     modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    shape = RoundedCornerShape(16.dp),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
@@ -206,6 +207,7 @@ private fun VitalsStep(rules: FollowUpRules?, onContinue: () -> Unit) {
                     onValueChange = { bpValue = it },
                     label = { Text("Blood Pressure (mmHg)") },
                     modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    shape = RoundedCornerShape(16.dp),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
@@ -217,13 +219,14 @@ private fun VitalsStep(rules: FollowUpRules?, onContinue: () -> Unit) {
                     onValueChange = { hrValue = it },
                     label = { Text("Heart Rate (bpm)") },
                     modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    shape = RoundedCornerShape(16.dp),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
             }
         }
         
-        LpmPrimaryButton(text = "Save", onClick = onContinue)
+        LpmPrimaryButton(text = "Save & Continue", onClick = onContinue)
         Spacer(modifier = Modifier.height(24.dp))
     }
 }
@@ -237,27 +240,28 @@ private fun DoneStep(onFinish: () -> Unit) {
     ) {
         Box(
             modifier = Modifier
-                .size(64.dp)
-                .background(Black, CircleShape),
+                .size(72.dp)
+                .clip(CircleShape)
+                .background(MintBadge),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 Icons.Default.Check,
                 contentDescription = null,
-                tint = White,
-                modifier = Modifier.size(32.dp)
+                tint = SagePrimary,
+                modifier = Modifier.size(36.dp)
             )
         }
         Spacer(modifier = Modifier.height(24.dp))
-        LpmSectionTitle("Routine saved")
+        LpmSectionTitle("Routine Completed")
         Spacer(modifier = Modifier.height(12.dp))
         LpmBodyText(
-            "Today's data has been saved. Come back tomorrow for your next routine.",
-            modifier = Modifier.padding(horizontal = 16.dp)
+            "Today's data has been securely saved to your timeline file.",
+            modifier = Modifier.padding(horizontal = 20.dp)
         )
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(36.dp))
         LpmPrimaryButton(
-            text = "Back to home",
+            text = "Back to Home",
             onClick = onFinish,
             modifier = Modifier.padding(horizontal = 24.dp)
         )

@@ -4,21 +4,26 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
-import android.print.PrintAttributes
-import android.print.PrintManager
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.Assignment
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -34,17 +39,21 @@ import com.preappointment1.app.data.repository.DocumentsRepository
 import com.preappointment1.app.data.repository.ReportRepository
 import com.preappointment1.app.data.repository.TimelineRepository
 import com.preappointment1.app.report.PdfReportGenerator
-import com.preappointment1.app.ui.components.*
+import com.preappointment1.app.ui.components.StitchBottomNavBar
+import com.preappointment1.app.ui.components.StitchTab
 import com.preappointment1.app.ui.theme.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportScreen(
     followUp: FollowUpUi,
     onBack: () -> Unit,
+    activeTab: StitchTab = StitchTab.PROGRESS,
+    onTabSelected: ((StitchTab) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -56,7 +65,6 @@ fun ReportScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isSaving by remember { mutableStateOf(false) }
 
-    // Generate the PDF on screen load
     LaunchedEffect(followUp.id) {
         try {
             val events = withContext(Dispatchers.IO) {
@@ -78,7 +86,6 @@ fun ReportScreen(
             }
             pdfFile = file
 
-            // Render pages as bitmaps for preview
             val bitmaps = withContext(Dispatchers.IO) {
                 renderPdfPages(file)
             }
@@ -92,24 +99,69 @@ fun ReportScreen(
     }
 
     Scaffold(
-        topBar = { LpmTopBar(title = "Medical Report", onBack = onBack) },
-        containerColor = Gray50,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Doctor Briefing",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = TextPrimary
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = SagePrimary
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = CanvasBackground,
+                    titleContentColor = TextPrimary
+                )
+            )
+        },
+        bottomBar = {
+            if (onTabSelected != null) {
+                StitchBottomNavBar(
+                    currentTab = activeTab,
+                    onTabSelected = onTabSelected
+                )
+            }
+        },
+        containerColor = CanvasBackground,
         modifier = modifier
     ) { padding ->
         if (isGenerating) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(padding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator(color = Black)
+                    CircularProgressIndicator(
+                        color = SagePrimary,
+                        modifier = Modifier.size(44.dp),
+                        strokeWidth = 3.5.dp
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Generating report...", color = Gray600)
+                    Text(
+                        "Compiling your clinical briefing…",
+                        color = TextSecondary,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         } else if (errorMessage != null) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(padding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -121,11 +173,17 @@ fun ReportScreen(
                     Text(
                         errorMessage ?: "",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Gray600,
+                        color = TextSecondary,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(24.dp))
-                    LpmPrimaryButton("Try again", onClick = onBack)
+                    Button(
+                        onClick = onBack,
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = SagePrimary)
+                    ) {
+                        Text("Go Back", fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         } else {
@@ -134,20 +192,70 @@ fun ReportScreen(
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                // PDF Preview
+                // PDF Preview with Sage/Mint cards
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    // Summary Header Card
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .shadow(2.dp, RoundedCornerShape(22.dp), spotColor = SagePrimary.copy(alpha = 0.08f))
+                                .clip(RoundedCornerShape(22.dp))
+                                .background(CardBackground)
+                                .border(1.dp, CardBorderSoft, RoundedCornerShape(22.dp))
+                                .padding(18.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(14.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(44.dp)
+                                        .clip(CircleShape)
+                                        .background(MintBadge),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.CheckCircle,
+                                        contentDescription = null,
+                                        tint = SagePrimary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Official Briefing File",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp,
+                                        color = TextPrimary
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "Synthesized data & symptom trends ready for your doctor",
+                                        fontSize = 13.sp,
+                                        color = TextSecondary,
+                                        lineHeight = 17.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     items(pageBitmaps.size) { index ->
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(4.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                            colors = CardDefaults.cardColors(containerColor = White)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .shadow(4.dp, RoundedCornerShape(16.dp), spotColor = Color.Black.copy(alpha = 0.08f))
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color.White)
+                                .border(1.dp, CardBorderSoft, RoundedCornerShape(16.dp))
                         ) {
                             Image(
                                 bitmap = pageBitmaps[index].asImageBitmap(),
@@ -159,54 +267,31 @@ fun ReportScreen(
 
                     item {
                         Text(
-                            "${pageBitmaps.size} page${if (pageBitmaps.size > 1) "s" else ""}",
+                            "${pageBitmaps.size} page${if (pageBitmaps.size > 1) "s" else ""} · Generated locally by P1 Health",
                             style = MaterialTheme.typography.labelMedium,
-                            color = Gray400,
-                            modifier = Modifier.fillMaxWidth(),
+                            color = TextMuted,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
                             textAlign = TextAlign.Center
                         )
                     }
                 }
 
-                // Action buttons
+                // Action Bar
                 Surface(
-                    color = White,
+                    color = CardBackground,
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
                     shadowElevation = 8.dp,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, CardBorderSoft),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(horizontal = 20.dp, vertical = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        OutlinedButton(
-                            onClick = {
-                                pdfFile?.let { file ->
-                                    try {
-                                        val printManager = context.getSystemService(android.content.Context.PRINT_SERVICE) as PrintManager
-                                        val uri = FileProvider.getUriForFile(
-                                            context,
-                                            "${context.packageName}.fileprovider",
-                                            file
-                                        )
-                                        val printAdapter = android.print.PrintDocumentAdapter::class.java
-                                        // Use WebView print for simplicity
-                                        Toast.makeText(context, "Use the share button to print", Toast.LENGTH_SHORT).show()
-                                    } catch (e: Exception) {
-                                        Toast.makeText(context, "Print not available", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            },
-                            modifier = Modifier.weight(1f).height(50.dp),
-                            shape = RoundedCornerShape(8.dp),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Black)
-                        ) {
-                            Icon(Icons.Filled.Check, contentDescription = null, tint = Black, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Print", color = Black, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
-                        }
-
                         OutlinedButton(
                             onClick = {
                                 val file = pdfFile ?: return@OutlinedButton
@@ -238,53 +323,64 @@ fun ReportScreen(
                                 }
                             },
                             enabled = pdfFile != null && !isSaving,
-                            modifier = Modifier.weight(1f).height(50.dp),
-                            shape = RoundedCornerShape(8.dp),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Black)
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(52.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
+                            border = ButtonDefaults.outlinedButtonBorder.copy(
+                                brush = androidx.compose.ui.graphics.SolidColor(CardBorderSoft)
+                            )
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.ic_folder),
                                 contentDescription = null,
-                                tint = Black,
+                                tint = SagePrimary,
                                 modifier = Modifier.size(18.dp)
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                stringResource(R.string.report_save_to_folder),
-                                color = Black,
+                                if (isSaving) "Saving…" else "Save to Prep",
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 13.sp
+                                fontSize = 14.sp
                             )
                         }
 
                         Button(
                             onClick = {
                                 pdfFile?.let { file ->
-                                    try {
-                                        val uri = FileProvider.getUriForFile(
-                                            context,
-                                            "${context.packageName}.fileprovider",
-                                            file
-                                        )
-                                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                            type = "application/pdf"
-                                            putExtra(Intent.EXTRA_STREAM, uri)
-                                            putExtra(Intent.EXTRA_SUBJECT, "Medical Follow-Up Report — ${followUp.title}")
-                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                        }
-                                        context.startActivity(Intent.createChooser(shareIntent, "Share report"))
-                                    } catch (e: Exception) {
-                                        Toast.makeText(context, "Share failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    val uri = FileProvider.getUriForFile(
+                                        context,
+                                        "${context.packageName}.fileprovider",
+                                        file
+                                    )
+                                    val intent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "application/pdf"
+                                        putExtra(Intent.EXTRA_STREAM, uri)
+                                        putExtra(Intent.EXTRA_SUBJECT, "Doctor Briefing — ${followUp.title}")
+                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                     }
+                                    context.startActivity(Intent.createChooser(intent, "Share Doctor Briefing"))
                                 }
                             },
-                            modifier = Modifier.weight(1f).height(50.dp),
-                            shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Black)
+                            enabled = pdfFile != null,
+                            modifier = Modifier
+                                .weight(1.2f)
+                                .height(52.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = SagePrimary,
+                                contentColor = Color.White
+                            )
                         ) {
-                            Icon(Icons.Filled.Share, contentDescription = null, tint = White, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Share", color = White, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                            Icon(
+                                imageVector = Icons.Default.Share,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Share PDF", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                         }
                     }
                 }
@@ -293,30 +389,27 @@ fun ReportScreen(
     }
 }
 
-/**
- * Renders all pages of a PDF file as bitmaps for preview.
- */
 private fun renderPdfPages(file: File): List<Bitmap> {
     val bitmaps = mutableListOf<Bitmap>()
-    val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-    val renderer = PdfRenderer(fd)
-
-    for (i in 0 until renderer.pageCount) {
-        val page = renderer.openPage(i)
-        // Render at 2x for quality
-        val scale = 2
-        val bitmap = Bitmap.createBitmap(
-            page.width * scale,
-            page.height * scale,
-            Bitmap.Config.ARGB_8888
-        )
-        bitmap.eraseColor(android.graphics.Color.WHITE)
-        page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-        bitmaps.add(bitmap)
-        page.close()
+    val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+    val renderer = PdfRenderer(pfd)
+    try {
+        for (i in 0 until renderer.pageCount) {
+            val page = renderer.openPage(i)
+            val scale = 2
+            val bitmap = Bitmap.createBitmap(
+                page.width * scale,
+                page.height * scale,
+                Bitmap.Config.ARGB_8888
+            )
+            bitmap.eraseColor(android.graphics.Color.WHITE)
+            page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+            page.close()
+            bitmaps.add(bitmap)
+        }
+    } finally {
+        renderer.close()
+        pfd.close()
     }
-
-    renderer.close()
-    fd.close()
     return bitmaps
 }

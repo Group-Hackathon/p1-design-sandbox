@@ -533,7 +533,16 @@ private fun AppRoot(
                 } else {
                     ReportScreen(
                         followUp = followUp,
-                        onBack = { screen = AppScreen.Home }
+                        onBack = { screen = AppScreen.Home },
+                        activeTab = com.preappointment1.app.ui.components.StitchTab.PROGRESS,
+                        onTabSelected = { tab ->
+                            when (tab) {
+                                com.preappointment1.app.ui.components.StitchTab.HOME -> screen = AppScreen.Home
+                                com.preappointment1.app.ui.components.StitchTab.TIMELINE -> screen = AppScreen.Journey
+                                com.preappointment1.app.ui.components.StitchTab.PROGRESS -> { /* already on progress */ }
+                                com.preappointment1.app.ui.components.StitchTab.PREP -> screen = AppScreen.Documents
+                            }
+                        }
                     )
                 }
             }
@@ -545,7 +554,16 @@ private fun AppRoot(
                 } else {
                     DocumentsScreen(
                         followUp = followUp,
-                        onBack = { screen = AppScreen.Home }
+                        onBack = { screen = AppScreen.Home },
+                        activeTab = com.preappointment1.app.ui.components.StitchTab.PREP,
+                        onTabSelected = { tab ->
+                            when (tab) {
+                                com.preappointment1.app.ui.components.StitchTab.HOME -> screen = AppScreen.Home
+                                com.preappointment1.app.ui.components.StitchTab.TIMELINE -> screen = AppScreen.Journey
+                                com.preappointment1.app.ui.components.StitchTab.PROGRESS -> screen = AppScreen.Report
+                                com.preappointment1.app.ui.components.StitchTab.PREP -> { /* already on prep */ }
+                            }
+                        }
                     )
                 }
             }

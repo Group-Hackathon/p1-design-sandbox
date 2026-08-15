@@ -38,7 +38,7 @@ fun ScheduleEditorSheet(
         )
         AlertDialog(
             onDismissRequest = { editingSlot = null },
-            title = { Text("Change time for ${slot.timeKey}") },
+            title = { Text("Change time for ${slot.timeKey}", fontWeight = FontWeight.Bold, color = TextPrimary) },
             text = { TimePicker(state = pickerState) },
             confirmButton = {
                 TextButton(
@@ -47,28 +47,32 @@ fun ScheduleEditorSheet(
                         editedSchedule = ScheduleLogic.replaceSlotTime(editedSchedule, slot.timeKey, newTime)
                         editingSlot = null
                     }
-                ) { Text("OK", color = Black) }
+                ) { Text("OK", color = SagePrimary, fontWeight = FontWeight.Bold) }
             },
             dismissButton = {
-                TextButton(onClick = { editingSlot = null }) { Text("Cancel") }
+                TextButton(onClick = { editingSlot = null }) { Text("Cancel", color = TextSecondary) }
             }
         )
     }
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = CardBackground,
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp)
         ) {
-            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(8.dp))
+            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = TextPrimary)
+            Spacer(modifier = Modifier.height(6.dp))
             LpmBodyText("Tap a time to adjust when reminders and check-ins open.")
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.heightIn(max = 360.dp)
             ) {
                 items(slots, key = { it.timeKey }) { slot ->
@@ -83,23 +87,24 @@ fun ScheduleEditorSheet(
                                 Text(
                                     slot.timeKey,
                                     fontWeight = FontWeight.Bold,
-                                    color = Black
+                                    color = TextPrimary
                                 )
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     slot.actions.joinToString(", "),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Gray600
+                                    color = TextSecondary
                                 )
                             }
                             TextButton(onClick = { editingSlot = slot }) {
-                                Text("Edit time", color = Black)
+                                Text("Edit time", color = SagePrimary, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             LpmPrimaryButton(
                 text = "Save schedule",
                 loading = isSaving,

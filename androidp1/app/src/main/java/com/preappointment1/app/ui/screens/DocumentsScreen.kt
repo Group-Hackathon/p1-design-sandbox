@@ -5,31 +5,43 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import com.preappointment1.app.R
 import com.preappointment1.app.data.local.DocumentSource
 import com.preappointment1.app.data.local.LocalDocumentEntity
 import com.preappointment1.app.data.repository.DocumentsRepository
+import com.preappointment1.app.ui.components.StitchBottomNavBar
+import com.preappointment1.app.ui.components.StitchTab
 import com.preappointment1.app.ui.theme.*
 import kotlinx.coroutines.launch
 import java.text.DateFormat
@@ -40,6 +52,8 @@ import java.util.Date
 fun DocumentsScreen(
     followUp: FollowUpUi,
     onBack: () -> Unit,
+    activeTab: StitchTab = StitchTab.PREP,
+    onTabSelected: ((StitchTab) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -93,8 +107,9 @@ fun DocumentsScreen(
                 title = {
                     Column {
                         Text(
-                            stringResource(R.string.documents_title),
+                            text = "Preparation Folder",
                             fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
                             color = TextPrimary
                         )
                         Text(
@@ -150,6 +165,14 @@ fun DocumentsScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = CanvasBackground)
             )
+        },
+        bottomBar = {
+            if (onTabSelected != null) {
+                StitchBottomNavBar(
+                    currentTab = activeTab,
+                    onTabSelected = onTabSelected
+                )
+            }
         }
     ) { padding ->
         if (documents.isEmpty()) {
@@ -157,37 +180,59 @@ fun DocumentsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .padding(32.dp),
+                    .padding(24.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_folder),
-                    contentDescription = null,
-                    tint = Gray400,
-                    modifier = Modifier.size(56.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(MintBadge),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Folder,
+                        contentDescription = null,
+                        tint = SagePrimary,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(20.dp))
                 Text(
                     stringResource(R.string.documents_empty_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Black
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                    textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     stringResource(R.string.documents_empty_body),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Gray600
+                    fontSize = 14.sp,
+                    color = TextSecondary,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 20.sp,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = { showAddMenu = true },
+                    shape = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = SagePrimary)
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Add Document or Scan", fontWeight = FontWeight.Bold)
+                }
             }
         } else {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(documents, key = { it.id }) { doc ->
                     DocumentRow(
@@ -237,56 +282,87 @@ private fun DocumentRow(
             .format(Date(document.createdAt))
     }
     val sourceLabel = when (document.source) {
-        DocumentSource.REPORT -> stringResource(R.string.documents_source_report)
-        DocumentSource.PHOTO -> stringResource(R.string.documents_source_photo)
-        DocumentSource.PDF -> stringResource(R.string.documents_source_pdf)
-        else -> stringResource(R.string.documents_source_other)
+        DocumentSource.REPORT -> "Report PDF"
+        DocumentSource.PHOTO -> "Photo Scan"
+        DocumentSource.PDF -> "PDF Document"
+        else -> "File"
     }
 
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Gray200.copy(alpha = 0.35f), RoundedCornerShape(10.dp))
+            .shadow(2.dp, RoundedCornerShape(20.dp), spotColor = SagePrimary.copy(alpha = 0.06f))
+            .clip(RoundedCornerShape(20.dp))
+            .background(CardBackground)
+            .border(1.dp, CardBorderSoft, RoundedCornerShape(20.dp))
             .clickable(onClick = onOpen)
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(14.dp)
     ) {
-        when (document.source) {
-            DocumentSource.REPORT, DocumentSource.PDF -> {
-                Icon(
-                    Icons.AutoMirrored.Filled.List,
-                    contentDescription = null,
-                    tint = Black,
-                    modifier = Modifier.size(28.dp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MintBadge),
+                contentAlignment = Alignment.Center
+            ) {
+                when (document.source) {
+                    DocumentSource.REPORT, DocumentSource.PDF -> {
+                        Icon(
+                            imageVector = Icons.Outlined.Description,
+                            contentDescription = null,
+                            tint = SagePrimary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    DocumentSource.PHOTO -> {
+                        Icon(
+                            imageVector = Icons.Outlined.Photo,
+                            contentDescription = null,
+                            tint = SagePrimary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    else -> {
+                        Icon(
+                            imageVector = Icons.Outlined.Folder,
+                            contentDescription = null,
+                            tint = SagePrimary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = document.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "$sourceLabel · $dateLabel",
+                    fontSize = 12.sp,
+                    color = TextSecondary
                 )
             }
-            else -> {
+
+            IconButton(onClick = onDelete) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_folder),
-                    contentDescription = null,
-                    tint = Black,
-                    modifier = Modifier.size(28.dp)
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = "Delete",
+                    tint = TextMuted,
+                    modifier = Modifier.size(20.dp)
                 )
             }
-        }
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                document.title,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = Black,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                "$sourceLabel · $dateLabel",
-                style = MaterialTheme.typography.bodySmall,
-                color = Gray600
-            )
-        }
-        IconButton(onClick = onDelete) {
-            Icon(Icons.Filled.Delete, contentDescription = null, tint = Gray600)
         }
     }
 }
