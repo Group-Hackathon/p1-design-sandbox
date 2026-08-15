@@ -1,7 +1,7 @@
 # 🌿 P1 — Pre-Appointment 1 & Living Patient Memory
 
 <div align="center">
-  <img src="logo%20P1%20remix/p1_logo_sage_hud_v1.jpg" alt="P1 Logo Sage HUD" width="220" style="border-radius: 36px; box-shadow: 0 16px 32px rgba(45, 90, 71, 0.25);" />
+  <img src="docs/images/p1_logo_official_final.png" alt="P1 Official App Logo" width="220" style="border-radius: 40px; box-shadow: 0 16px 36px rgba(45, 90, 71, 0.2);" />
   
   <h3><strong>Next-Gen AI Pre-Appointment & Clinical Memory Mobile Companion</strong></h3>
   <p><em>Prepare crystal-clear, structured clinical briefings for your doctor — in under 2 minutes a day.</em></p>
@@ -16,29 +16,17 @@
 
 ---
 
-## 🎨 New P1 Logo Redesigns (Sage & Mint HUD Palette)
+## 🎨 Official P1 Logo (Sage HUD & Biometric Viewfinder)
 
-The app logo has been refined in the **Stitch Sage Green (`#2D5A47`)** and **Fresh Mint (`#C4E8D6`)** color identity, featuring a high-tech medical telemetry and biometric viewfinder aesthetic.
+The official brand identity of **P1** embodies modern clinical precision:
+- **Monogram**: Deep **Sage Green (`#2D5A47`)** bold italic **P1** emblem.
+- **Biometric Telemetry**: High-precision circular gauge dial with active P1 signal bars, QR identification, and telemetry barcode.
+- **Reticle HUD**: 4 rounded framing brackets representing continuous focus on the patient's living clinical memory.
 
 <div align="center">
-  <table>
-    <tr>
-      <th align="center">✨ Variation 1: Sage HUD Scanner (Primary App Icon)</th>
-      <th align="center">⚡ Variation 2: Emerald Precision Badge</th>
-    </tr>
-    <tr>
-      <td align="center">
-        <img src="docs/images/p1_logo_v1_sage_hud.jpg" width="280" style="border-radius: 28px;" />
-        <br /><br />
-        <em>Dynamic italic P1 monogram in brushed metal, glowing mint HUD scanning viewfinder brackets, and real-time biometric vitals rings.</em>
-      </td>
-      <td align="center">
-        <img src="docs/images/p1_logo_v2_emerald_hud.jpg" width="280" style="border-radius: 28px;" />
-        <br /><br />
-        <em>Beveled metallic titanium badge with deep emerald illumination and clinical telemetry indicators.</em>
-      </td>
-    </tr>
-  </table>
+  <img src="docs/images/p1_logo_official_final.png" width="280" style="border-radius: 36px; box-shadow: 0 12px 28px rgba(0,0,0,0.08);" />
+  <br /><br />
+  <em>Official P1 Application Launcher & Brand Asset</em>
 </div>
 
 ---
