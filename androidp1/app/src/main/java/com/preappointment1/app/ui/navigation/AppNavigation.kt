@@ -299,7 +299,7 @@ fun AppNavigation(
                     } else {
                         JourneyScreen(
                             followUp = followUp,
-                            onBack = { popBack() },
+                            onBack = { if (backStack.size > 1) popBack() else switchTab(AppDestination.Home) },
                             onOpenDrawer = { scope.launch { drawerState.open() } },
                             onOpenReport = { navigateTo(AppDestination.Report) },
                             onOpenDocuments = { navigateTo(AppDestination.Documents) },
@@ -327,7 +327,7 @@ fun AppNavigation(
                         .maxByOrNull { it.startsAt }
                     NotificationsScreen(
                         activeFollowUp = activeFollowUp,
-                        onBack = { popBack() },
+                        onBack = { if (backStack.size > 1) popBack() else switchTab(AppDestination.Home) },
                         onScheduleUpdated = { refreshKey++ }
                     )
                 }
@@ -340,7 +340,7 @@ fun AppNavigation(
                     } else {
                         ReportScreen(
                             followUp = followUp,
-                            onBack = { popBack() },
+                            onBack = { if (backStack.size > 1) popBack() else switchTab(AppDestination.Home) },
                             activeTab = StitchTab.PROGRESS,
                             onTabSelected = onTabSelected
                         )
@@ -355,7 +355,7 @@ fun AppNavigation(
                     } else {
                         DocumentsScreen(
                             followUp = followUp,
-                            onBack = { popBack() },
+                            onBack = { if (backStack.size > 1) popBack() else switchTab(AppDestination.Home) },
                             activeTab = StitchTab.PREP,
                             onTabSelected = onTabSelected
                         )

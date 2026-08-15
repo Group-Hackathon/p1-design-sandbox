@@ -198,7 +198,7 @@ fun CheckInScreen(
     var showCameraSheet by remember { mutableStateOf(false) }
     var photoFilename by remember { mutableStateOf<String?>(null) }
     var photoEntries by remember { mutableStateOf<List<PhotoEntry>>(emptyList()) }
-    var photoMode by remember { mutableStateOf(initialPhotoMode) }
+    var photoMode by remember(initialPhotoMode) { mutableStateOf(initialPhotoMode) }
     var frameOffsetX by remember { mutableFloatStateOf(0f) }
     var frameOffsetY by remember { mutableFloatStateOf(0f) }
     var cameraUri by remember { mutableStateOf<Uri?>(null) }
