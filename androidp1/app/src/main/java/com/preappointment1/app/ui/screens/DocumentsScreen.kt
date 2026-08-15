@@ -63,6 +63,10 @@ fun DocumentsScreen(
     var pendingDelete by remember { mutableStateOf<LocalDocumentEntity?>(null) }
     var showAddMenu by remember { mutableStateOf(false) }
 
+    LaunchedEffect(followUp.id) {
+        DocumentsRepository.seedSampleDocumentsIfEmpty(followUp.id)
+    }
+
     val pickDocument = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->

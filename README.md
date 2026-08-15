@@ -140,7 +140,20 @@ The core interactive experience of P1 features a full 3D robot body model that a
 
 ---
 
-## V. Build & Installation
+## V. Direct APK Download & Installation
+
+### 📥 Standalone APK Release
+You can directly download and install the official build on your Android device:
+- **Download Link**: [Download P1 v1.0 Release APK (Direct Link)](releases/p1-app-release-v1.0.apk)
+
+```bash
+# Or install directly via ADB
+adb install -r releases/p1-app-release-v1.0.apk
+```
+
+---
+
+## VI. Developer Build Instructions
 
 ```bash
 # Navigate to the Android project directory
@@ -148,6 +161,9 @@ cd androidp1
 
 # Compile Debug APK
 ./gradlew assembleDebug
+
+# Compile Official Release APK
+./gradlew assembleRelease
 
 # Install directly to connected ADB device
 ./gradlew installDebug

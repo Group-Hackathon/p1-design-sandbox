@@ -95,6 +95,35 @@ object DocumentsRepository {
         entity
     }
 
+    suspend fun seedSampleDocumentsIfEmpty(followUpId: String) = withContext(Dispatchers.IO) {
+        val existing = dao.getForFollowUp(followUpId)
+        if (existing.isNotEmpty()) return@withContext
+
+        val dir = documentsDir(followUpId)
+        val docs = listOf(
+            Triple("Official Doctor Briefing.pdf", "application/pdf", DocumentSource.REPORT),
+            Triple("Blood Test Panel (Lipids & CBC).pdf", "application/pdf", DocumentSource.PDF),
+            Triple("Right Knee Tracking Photo.jpg", "image/jpeg", DocumentSource.PHOTO)
+        )
+
+        docs.forEachIndexed { index, (title, mime, source) ->
+            val id = UUID.randomUUID().toString()
+            val fileName = "sample_${index}_$id.${if (mime.contains("pdf")) "pdf" else "jpg"}"
+            val f = File(dir, fileName)
+            if (!f.exists()) f.writeBytes(ByteArray(1024))
+            dao.upsert(
+                LocalDocumentEntity(
+                    id = id,
+                    followUpId = followUpId,
+                    title = title,
+                    mimeType = mime,
+                    relativePath = "documents/$followUpId/$fileName",
+                    source = source
+                )
+            )
+        }
+    }
+
     suspend fun delete(entity: LocalDocumentEntity) = withContext(Dispatchers.IO) {
         val file = resolveFile(entity)
         if (file.exists()) file.delete()
