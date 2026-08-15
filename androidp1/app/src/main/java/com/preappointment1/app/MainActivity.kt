@@ -351,9 +351,13 @@ private fun AppRoot(
             AppScreen.Home -> {
                 val activeFollowUp = followUps.firstOrNull { it.daysRemaining > 0 } ?: followUps.firstOrNull()
                 val currentUserName = SessionManager.getUserName() ?: "Sarah"
+                val events by (if (activeFollowUp != null) TimelineRepository.observeEvents(activeFollowUp.id) else kotlinx.coroutines.flow.flowOf(emptyList()))
+                    .collectAsState(initial = emptyList())
 
                 StitchHomeScreen(
                     patientName = currentUserName,
+                    activeFollowUp = activeFollowUp,
+                    timelineEvents = events,
                     activeTab = com.preappointment1.app.ui.components.StitchTab.HOME,
                     onTabSelected = { tab ->
                         when (tab) {
@@ -371,11 +375,16 @@ private fun AppRoot(
                                     selectedFollowUp = activeFollowUp
                                     screen = AppScreen.Report
                                 } else {
-                                    scope.launch { drawerState.open() }
+                                    screen = AppScreen.NewFollowUp
                                 }
                             }
                             com.preappointment1.app.ui.components.StitchTab.PREP -> {
-                                screen = AppScreen.Documents
+                                if (activeFollowUp != null) {
+                                    selectedFollowUp = activeFollowUp
+                                    screen = AppScreen.Documents
+                                } else {
+                                    screen = AppScreen.NewFollowUp
+                                }
                             }
                         }
                     },
@@ -386,7 +395,7 @@ private fun AppRoot(
                             openMeasurementFormOnLaunch = true
                             screen = AppScreen.Journey
                         } else {
-                            screen = AppScreen.Documents
+                            screen = AppScreen.NewFollowUp
                         }
                     },
                     onOpenQuickLog = {
@@ -397,6 +406,17 @@ private fun AppRoot(
                         } else {
                             screen = AppScreen.NewFollowUp
                         }
+                    },
+                    onOpenTimeline = {
+                        if (activeFollowUp != null) {
+                            selectedFollowUp = activeFollowUp
+                            screen = AppScreen.Journey
+                        } else {
+                            screen = AppScreen.NewFollowUp
+                        }
+                    },
+                    onStartNewTracking = {
+                        screen = AppScreen.NewFollowUp
                     },
                     onSaveVoiceLog = { transcript, _ ->
                         scope.launch {
@@ -481,7 +501,16 @@ private fun AppRoot(
                         onMeasurementFormLaunchHandled = { openMeasurementFormOnLaunch = false },
                         highlightPendingCheckIn = highlightCheckIn,
                         onHighlightCheckInHandled = { highlightCheckIn = false },
-                        notificationScheduleKey = notificationScheduleKey
+                        notificationScheduleKey = notificationScheduleKey,
+                        activeTab = com.preappointment1.app.ui.components.StitchTab.TIMELINE,
+                        onTabSelected = { tab ->
+                            when (tab) {
+                                com.preappointment1.app.ui.components.StitchTab.HOME -> screen = AppScreen.Home
+                                com.preappointment1.app.ui.components.StitchTab.TIMELINE -> { /* already on timeline */ }
+                                com.preappointment1.app.ui.components.StitchTab.PROGRESS -> screen = AppScreen.Report
+                                com.preappointment1.app.ui.components.StitchTab.PREP -> screen = AppScreen.Documents
+                            }
+                        }
                     )
                 }
             }
@@ -500,11 +529,11 @@ private fun AppRoot(
             AppScreen.Report -> {
                 val followUp = selectedFollowUp
                 if (followUp == null) {
-                    screen = AppScreen.Journey
+                    screen = AppScreen.Home
                 } else {
                     ReportScreen(
                         followUp = followUp,
-                        onBack = { screen = AppScreen.Journey }
+                        onBack = { screen = AppScreen.Home }
                     )
                 }
             }
@@ -512,11 +541,11 @@ private fun AppRoot(
             AppScreen.Documents -> {
                 val followUp = selectedFollowUp
                 if (followUp == null) {
-                    screen = AppScreen.Journey
+                    screen = AppScreen.Home
                 } else {
                     DocumentsScreen(
                         followUp = followUp,
-                        onBack = { screen = AppScreen.Journey }
+                        onBack = { screen = AppScreen.Home }
                     )
                 }
             }

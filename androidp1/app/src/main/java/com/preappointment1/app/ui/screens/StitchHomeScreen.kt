@@ -11,9 +11,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.LocalHospital
 import androidx.compose.material3.*
@@ -26,10 +29,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.preappointment1.app.data.model.TimelineEventResponse
 import com.preappointment1.app.ui.components.StitchBottomNavBar
 import com.preappointment1.app.ui.components.StitchTab
 import com.preappointment1.app.ui.components.VoiceLogSheet
 import com.preappointment1.app.ui.components.WellBeingTrendCard
+import com.preappointment1.app.ui.support.FileStats
 import com.preappointment1.app.ui.theme.*
 
 enum class FeelingSentiment(val label: String) {
@@ -41,16 +46,26 @@ enum class FeelingSentiment(val label: String) {
 @Composable
 fun StitchHomeScreen(
     patientName: String = "Sarah",
+    activeFollowUp: FollowUpUi? = null,
+    timelineEvents: List<TimelineEventResponse> = emptyList(),
     activeTab: StitchTab = StitchTab.HOME,
     onTabSelected: (StitchTab) -> Unit = {},
     onOpenSettings: () -> Unit = {},
     onOpenAddPhoto: () -> Unit = {},
     onOpenQuickLog: () -> Unit = {},
+    onOpenTimeline: () -> Unit = {},
+    onStartNewTracking: () -> Unit = {},
     onSaveVoiceLog: (transcript: String, aiInsight: String?) -> Unit = { _, _ -> },
     onSentimentSelected: (FeelingSentiment) -> Unit = {}
 ) {
     var selectedSentiment by remember { mutableStateOf<FeelingSentiment?>(FeelingSentiment.SAME) }
     var showVoiceSheet by remember { mutableStateOf(false) }
+
+    val fileStats = remember(activeFollowUp, timelineEvents) {
+        if (activeFollowUp != null) {
+            FileStats.compute(activeFollowUp, timelineEvents)
+        } else null
+    }
 
     Scaffold(
         containerColor = CanvasBackground,
@@ -136,7 +151,7 @@ fun StitchHomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(26.dp))
 
             // ── Greeting Section ──
             Text(
@@ -147,7 +162,7 @@ fun StitchHomeScreen(
                 lineHeight = 38.sp
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Text(
                 text = "How are you feeling today?",
@@ -251,7 +266,7 @@ fun StitchHomeScreen(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(115.dp)
+                        .height(110.dp)
                         .shadow(2.dp, RoundedCornerShape(22.dp), spotColor = Color.Black.copy(alpha = 0.04f))
                         .clip(RoundedCornerShape(22.dp))
                         .background(CardBackground)
@@ -283,7 +298,7 @@ fun StitchHomeScreen(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(115.dp)
+                        .height(110.dp)
                         .shadow(2.dp, RoundedCornerShape(22.dp), spotColor = Color.Black.copy(alpha = 0.04f))
                         .clip(RoundedCornerShape(22.dp))
                         .background(CardBackground)
@@ -307,6 +322,155 @@ fun StitchHomeScreen(
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = TextPrimary
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ── Active Appointment File / Tracking Card (Symbiosis with Timeline) ──
+            if (activeFollowUp != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(3.dp, RoundedCornerShape(24.dp), spotColor = SagePrimary.copy(alpha = 0.08f))
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(CardBackground)
+                        .clickable { onOpenTimeline() }
+                        .padding(20.dp)
+                ) {
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = activeFollowUp.title,
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary
+                                )
+                                Spacer(modifier = Modifier.height(3.dp))
+                                Text(
+                                    text = if (activeFollowUp.daysRemaining > 0)
+                                        "Appointment in ${activeFollowUp.daysRemaining} days"
+                                    else "Appointment today",
+                                    fontSize = 13.sp,
+                                    color = TextSecondary
+                                )
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(MintBadge)
+                                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                            ) {
+                                Text(
+                                    text = "File ${fileStats?.readinessPercent ?: 50}% ready",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MintBadgeText
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        // Progress Bar
+                        LinearProgressIndicator(
+                            progress = { ((fileStats?.readinessPercent ?: 50) / 100f).coerceIn(0f, 1f) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(6.dp)
+                                .clip(RoundedCornerShape(3.dp)),
+                            color = SagePrimary,
+                            trackColor = MintBadge
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "${fileStats?.measurementCount ?: timelineEvents.size} entries · ${fileStats?.photoCount ?: 0} photos",
+                                fontSize = 12.sp,
+                                color = TextMuted
+                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "Open Timeline",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SagePrimary
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(
+                                    imageVector = Icons.Default.ArrowForward,
+                                    contentDescription = null,
+                                    tint = SagePrimary,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Empty state card
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(2.dp, RoundedCornerShape(24.dp), spotColor = Color.Black.copy(alpha = 0.04f))
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(CardBackground)
+                        .clickable { onStartNewTracking() }
+                        .padding(20.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(MintBadge),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Assignment,
+                                contentDescription = null,
+                                tint = SagePrimary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Start an appointment file",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Prepare a clear summary for your doctor",
+                                fontSize = 13.sp,
+                                color = TextSecondary
+                            )
+                        }
+
+                        Icon(
+                            imageVector = Icons.Default.ArrowForward,
+                            contentDescription = null,
+                            tint = SagePrimary,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }

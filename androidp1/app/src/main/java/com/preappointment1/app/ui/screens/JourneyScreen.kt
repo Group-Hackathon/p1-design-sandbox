@@ -15,12 +15,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.ui.res.painterResource
+import com.preappointment1.app.ui.components.StitchBottomNavBar
+import com.preappointment1.app.ui.components.StitchTab
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -103,6 +106,8 @@ fun JourneyScreen(
     highlightPendingCheckIn: Boolean = false,
     onHighlightCheckInHandled: () -> Unit = {},
     notificationScheduleKey: String? = null,
+    activeTab: StitchTab = StitchTab.TIMELINE,
+    onTabSelected: ((StitchTab) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -321,15 +326,15 @@ fun JourneyScreen(
         )
     }
 
-    Box(modifier = modifier.fillMaxSize().background(White)) {
+    Box(modifier = modifier.fillMaxSize().background(CanvasBackground)) {
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                 TopAppBar(
-                    title = { Text(currentFollowUp.title, fontWeight = FontWeight.Bold, fontSize = 22.sp, letterSpacing = (-1).sp) },
+                    title = { Text(currentFollowUp.title, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = TextPrimary) },
                     navigationIcon = {
-                        IconButton(onClick = onOpenDrawer) {
-                            Icon(Icons.Outlined.Menu, contentDescription = "Menu", tint = Black)
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = SagePrimary)
                         }
                     },
                     actions = {
@@ -337,13 +342,13 @@ fun JourneyScreen(
                             Icon(
                                 painter = painterResource(R.drawable.ic_folder),
                                 contentDescription = stringResource(R.string.action_open_folder),
-                                tint = Black
+                                tint = SagePrimary
                             )
                         }
                         // 3-dot overflow menu
                         Box {
                             IconButton(onClick = { showMenu = true }) {
-                                Icon(Icons.Filled.MoreVert, contentDescription = "Options", tint = Black)
+                                Icon(Icons.Filled.MoreVert, contentDescription = "Options", tint = SagePrimary)
                             }
                             DropdownMenu(
                                 expanded = showMenu,
@@ -374,12 +379,20 @@ fun JourneyScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = White,
-                        titleContentColor = Black
+                        containerColor = CanvasBackground,
+                        titleContentColor = TextPrimary
                     )
                 )
             },
-            containerColor = Color.Transparent,
+            bottomBar = {
+                if (onTabSelected != null) {
+                    StitchBottomNavBar(
+                        currentTab = activeTab,
+                        onTabSelected = onTabSelected
+                    )
+                }
+            },
+            containerColor = CanvasBackground,
             modifier = Modifier.fillMaxSize()
         ) { padding ->
             Column(
@@ -394,7 +407,7 @@ fun JourneyScreen(
                             .align(Alignment.TopCenter)
                             .width(2.dp)
                             .fillMaxHeight()
-                            .background(Gray200)
+                            .background(MintBadge)
                     )
 
                     LazyColumn(
