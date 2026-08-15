@@ -175,6 +175,14 @@ adb shell am start -n com.preappointment1.designsandbox/com.preappointment1.app.
 
 ---
 
+## VII. XPRIZE & Hackathon Submission
+
+Developed with passion by the **P1 Hackathon Team** for the **Build with Gemini XPRIZE**:
+- **Devpost Project**: [P1 — Pre-Appointment 1 (Devpost Submission)](https://devpost.com/submit-to/29541-build-with-gemini-xprize/manage/submissions/1032622-p1-pre-appointment-1/manage-team)
+- **Core Stack**: Google Gemini Clinical Intelligence, Stitch Design System & Android Jetpack Compose.
+
+---
+
 <div align="center">
-  <sub>Developed with Google Stitch & Jetpack Compose. Built for the Hackathon.</sub>
+  <sub>Developed by the P1 Hackathon Team for the Build with Gemini XPRIZE.</sub>
 </div>
