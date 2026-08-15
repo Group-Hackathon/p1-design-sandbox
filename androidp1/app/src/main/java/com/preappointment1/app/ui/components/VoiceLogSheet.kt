@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.preappointment1.app.R
 import com.preappointment1.app.ui.theme.*
 import com.preappointment1.app.voice.VoiceManager
 import com.preappointment1.app.voice.VoiceSessionState
@@ -161,7 +162,7 @@ fun VoiceLogSheet(
                         )
                     }
                     Text(
-                        text = "Voice Check-in",
+                        text = androidx.compose.ui.res.stringResource(R.string.voice_sheet_title),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
@@ -185,11 +186,11 @@ fun VoiceLogSheet(
             // Subtitle status
             Text(
                 text = when {
-                    sessionState.state == VoiceState.LISTENING -> "Listening… speak naturally about how you feel"
-                    sessionState.state == VoiceState.PROCESSING -> "Processing your speech…"
-                    editableText.isNotBlank() -> "Review or edit what P1 heard below"
-                    sessionState.state == VoiceState.ERROR -> sessionState.errorMessage ?: "Tap mic or speech button to start"
-                    else -> "Tap the microphone to speak"
+                    sessionState.state == VoiceState.LISTENING -> androidx.compose.ui.res.stringResource(R.string.voice_listening_hint)
+                    sessionState.state == VoiceState.PROCESSING -> androidx.compose.ui.res.stringResource(R.string.voice_processing_hint)
+                    editableText.isNotBlank() -> androidx.compose.ui.res.stringResource(R.string.voice_review_hint)
+                    sessionState.state == VoiceState.ERROR -> sessionState.errorMessage ?: androidx.compose.ui.res.stringResource(R.string.voice_tap_hint)
+                    else -> androidx.compose.ui.res.stringResource(R.string.voice_tap_hint)
                 },
                 fontSize = 14.sp,
                 color = if (sessionState.state == VoiceState.ERROR && editableText.isBlank()) PainMedium else TextSecondary,
@@ -236,7 +237,7 @@ fun VoiceLogSheet(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "Open system voice recognizer",
+                    text = androidx.compose.ui.res.stringResource(R.string.voice_open_system_recognizer),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = SagePrimary
@@ -254,7 +255,7 @@ fun VoiceLogSheet(
                 },
                 placeholder = {
                     Text(
-                        "Your words will appear here in real time as you speak (or type here directly)…",
+                        androidx.compose.ui.res.stringResource(R.string.voice_input_placeholder),
                         color = TextMuted,
                         fontSize = 14.sp
                     )
@@ -294,7 +295,7 @@ fun VoiceLogSheet(
                         brush = androidx.compose.ui.graphics.SolidColor(CardBorderSoft)
                     )
                 ) {
-                    Text("Restart", fontWeight = FontWeight.SemiBold)
+                    Text(androidx.compose.ui.res.stringResource(R.string.action_restart), fontWeight = FontWeight.SemiBold)
                 }
 
                 Button(
@@ -323,7 +324,7 @@ fun VoiceLogSheet(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Save to File", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Text(androidx.compose.ui.res.stringResource(R.string.voice_save_to_file), fontWeight = FontWeight.Bold, fontSize = 15.sp)
                 }
             }
 

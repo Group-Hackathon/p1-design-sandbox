@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand & Common -->
+    <string name="app_name">P1 Sandbox</string>
+    <string name="brand_title">P1 Santé</string>
+    <string name="patient_name_placeholder">Patient 1</string>
+    <string name="view_profile">Voir le profil</string>
+    <string name="profile_title">Profil</string>
+    <string name="my_trackings">MES DOSSIERS</string>
+    <string name="start_new_tracking">Préparer une nouvelle consultation</string>
+    <string name="pre_appointment">PRÉ-CONSULTATION 1</string>
+    <string name="action_confirm">Confirmer</string>
+    <string name="action_cancel">Annuler</string>
+    <string name="action_delete">Supprimer</string>
+    <string name="action_save">Enregistrer</string>
+    <string name="action_restart">Recommencer</string>
+    <string name="action_continue">Continuer</string>
+    <string name="action_go_back">Retour</string>
+    <string name="action_open">Ouvrir</string>
+
+    <!-- Navigation Tabs -->
+    <string name="nav_home">Accueil</string>
+    <string name="nav_timeline">Suivi</string>
+    <string name="nav_progress">Rapport</string>
+    <string name="nav_prep">Dossier</string>
+
+    <!-- Stitch Home Screen -->
+    <string name="home_greeting_morning">Bonjour,\n%1$s.</string>
+    <string name="home_greeting_afternoon">Bon après-midi,\n%1$s.</string>
+    <string name="home_greeting_evening">Bonsoir,\n%1$s.</string>
+    <string name="home_feeling_question">Comment vous sentez-vous aujourd\'hui ?</string>
+    <string name="sentiment_better">Mieux</string>
+    <string name="sentiment_same">Pareil</string>
+    <string name="sentiment_worse">Moins bien</string>
+    <string name="home_hero_voice_btn">Dites à P1 ce que vous ressentez</string>
+    <string name="home_action_add_photo">Ajouter photo</string>
+    <string name="home_action_quick_log">Check-in rapide</string>
+    <string name="home_insights_title">Vos 7 derniers jours</string>
+    <string name="home_insights_stable">Stable</string>
+    <string name="home_insights_wellness">Tendance générale de bien-être</string>
+    <string name="home_active_file_ready">Dossier %1$d%% prêt</string>
+    <string name="home_active_file_entries">%1$d entrées · %2$d photos</string>
+    <string name="home_open_timeline">Ouvrir le suivi</string>
+    <string name="home_empty_prep_title">Préparer une consultation</string>
+    <string name="home_empty_prep_subtitle">Préparez un résumé clair pour votre médecin</string>
+
+    <!-- Dashboard Compatibility -->
+    <string name="dashboard_empty_title">Aucune préparation pour l\'instant</string>
+    <string name="dashboard_empty_body">Quand vous avez un rendez-vous à venir, commencez ici. Nous vous aidons à construire un dossier clair pour votre médecin.</string>
+    <string name="dashboard_empty_action">Préparer ma prochaine consultation</string>
+    <string name="dashboard_greeting">%1$s</string>
+    <string name="dashboard_greeting_named">%1$s, %2$s</string>
+    <string name="dashboard_subtitle">Vos dossiers de consultation</string>
+    <string name="file_ready_percent">Dossier %1$d%% prêt</string>
+    <string name="file_contents">%1$d entrées · %2$d photos · %3$d notes</string>
+    <string name="file_streak">%1$d jours consécutifs</string>
+    <string name="file_appt_countdown">Rendez-vous dans %1$d jours</string>
+    <string name="file_appt_today">Rendez-vous aujourd\'hui</string>
+    <string name="file_continue">Ouvrir le dossier</string>
+    <string name="file_checkin_now">Bilan du jour (~2 min)</string>
+
+    <!-- Voice Check-in -->
+    <string name="voice_sheet_title">Check-in Vocal</string>
+    <string name="voice_listening_hint">À votre écoute… parlez naturellement</string>
+    <string name="voice_processing_hint">Traitement en cours…</string>
+    <string name="voice_review_hint">Relisez ou ajustez ce que P1 a entendu ci-dessous</string>
+    <string name="voice_tap_hint">Appuyez sur le micro pour parler</string>
+    <string name="voice_open_system_recognizer">Ouvrir la reconnaissance vocale système</string>
+    <string name="voice_input_placeholder">Vos mots apparaîtront ici en temps réel (ou écrivez directement ici)…</string>
+    <string name="voice_save_to_file">Enregistrer au dossier</string>
+
+    <!-- Welcome Slides -->
+    <string name="welcome_slide_1_title">N\'oubliez rien lors de votre rendez-vous médical</string>
+    <string name="welcome_slide_1_body">Les détails utiles s\'oublient entre deux consultations. P1 vous aide à les noter simplement, chaque jour.</string>
+    <string name="welcome_slide_2_title">Capturez ce qui se passe entre les visites</string>
+    <string name="welcome_slide_2_body">Courts bilans, photos et notes. Moins de deux minutes par jour.</string>
+    <string name="welcome_slide_3_title">Un document clair pour votre praticien</string>
+    <string name="welcome_slide_3_body">Le jour de la consultation, toutes vos données sont organisées et prêtes à être partagées.</string>
+    <string name="welcome_next">Suivant</string>
+    <string name="welcome_skip">Passer — aller à l\'accueil</string>
+    <string name="welcome_start">Préparer ma consultation</string>
+    <string name="welcome_go_home">Aller à l\'accueil</string>
+
+    <!-- Timeline & Journey -->
+    <string name="summary_appt_date">Date RDV</string>
+    <string name="summary_days_left">Jours restants</string>
+    <string name="summary_complete">Dossier prêt</string>
+    <string name="summary_file_contents">%1$d entrées · %2$d photos · %3$d notes</string>
+    <string name="status_ongoing">En cours</string>
+    <string name="status_completed">Terminé</string>
+    <string name="next_appt_in_days">Rendez-vous dans %1$d jours</string>
+    <string name="next_action_now">Prêt maintenant — bilan de %1$s (~2 min)</string>
+    <string name="next_action_in">Prochain bilan : %1$s (dans %2$s)</string>
+    <string name="next_action_pending">Bilan en attente — appuyez quand vous êtes prêt</string>
+    <string name="next_action_done_today">Tout est validé pour aujourd\'hui. À bientôt pour le prochain point.</string>
+    <string name="empty_state_welcome">Votre dossier a démarré. Prenez deux minutes pour votre premier bilan.</string>
+    <string name="timeline_missed">MANQUÉ</string>
+    <string name="timeline_upcoming">À VENIR</string>
+    <string name="timeline_add_missed">+ Ajouter le point manqué</string>
+    <string name="btn_fill_measurements">Faire le bilan (%1$s)</string>
+    <string name="bottom_starter_title">Commençons votre dossier</string>
+    <string name="btn_start_baseline">Premier bilan (~2 min)</string>
+    <string name="bottom_checkin_now_title">Bilan du moment — %1$s</string>
+    <string name="bottom_checkin_will_ask">Nous mesurerons : %1$s</string>
+    <string name="bottom_next_measurement_at">Prochain bilan à %1$s</string>
+    <string name="bottom_next_measurement_prepare">À venir : %1$s. Préparez-vous à votre rythme.</string>
+    <string name="bottom_countdown">Ouvre dans %1$s</string>
+    <string name="quick_action_note">Note</string>
+    <string name="quick_action_extra">Bilan 3D</string>
+    <string name="quick_action_report">Rapport</string>
+    <string name="action_open_folder">Dossier</string>
+    <string name="dialog_delete_tracking_title">Supprimer ce dossier</string>
+    <string name="dialog_delete_tracking_desc">Cette action supprimera définitivement le dossier et toutes ses données.</string>
+    <string name="menu_edit_schedule">Modifier les horaires</string>
+    <string name="menu_change_appt_date">Modifier la date du RDV</string>
+    <string name="menu_delete_tracking">Supprimer le dossier</string>
+    <string name="dialog_delete_record_title">Supprimer l\'entrée</string>
+    <string name="dialog_delete_record_desc">Retirer cette entrée du dossier médical ?</string>
+    <string name="check_in_at">Bilan à %1$s</string>
+    <string name="next_check_in">Prochain bilan</string>
+    <string name="period_initial">Initial</string>
+    <string name="period_routine">Routine</string>
+    <string name="note_sheet_title">Informer votre médecin</string>
+    <string name="note_sheet_desc">Tout ce que vous voulez lui transmettre — symptômes, contexte, questions.</string>
+    <string name="note_sheet_placeholder">Je souhaite que mon médecin sache…</string>
+    <string name="note_sheet_send">Ajouter au dossier</string>
+    <string name="extra_picker_title">Ajouter une mesure supplémentaire</string>
+    <string name="extra_picker_desc">Choisissez une mesure de votre protocole.</string>
+
+    <!-- Doctor Briefing / Report -->
+    <string name="report_title">Rapport Médical</string>
+    <string name="report_generating">Synthèse clinique en cours…</string>
+    <string name="report_file_title">Dossier de Synthèse Officiel</string>
+    <string name="report_file_subtitle">Données et évolution des symptômes prêtes pour votre médecin</string>
+    <string name="report_save_to_prep">Enregistrer au dossier</string>
+    <string name="report_saving">Enregistrement…</string>
+    <string name="report_share_pdf">Partager le PDF</string>
+    <string name="report_saved_to_folder">Enregistré dans votre dossier de préparation</string>
+    <string name="report_save_failed">Impossible d\'enregistrer le fichier</string>
+    <string name="report_share_chooser_title">Partager le rapport médical</string>
+
+    <!-- Preparation / Documents Folder -->
+    <string name="documents_title">Dossier de Préparation</string>
+    <string name="documents_empty_title">Aucun document stocké</string>
+    <string name="documents_empty_body">Conservez ici ordonnances, comptes-rendus et photos — stockés uniquement sur cet appareil.</string>
+    <string name="documents_add_photo">Ajouter photo</string>
+    <string name="documents_add_pdf">Ajouter PDF</string>
+    <string name="documents_add_any">Ajouter fichier</string>
+    <string name="documents_added">Ajouté à votre dossier</string>
+    <string name="documents_add_failed">Échec de l\'ajout : %1$s</string>
+    <string name="documents_delete_title">Supprimer du dossier ?</string>
+    <string name="documents_delete_body">Cela supprime la copie locale de votre appareil.</string>
+    <string name="documents_missing_file">Fichier introuvable sur l\'appareil</string>
+    <string name="documents_open">Ouvrir</string>
+    <string name="documents_open_failed">Impossible d\'ouvrir : %1$s</string>
+    <string name="documents_add_btn">Ajouter document ou scan</string>
+    <string name="documents_source_report">Rapport</string>
+    <string name="documents_source_photo">Photo</string>
+    <string name="documents_source_pdf">PDF</string>
+    <string name="documents_source_other">Fichier</string>
+
+    <!-- Daily Routine & Measurements -->
+    <string name="routine_step_pain">Évaluation de la douleur</string>
+    <string name="routine_step_vitals">Constantes</string>
+    <string name="routine_completed_title">Bilan terminé</string>
+    <string name="routine_completed_desc">Vos données du jour sont enregistrées de façon sécurisée.</string>
+    <string name="measurement_type_pain">Niveau de douleur</string>
+    <string name="measurement_type_temperature">Température</string>
+    <string name="measurement_type_photo">Photo</string>
+    <string name="schedule_editor_title">Horaires des bilans</string>
+
+    <!-- Notifications & Offline -->
+    <string name="notifications_edit_defaults">Modifier les horaires par défaut</string>
+    <string name="notifications_edit_protocol">Modifier les horaires du protocole</string>
+    <string name="notification_checkin_pending">Votre bilan vous attend — environ 2 minutes</string>
+    <string name="notification_checkin_already_done">Déjà enregistré pour aujourd\'hui. À bientôt pour le prochain point.</string>
+    <string name="focus_form_header">Bilan du jour</string>
+    <string name="focus_form_missed">Ajouter le point manqué — %1$s</string>
+</resources>

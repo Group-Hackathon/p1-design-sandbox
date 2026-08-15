@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import com.preappointment1.app.R
-import com.preappointment1.app.MainTopBar
 import com.preappointment1.app.data.repository.FollowUpRepository
 import com.preappointment1.app.data.repository.TimelineRepository
 import com.preappointment1.app.data.sync.SyncManager

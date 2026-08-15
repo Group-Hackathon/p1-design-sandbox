@@ -26,9 +26,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.preappointment1.app.R
 import com.preappointment1.app.data.model.TimelineEventResponse
 import com.preappointment1.app.ui.components.StitchBottomNavBar
 import com.preappointment1.app.ui.components.StitchTab
@@ -37,29 +39,38 @@ import com.preappointment1.app.ui.components.WellBeingTrendCard
 import com.preappointment1.app.ui.support.FileStats
 import com.preappointment1.app.ui.theme.*
 
-enum class FeelingSentiment(val label: String) {
-    BETTER("Better"),
-    SAME("Same"),
-    WORSE("Worse")
+enum class FeelingSentiment {
+    BETTER,
+    SAME,
+    WORSE
 }
 
 @Composable
 fun StitchHomeScreen(
-    patientName: String = "Sarah",
-    activeFollowUp: FollowUpUi? = null,
+    patientName: String = "Patient 1",
+    followUps: List<FollowUpUi> = emptyList(),
+    onOpenFollowUp: (FollowUpUi) -> Unit = {},
     timelineEvents: List<TimelineEventResponse> = emptyList(),
     activeTab: StitchTab = StitchTab.HOME,
     onTabSelected: (StitchTab) -> Unit = {},
     onOpenSettings: () -> Unit = {},
+    onOpenProfile: () -> Unit = {},
+    onOpenNotifications: () -> Unit = {},
     onOpenAddPhoto: () -> Unit = {},
     onOpenQuickLog: () -> Unit = {},
     onOpenTimeline: () -> Unit = {},
     onStartNewTracking: () -> Unit = {},
+    onVoiceNoteCreated: () -> Unit = {},
+    onPhotoAdded: () -> Unit = {},
     onSaveVoiceLog: (transcript: String, aiInsight: String?) -> Unit = { _, _ -> },
     onSentimentSelected: (FeelingSentiment) -> Unit = {}
 ) {
     var selectedSentiment by remember { mutableStateOf<FeelingSentiment?>(FeelingSentiment.SAME) }
     var showVoiceSheet by remember { mutableStateOf(false) }
+
+    val activeFollowUp = remember(followUps) {
+        followUps.firstOrNull { it.daysRemaining > 0 } ?: followUps.firstOrNull()
+    }
 
     val fileStats = remember(activeFollowUp, timelineEvents) {
         if (activeFollowUp != null) {
@@ -89,19 +100,20 @@ fun StitchHomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Avatar
+                // Avatar (Default Patient 1 / P1)
                 Box(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(CircleShape)
                         .background(MintBadge)
-                        .border(1.5.dp, Color.White, CircleShape),
+                        .border(1.5.dp, Color.White, CircleShape)
+                        .clickable { onOpenProfile() },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = patientName.take(1).uppercase(),
+                        text = "P1",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
+                        fontSize = 16.sp,
                         color = SagePrimary
                     )
                 }
@@ -130,7 +142,7 @@ fun StitchHomeScreen(
                         )
                     }
                     Text(
-                        text = "P1 Health",
+                        text = stringResource(R.string.brand_title),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = SagePrimary
@@ -155,7 +167,7 @@ fun StitchHomeScreen(
 
             // ── Greeting Section ──
             Text(
-                text = "Good morning,\n$patientName.",
+                text = stringResource(R.string.home_greeting_morning, patientName),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = TextPrimary,
@@ -165,7 +177,7 @@ fun StitchHomeScreen(
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = "How are you feeling today?",
+                text = stringResource(R.string.home_feeling_question),
                 fontSize = 15.sp,
                 color = TextSecondary,
                 fontWeight = FontWeight.Normal
@@ -180,6 +192,11 @@ fun StitchHomeScreen(
             ) {
                 FeelingSentiment.values().forEach { sentiment ->
                     val isSelected = selectedSentiment == sentiment
+                    val label = when (sentiment) {
+                        FeelingSentiment.BETTER -> stringResource(R.string.sentiment_better)
+                        FeelingSentiment.SAME -> stringResource(R.string.sentiment_same)
+                        FeelingSentiment.WORSE -> stringResource(R.string.sentiment_worse)
+                    }
                     val interactionSource = remember { MutableInteractionSource() }
 
                     Box(
@@ -208,7 +225,7 @@ fun StitchHomeScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = sentiment.label,
+                            text = label,
                             fontSize = 15.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             color = if (isSelected) TextPrimary else TextSecondary
@@ -247,7 +264,7 @@ fun StitchHomeScreen(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "Tell P1 how you’re feeling",
+                        text = stringResource(R.string.home_hero_voice_btn),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Color.White
@@ -286,7 +303,7 @@ fun StitchHomeScreen(
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "Add photo",
+                            text = stringResource(R.string.home_action_add_photo),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = TextPrimary
@@ -318,7 +335,7 @@ fun StitchHomeScreen(
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "Quick log",
+                            text = stringResource(R.string.home_action_quick_log),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = TextPrimary
@@ -337,7 +354,10 @@ fun StitchHomeScreen(
                         .shadow(3.dp, RoundedCornerShape(24.dp), spotColor = SagePrimary.copy(alpha = 0.08f))
                         .clip(RoundedCornerShape(24.dp))
                         .background(CardBackground)
-                        .clickable { onOpenTimeline() }
+                        .clickable {
+                            onOpenFollowUp(activeFollowUp)
+                            onOpenTimeline()
+                        }
                         .padding(20.dp)
                 ) {
                     Column {
@@ -356,8 +376,8 @@ fun StitchHomeScreen(
                                 Spacer(modifier = Modifier.height(3.dp))
                                 Text(
                                     text = if (activeFollowUp.daysRemaining > 0)
-                                        "Appointment in ${activeFollowUp.daysRemaining} days"
-                                    else "Appointment today",
+                                        stringResource(R.string.next_appt_in_days, activeFollowUp.daysRemaining)
+                                    else stringResource(R.string.summary_appt_date),
                                     fontSize = 13.sp,
                                     color = TextSecondary
                                 )
@@ -370,7 +390,7 @@ fun StitchHomeScreen(
                                     .padding(horizontal = 10.dp, vertical = 5.dp)
                             ) {
                                 Text(
-                                    text = "File ${fileStats?.readinessPercent ?: 50}% ready",
+                                    text = stringResource(R.string.home_active_file_ready, fileStats?.readinessPercent ?: 50),
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = MintBadgeText
@@ -399,13 +419,17 @@ fun StitchHomeScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "${fileStats?.measurementCount ?: timelineEvents.size} entries · ${fileStats?.photoCount ?: 0} photos",
+                                text = stringResource(
+                                    R.string.home_active_file_entries,
+                                    fileStats?.measurementCount ?: timelineEvents.size,
+                                    fileStats?.photoCount ?: 0
+                                ),
                                 fontSize = 12.sp,
                                 color = TextMuted
                             )
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "Open Timeline",
+                                    text = stringResource(R.string.home_open_timeline),
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = SagePrimary
@@ -453,14 +477,14 @@ fun StitchHomeScreen(
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Start an appointment file",
+                                text = stringResource(R.string.home_empty_prep_title),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = TextPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Prepare a clear summary for your doctor",
+                                text = stringResource(R.string.home_empty_prep_subtitle),
                                 fontSize = 13.sp,
                                 color = TextSecondary
                             )
@@ -480,7 +504,7 @@ fun StitchHomeScreen(
 
             // ── Insights Card: Your last 7 days ──
             WellBeingTrendCard(
-                statusText = "Stable",
+                statusText = stringResource(R.string.home_insights_stable),
                 dataPoints = listOf(0.35f, 0.45f, 0.40f, 0.65f, 0.50f, 0.70f, 0.68f)
             )
 
@@ -493,6 +517,7 @@ fun StitchHomeScreen(
                 onDismiss = { showVoiceSheet = false },
                 onSaveVoiceLog = { transcript, insight ->
                     onSaveVoiceLog(transcript, insight)
+                    onVoiceNoteCreated()
                 }
             )
         }

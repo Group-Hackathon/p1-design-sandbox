@@ -103,7 +103,7 @@ fun ReportScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Doctor Briefing",
+                        text = stringResource(R.string.report_title),
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
                         color = TextPrimary
@@ -150,7 +150,7 @@ fun ReportScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        "Compiling your clinical briefing…",
+                        stringResource(R.string.report_generating),
                         color = TextSecondary,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium
@@ -182,7 +182,7 @@ fun ReportScreen(
                         shape = RoundedCornerShape(20.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = SagePrimary)
                     ) {
-                        Text("Go Back", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.action_go_back), fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -231,14 +231,14 @@ fun ReportScreen(
                                 }
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Official Briefing File",
+                                        text = stringResource(R.string.report_file_title),
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 16.sp,
                                         color = TextPrimary
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
-                                        text = "Synthesized data & symptom trends ready for your doctor",
+                                        text = stringResource(R.string.report_file_subtitle),
                                         fontSize = 13.sp,
                                         color = TextSecondary,
                                         lineHeight = 17.sp
@@ -267,7 +267,7 @@ fun ReportScreen(
 
                     item {
                         Text(
-                            "${pageBitmaps.size} page${if (pageBitmaps.size > 1) "s" else ""} · Generated locally by P1 Health",
+                            "${pageBitmaps.size} page${if (pageBitmaps.size > 1) "s" else ""}",
                             style = MaterialTheme.typography.labelMedium,
                             color = TextMuted,
                             modifier = Modifier
@@ -340,7 +340,7 @@ fun ReportScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                if (isSaving) "Saving…" else "Save to Prep",
+                                if (isSaving) stringResource(R.string.report_saving) else stringResource(R.string.report_save_to_prep),
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 14.sp
                             )
@@ -360,7 +360,7 @@ fun ReportScreen(
                                         putExtra(Intent.EXTRA_SUBJECT, "Doctor Briefing — ${followUp.title}")
                                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                     }
-                                    context.startActivity(Intent.createChooser(intent, "Share Doctor Briefing"))
+                                    context.startActivity(Intent.createChooser(intent, context.getString(R.string.report_share_chooser_title)))
                                 }
                             },
                             enabled = pdfFile != null,
@@ -380,7 +380,7 @@ fun ReportScreen(
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Share PDF", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            Text(stringResource(R.string.report_share_pdf), fontWeight = FontWeight.Bold, fontSize = 14.sp)
                         }
                     }
                 }
