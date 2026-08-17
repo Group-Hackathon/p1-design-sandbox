@@ -12,11 +12,11 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.preappointment1.designsandbox"
+        applicationId = "com.preappointment1.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 14
-        versionName = "1.0.14"
+        versionCode = 15
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
